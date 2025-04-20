@@ -1,5 +1,7 @@
+"use client"
+
 import { redirect } from "next/navigation"
 
 export default function Home() {
-  redirect("/pregame")
+  redirect("/condition-assignment")
 }

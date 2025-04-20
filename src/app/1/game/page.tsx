@@ -46,7 +46,7 @@ const RAT_QUESTIONS = [
 
 const GAME_DURATION = 120 // 2 minutes
 
-export default function GamePage() {
+export default function PrivateGamePage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const userName = searchParams.get("userName") || "Player"
@@ -71,7 +71,7 @@ export default function GamePage() {
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
-          router.push(`/postgame?score=${score}&userName=${encodeURIComponent(userName)}`)
+          router.push(`/1/postgame?score=${score}&userName=${encodeURIComponent(userName)}`)
           return 0
         }
         return prev - 1
@@ -88,7 +88,7 @@ export default function GamePage() {
       setUserInput("")
       setFeedback(null)
     } else {
-      router.push(`/postgame?score=${Math.max(0, score - 5)}&userName=${encodeURIComponent(userName)}`)
+      router.push(`/1/postgame?score=${Math.max(0, score - 5)}&userName=${encodeURIComponent(userName)}`)
     }
   }
 
@@ -103,7 +103,7 @@ export default function GamePage() {
           setUserInput("")
           setFeedback(null)
         } else {
-          router.push(`/postgame?score=${score + 20}&userName=${encodeURIComponent(userName)}`)
+          router.push(`/1/postgame?score=${score + 20}&userName=${encodeURIComponent(userName)}`)
         }
       }, 1000)
     } else {
@@ -134,7 +134,7 @@ export default function GamePage() {
             </div>
           </CardTitle>
         </CardHeader>
-        <CardContent className="space-y-6 p-6">
+        <CardContent className="space-y-6 p-6 relative">
           <div className="grid grid-cols-3 gap-4">
             {currentQuestion.words.map((word, index) => (
               <div key={index} className="bg-gray-100 p-3 rounded-lg text-center">
@@ -176,7 +176,7 @@ export default function GamePage() {
           </div>
 
           {feedback && (
-            <div className="flex items-center justify-center space-x-2">
+            <div className="absolute bottom-2 left-2 flex items-center space-x-2 bg-white/80 backdrop-blur-sm rounded-lg px-3 py-2 shadow-sm">
               {feedback === "correct" ? (
                 <>
                   <CheckCircle2 className="text-green-500" />

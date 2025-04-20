@@ -6,7 +6,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { AlertCircle, Trophy, Award } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
 
-export default function PostgamePage() {
+export default function PublicPostgamePage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const score = parseInt(searchParams.get("score") || "0")
@@ -46,7 +46,7 @@ export default function PostgamePage() {
         </CardContent>
         <CardFooter className="flex flex-col space-y-2">
           <Button
-            onClick={() => router.push("/pregame")}
+            onClick={() => router.push("/2/pregame")}
             className="w-full bg-black hover:bg-black/90 text-white cursor-pointer"
           >
             Play Again
@@ -59,7 +59,7 @@ export default function PostgamePage() {
             {scorePosted ? "Score Posted" : "Post My Score"}
           </Button>
           <Button
-            onClick={() => router.push("/leaderboard")}
+            onClick={() => router.push("/2/leaderboard?from=postgame")}
             className="w-full bg-black hover:bg-black/90 text-white flex items-center gap-2 cursor-pointer"
           >
             <Award className="h-4 w-4" />
