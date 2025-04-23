@@ -121,7 +121,7 @@ export default function PrivateGamePage() {
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4 bg-blue-100">
-      <h1 className="mb-8 text-3xl font-bold">Category Story 👀</h1>
+      <h1 className="mb-8 text-3xl font-bold">Category Story</h1>
       <Card className="w-full max-w-md bg-white">
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
