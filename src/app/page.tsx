@@ -3,5 +3,5 @@
 import { redirect } from "next/navigation"
 
 export default function Home() {
-  redirect("/condition-assignment")
+  redirect("/survey/demographics")
 }

@@ -16,6 +16,14 @@ export default function PublicPregame() {
   const [countdown, setCountdown] = useState(10)
   const [isTimerActive, setIsTimerActive] = useState(false)
   
+  // Set initial leaderboard timer
+  useEffect(() => {
+    const existingTimer = localStorage.getItem('leaderboardTimer');
+    if (!existingTimer) {
+      localStorage.setItem('leaderboardTimer', Date.now().toString());
+    }
+  }, []);
+
   // Handle countdown timer
   useEffect(() => {
     if (showModal && !isTimerActive) { // if modal is open and timer is not active, start timer
@@ -122,19 +130,18 @@ export default function PublicPregame() {
             </div>
             <Button
               onClick={() => setShowModal(true)}
-              variant="outline"
-              className="w-full flex items-center justify-center gap-2 hover:bg-blue-50"
+              className="w-full flex items-center justify-center gap-2 bg-black hover:bg-black/90 text-white"
             >
               <BookOpen className="h-4 w-4" />
               Read Me
             </Button>
           </div>
         </CardContent>
-        <CardFooter className="flex flex-col space-y-2">
+        <CardFooter className="flex flex-col space-y-2 pt-0">
           <Button 
             onClick={() => router.push("/2/leaderboard")} 
             variant="outline" 
-            className="w-full mb-2 flex items-center gap-2 hover:bg-blue-50 hover:text-yellow-700 transition-colors cursor-pointer"
+            className="w-full flex items-center gap-2 hover:bg-blue-50 hover:text-yellow-700 transition-colors cursor-pointer"
           >
             <Award className="h-4 w-4" />
             View Leaderboard
