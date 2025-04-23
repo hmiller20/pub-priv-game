@@ -19,9 +19,41 @@ function getCondition(): Condition {
 
 export default function ConditionAssignment() {
   useEffect(() => {
-    const condition = getCondition();
-    // Redirect to the appropriate condition's pregame page
-    window.location.href = `/${condition}/pregame`;
+    const assignCondition = async () => {
+      const condition = getCondition();
+      const userId = localStorage.getItem('ratGameUserId');
+
+      if (!userId) {
+        console.error('No user ID found');
+        window.location.href = '/survey/demographics';
+        return;
+      }
+
+      try {
+        // Update user document with assigned condition
+        const response = await fetch(`/api/users/${userId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            assignedCondition: condition // Store the raw condition number
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error('Failed to update user condition');
+        }
+
+        // Redirect to the appropriate condition's pregame page
+        window.location.href = `/${condition}/pregame`;
+      } catch (error) {
+        console.error('Error updating user condition:', error);
+        alert('There was an error assigning your condition. Please try again.');
+      }
+    };
+
+    assignCondition();
   }, []);
 
   return (

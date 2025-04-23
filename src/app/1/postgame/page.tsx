@@ -11,9 +11,37 @@ export default function PrivatePostgamePage() {
   const score = parseInt(searchParams.get("score") || "0")
   const userName = searchParams.get("userName") || "Player"
 
-  const handleConclude = () => {
-    router.push(`/code?score=${score}&condition=1`)
-  }
+  const incrementGamePlay = async () => {
+    const userId = localStorage.getItem('ratGameUserId');
+    if (!userId) return;
+
+    try {
+      const gamePlay = {
+        score: score,
+        completedAt: new Date()
+      };
+
+      await fetch(`/api/users/${userId}/gameplay`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(gamePlay),
+      });
+    } catch (error) {
+      console.error('Failed to submit game results:', error);
+    }
+  };
+
+  const handlePlayAgain = async () => {
+    await incrementGamePlay();
+    router.push("/1/pregame");
+  };
+
+  const handleConclude = async () => {
+    await incrementGamePlay();
+    router.push(`/code?score=${score}&condition=1`);
+  };
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4 md:p-24 bg-blue-100">
@@ -33,7 +61,7 @@ export default function PrivatePostgamePage() {
         </CardContent>
         <CardFooter className="flex flex-col space-y-2">
           <Button
-            onClick={() => router.push("/1/pregame")}
+            onClick={handlePlayAgain}
             className="w-full bg-black hover:bg-black/90 text-white cursor-pointer"
           >
             Play Again

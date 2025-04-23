@@ -62,29 +62,82 @@ export default function SurveyPage() {
     }))
   }
 
-    // Check for previous failures on component mount
-    useEffect(() => {
-        const hasFailed = localStorage.getItem('attentionCheckFailed')
-        if (hasFailed === 'true') {
-          router.push('/survey/page5')
-        }
-      }, [router])
+  // Check for previous failures on component mount
+  useEffect(() => {
+    const hasFailed = localStorage.getItem('attentionCheckFailed')
+    if (hasFailed === 'true') {
+      router.push('/survey/page5')
+    }
+  }, [router])
 
   // Check if all non-attention-check questions have been answered
   const isComplete = React.useMemo(() => {
     return questions
-      .filter(q => !q.id.includes('attn')) // Exclude attention check questions
+      .filter(q => !q.id.includes('attn'))
       .every((q) => typeof responses[q.id] === 'number')
   }, [responses])
 
-  const handleNext = () => {
+  const handleNext = async () => {
     // Check if the attention check question was answered correctly
     if (responses['attn_3'] !== 3) {
-        // Store the failure in local storage
+      // Store the failure in local storage
       localStorage.setItem('attentionCheckFailed', 'true')
       router.push('/survey/page5')
-    } else {
-      router.push('/condition-assignment')
+      return;
+    }
+
+    try {
+      // Get the stored userId
+      const userId = localStorage.getItem('ratGameUserId');
+      if (!userId) {
+        throw new Error('No user ID found');
+      }
+
+      // Get the mastery responses from previous page from localStorage
+      const masteryResponses = JSON.parse(localStorage.getItem('masteryResponses') || '[]');
+
+      // Transform mastery responses into named fields
+      const masteryObj = masteryResponses.reduce((acc: Record<string, number>, val: number, idx: number) => {
+        acc[`mastery${idx + 1}`] = val;
+        return acc;
+      }, {});
+
+      // Transform public responses into named fields
+      const publicObj: Record<string, number> = {};
+      
+      // Add all public responses with their original numbers
+      questions
+        .filter(q => q.id.startsWith('public'))
+        .forEach(q => {
+          // Extract the number from the id (e.g., "public1" -> "1")
+          const num = q.id.replace('public', '');
+          publicObj[`public${num}`] = responses[q.id];
+        });
+      
+      // Add attention check response
+      publicObj['attn_3'] = responses['attn_3'];
+
+      // Save survey responses
+      const response = await fetch(`/api/users/${userId}/survey`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          mastery: masteryObj,
+          public: publicObj
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to save survey responses');
+      }
+
+      // Proceed to condition assignment
+      router.push('/condition-assignment');
+    } catch (error) {
+      console.error('Error saving survey responses:', error);
+      alert('There was an error saving your responses. Please try again.');
     }
   }
 
@@ -123,13 +176,7 @@ export default function SurveyPage() {
             </div>
           ))}
 
-          <div className="flex justify-end mt-6">
-            {/* we needed a div to put the button at the right end of the container
-             * w-1/3 - sets the width to 1/3 of the container
-             * py-2 - adds padding of 0.5rem to top and bottom
-             * text-md - Sets medium font size
-             * mt-6 - adds margin-top of 1.5rem
-             */}
+          <div className="flex justify-end">
             <Button
               onClick={handleNext}
               className="w-1/5 py-2 text-md"

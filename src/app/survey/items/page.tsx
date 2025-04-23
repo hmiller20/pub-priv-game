@@ -68,6 +68,15 @@ export default function SurveyPage() {
     return questions.every((q) => typeof responses[q.id] === 'number')
   }, [responses])
 
+  const handleNext = () => {
+    // Store mastery responses for the next page
+    const masteryResponses = questions.map(q => responses[q.id]);
+    localStorage.setItem('masteryResponses', JSON.stringify(masteryResponses));
+    
+    // Navigate to next survey page
+    router.push('/survey/items2');
+  }
+
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-blue-100">
       <Card className="w-full max-w-2xl">
@@ -103,15 +112,9 @@ export default function SurveyPage() {
             </div>
           ))}
 
-          <div className="flex justify-end mt-6">
-            {/* we needed a div to put the button at the right end of the container
-             * w-1/3 - sets the width to 1/3 of the container
-             * py-2 - adds padding of 0.5rem to top and bottom
-             * text-md - Sets medium font size
-             * mt-6 - adds margin-top of 1.5rem
-             */}
+          <div className="flex justify-end">
             <Button
-              onClick={() => router.push('/survey/items2')}
+              onClick={handleNext}
               className="w-1/5 py-2 text-md"
               disabled={!isComplete}
             >

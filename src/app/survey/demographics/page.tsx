@@ -18,9 +18,49 @@ export default function SurveyPage() {
       }
     }, [router])
 
-  const handleNext = () => {
-    // Navigate to the next survey page (to be implemented)
-    router.push('/survey/prompt');
+  const handleNext = async () => {
+    if (!age || !gender) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    try {
+      // Create user document with demographic info
+      const response = await fetch('/api/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          age: parseInt(age),
+          gender: gender === 'male' ? 0 : 
+                 gender === 'female' ? 1 : 
+                 gender === 'non-binary' ? 2 : 
+                 gender === 'prefer-not' ? 3 : 4, // 4 is "other"
+          gamePlays: 0,
+          leaderboardViews: 0,
+          gamePerformance: {
+            firstPlay: {
+              score: 0,
+              completedAt: new Date()
+            }
+          }
+        }),
+      });
+
+      const data = await response.json();
+      if (data.success) {
+        // Store userId for later use
+        localStorage.setItem('ratGameUserId', data.userId);
+        // Navigate to the next survey page
+        router.push('/survey/prompt');
+      } else {
+        throw new Error('Failed to create user');
+      }
+    } catch (error) {
+      console.error('Error creating user:', error);
+      alert('There was an error. Please try again.');
+    }
   };
 
   return (

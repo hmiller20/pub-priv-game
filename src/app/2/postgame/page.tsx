@@ -13,15 +13,41 @@ export default function PublicPostgamePage() {
   const userName = searchParams.get("userName") || "Player"
   const [scorePosted, setScorePosted] = useState(false)
 
+  const incrementGamePlay = async () => {
+    const userId = localStorage.getItem('ratGameUserId');
+    if (!userId) return;
+
+    try {
+      const gamePlay = {
+        score: score,
+        completedAt: new Date()
+      };
+
+      await fetch(`/api/users/${userId}/gameplay`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(gamePlay),
+      });
+    } catch (error) {
+      console.error('Failed to submit game results:', error);
+    }
+  };
+
+  const handlePlayAgain = async () => {
+    await incrementGamePlay();
+    router.push("/2/pregame");
+  };
+
   // Handle posting score to leaderboard and concluding study
-  const postScoreAndConclude = () => {
-    // This would normally connect to a backend API
-    // For now, we'll just simulate a successful post
-    setScorePosted(true)
-    alert(`Score of ${score} for ${userName} has been posted to the leaderboard!`)
+  const postScoreAndConclude = async () => {
+    await incrementGamePlay();
+    setScorePosted(true);
+    alert(`Score of ${score} for ${userName} has been posted to the leaderboard!`);
     // After posting score, redirect to code page
-    router.push(`/code?score=${score}&condition=2`)
-  }
+    router.push(`/code?score=${score}&condition=2`);
+  };
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4 md:p-24 bg-blue-100">
@@ -47,7 +73,7 @@ export default function PublicPostgamePage() {
         </CardContent>
         <CardFooter className="flex flex-col space-y-2">
           <Button
-            onClick={() => router.push("/2/pregame")}
+            onClick={handlePlayAgain}
             className="w-full bg-black hover:bg-black/90 text-white cursor-pointer"
           >
             Play Again

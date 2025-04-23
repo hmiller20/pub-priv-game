@@ -3,9 +3,9 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Trophy, ArrowLeft, ArrowUp, ArrowDown, Minus, Clock } from "lucide-react"
+import { Trophy, ArrowLeft, ArrowUp, ArrowDown, Minus, Clock, Award } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 
 // Enhanced leaderboard data with position changes
 const leaderboardData = [
@@ -26,6 +26,31 @@ export default function PublicLeaderboardPage() {
   const searchParams = useSearchParams()
   const from = searchParams.get("from")
   const [lastUpdated, setLastUpdated] = useState<number | null>(null)
+  const hasIncrementedViews = useRef(false)
+
+  // Increment leaderboard views when component mounts
+  useEffect(() => {    
+    const incrementViews = async () => {
+      if (hasIncrementedViews.current) return;
+      
+      const userId = localStorage.getItem('ratGameUserId');
+      if (!userId) return;
+
+      try {
+        await fetch(`/api/users/${userId}/leaderboard-view`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+        hasIncrementedViews.current = true;
+      } catch (error) {
+        console.error('Failed to increment leaderboard views:', error);
+      }
+    };
+
+    incrementViews();
+  }, []);
 
   // Update the timestamp every second
   useEffect(() => {

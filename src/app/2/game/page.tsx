@@ -57,6 +57,19 @@ export default function PublicGamePage() {
   const [timeLeft, setTimeLeft] = useState(GAME_DURATION)
   const [score, setScore] = useState(0)
   const [feedback, setFeedback] = useState<null | "correct" | "incorrect">(null)
+  const [userId, setUserId] = useState<string | null>(null)
+  const [gameStartTime] = useState(Date.now())
+
+  // Get userId from localStorage when component mounts
+  useEffect(() => {
+    const storedUserId = localStorage.getItem('ratGameUserId');
+    if (!storedUserId) {
+      console.error('No user ID found');
+      router.push('/survey/demographics');
+      return;
+    }
+    setUserId(storedUserId);
+  }, [router]);
 
   // Auto-focus input on mount and when question changes
   useEffect(() => {
@@ -81,28 +94,30 @@ export default function PublicGamePage() {
     return () => clearInterval(timer)
   }, [router, userName])
 
-  const handleSkip = () => {
+  const handleSkip = async () => {
     setScore(prev => Math.max(0, prev - 5)) // Prevent negative scores
     if (currentQuestionIndex < RAT_QUESTIONS.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1)
       setUserInput("")
       setFeedback(null)
     } else {
+      // Don't submit game results when skipping the last question
       router.push(`/2/postgame?score=${Math.max(0, score - 5)}&userName=${encodeURIComponent(userName)}`)
     }
   }
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const currentQuestion = RAT_QUESTIONS[currentQuestionIndex]
     if (userInput.toLowerCase() === currentQuestion.answer.toLowerCase()) {
       setScore(prev => prev + 20)
       setFeedback("correct")
-      setTimeout(() => {
+      setTimeout(async () => {
         if (currentQuestionIndex < RAT_QUESTIONS.length - 1) {
           setCurrentQuestionIndex(prev => prev + 1)
           setUserInput("")
           setFeedback(null)
         } else {
+          await submitGameResults(score + 20);
           router.push(`/2/postgame?score=${score + 20}&userName=${encodeURIComponent(userName)}`)
         }
       }, 1000)
@@ -110,6 +125,27 @@ export default function PublicGamePage() {
       setFeedback("incorrect")
     }
   }
+
+  const submitGameResults = async (finalScore: number) => {
+    if (!userId) return;
+    
+    try {
+      const gamePlay = {
+        score: finalScore,
+        completedAt: new Date()
+      };
+
+      await fetch(`/api/users/${userId}/gameplay`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(gamePlay),
+      });
+    } catch (error) {
+      console.error('Failed to submit game results:', error);
+    }
+  };
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
@@ -167,7 +203,6 @@ export default function PublicGamePage() {
             <Button
               onClick={handleSkip}
               variant="ghost"
-              size="sm"
               className="text-muted-foreground hover:bg-gray-100"
             >
               <SkipForward className="mr-1 h-4 w-4" />
