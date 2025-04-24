@@ -69,6 +69,7 @@ export async function incrementLeaderboardViews(userId: string) {
   return result;
 }
 
+// this function increments gamePlays
 export async function addGamePlay(userId: string, gamePlay: GamePlay) {
   const client = await clientPromise;
   const collection = client.db(DATABASE_NAME).collection(COLLECTION_NAME);

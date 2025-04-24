@@ -30,9 +30,10 @@ export default function PublicLeaderboardPage() {
 
   // Increment leaderboard views when component mounts
   useEffect(() => {    
+    if (hasIncrementedViews.current) return;
+    hasIncrementedViews.current = true;
+    
     const incrementViews = async () => {
-      if (hasIncrementedViews.current) return;
-      
       const userId = localStorage.getItem('ratGameUserId');
       if (!userId) return;
 
@@ -43,7 +44,6 @@ export default function PublicLeaderboardPage() {
             'Content-Type': 'application/json',
           }
         });
-        hasIncrementedViews.current = true;
       } catch (error) {
         console.error('Failed to increment leaderboard views:', error);
       }

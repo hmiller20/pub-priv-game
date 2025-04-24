@@ -1,3 +1,5 @@
+// This file is used to create a new user in the database
+
 import { NextResponse } from 'next/server';
 import { createUser } from '@/lib/db';
 

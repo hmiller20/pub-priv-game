@@ -101,7 +101,7 @@ export default function PrivateGamePage() {
     return () => clearInterval(timer)
   }, [router, userName])
 
-  const handleSkip = async () => {
+  const handleSkip = () => {
     setScore(prev => Math.max(0, prev - 5));
     if (currentQuestionIndex < RAT_QUESTIONS.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
@@ -120,39 +120,17 @@ export default function PrivateGamePage() {
       setScore(prev => prev + 20);
       setFeedback("correct");
       
-      setTimeout(async () => {
+      setTimeout(() => {
         if (currentQuestionIndex < RAT_QUESTIONS.length - 1) {
           setCurrentQuestionIndex(prev => prev + 1);
           setUserInput("");
           setFeedback(null);
         } else {
-          await submitGameResults(score + 20);
           router.push(`/1/postgame?score=${score + 20}&userName=${encodeURIComponent(userName)}`);
         }
       }, 1000);
     } else {
       setFeedback("incorrect");
-    }
-  };
-
-  const submitGameResults = async (finalScore: number) => {
-    if (!userId) return;
-    
-    try {
-      const gamePlay = {
-        score: finalScore,
-        completedAt: new Date()
-      };
-
-      await fetch(`/api/users/${userId}/gameplay`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(gamePlay),
-      });
-    } catch (error) {
-      console.error('Failed to submit game results:', error);
     }
   };
 

@@ -1,17 +1,9 @@
-import { ObjectId } from 'mongodb';
+// this file defines the various fields in the document schema for the MongoDB database
 
-export interface QuestionResponse {
-  questionId: string;
-  isCorrect: boolean;
-  attempts: number;
-  mastery: number;
-  publicResponse: string;
-  attentionCheck: string;
-}
+import { ObjectId } from 'mongodb';
 
 export interface GamePlay {
   score: number;
-  questions: QuestionResponse[];
   completedAt: Date;
 }
 

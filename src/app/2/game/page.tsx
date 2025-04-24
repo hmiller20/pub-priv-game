@@ -94,14 +94,13 @@ export default function PublicGamePage() {
     return () => clearInterval(timer)
   }, [router, userName])
 
-  const handleSkip = async () => {
+  const handleSkip = () => {
     setScore(prev => Math.max(0, prev - 5)) // Prevent negative scores
     if (currentQuestionIndex < RAT_QUESTIONS.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1)
       setUserInput("")
       setFeedback(null)
     } else {
-      // Don't submit game results when skipping the last question
       router.push(`/2/postgame?score=${Math.max(0, score - 5)}&userName=${encodeURIComponent(userName)}`)
     }
   }
@@ -111,13 +110,12 @@ export default function PublicGamePage() {
     if (userInput.toLowerCase() === currentQuestion.answer.toLowerCase()) {
       setScore(prev => prev + 20)
       setFeedback("correct")
-      setTimeout(async () => {
+      setTimeout(() => {
         if (currentQuestionIndex < RAT_QUESTIONS.length - 1) {
           setCurrentQuestionIndex(prev => prev + 1)
           setUserInput("")
           setFeedback(null)
         } else {
-          await submitGameResults(score + 20);
           router.push(`/2/postgame?score=${score + 20}&userName=${encodeURIComponent(userName)}`)
         }
       }, 1000)
@@ -125,27 +123,6 @@ export default function PublicGamePage() {
       setFeedback("incorrect")
     }
   }
-
-  const submitGameResults = async (finalScore: number) => {
-    if (!userId) return;
-    
-    try {
-      const gamePlay = {
-        score: finalScore,
-        completedAt: new Date()
-      };
-
-      await fetch(`/api/users/${userId}/gameplay`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(gamePlay),
-      });
-    } catch (error) {
-      console.error('Failed to submit game results:', error);
-    }
-  };
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)

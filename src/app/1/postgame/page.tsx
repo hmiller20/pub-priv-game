@@ -12,6 +12,7 @@ export default function PrivatePostgamePage() {
   const userName = searchParams.get("userName") || "Player"
 
   const incrementGamePlay = async () => {
+    localStorage.setItem('lastScore', score.toString())
     const userId = localStorage.getItem('ratGameUserId');
     if (!userId) return;
 

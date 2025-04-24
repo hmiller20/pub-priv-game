@@ -5,12 +5,17 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { BookOpen } from "lucide-react"
-import { useRouter } from "next/navigation"
+import { useRouter, useSearchParams } from "next/navigation"
 
 export default function Condition1Pregame() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [userName, setUserName] = useState("")
-  const [hasReadInstructions, setHasReadInstructions] = useState(false)
+  const [hasReadInstructions, setHasReadInstructions] = useState(() => {
+    // Check if there's a previous score in localStorage
+    const lastScore = localStorage.getItem('lastScore')
+    return lastScore !== null
+  })
   const [showModal, setShowModal] = useState(false)
   const [modalPage, setModalPage] = useState(1)
   const [countdown, setCountdown] = useState(10)
@@ -18,11 +23,15 @@ export default function Condition1Pregame() {
 
   // Handle countdown timer
   useEffect(() => {
-    if (showModal && !isTimerActive) { // if modal is open and timer is not active, start timer
+    if (showModal && !isTimerActive && !hasReadInstructions) {
       setIsTimerActive(true)
       setCountdown(10)
+    } else if (hasReadInstructions) {
+      // If they've played before, ensure timer is off and countdown is 0
+      setIsTimerActive(false)
+      setCountdown(0)
     }
-  }, [showModal, modalPage])
+  }, [showModal])
 
   useEffect(() => {
     let timer: NodeJS.Timeout
@@ -55,13 +64,10 @@ export default function Condition1Pregame() {
   const handleModalNext = () => {
     if (modalPage === 1) {
       setModalPage(2)
-      setIsTimerActive(true)
-      setCountdown(10)
     } else {
       setShowModal(false)
       setHasReadInstructions(true)
       setModalPage(1)
-      setCountdown(10)
     }
   }
 

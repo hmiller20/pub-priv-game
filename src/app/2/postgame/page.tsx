@@ -14,6 +14,7 @@ export default function PublicPostgamePage() {
   const [scorePosted, setScorePosted] = useState(false)
 
   const incrementGamePlay = async () => {
+    localStorage.setItem('lastScore', score.toString())
     const userId = localStorage.getItem('ratGameUserId');
     if (!userId) return;
 
