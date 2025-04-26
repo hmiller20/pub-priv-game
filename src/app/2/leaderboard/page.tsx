@@ -34,6 +34,10 @@ export default function PublicLeaderboardPage() {
     hasIncrementedViews.current = true;
     
     const incrementViews = async () => {
+      // Increment leaderboardViews counter in localStorage
+      const views = parseInt(localStorage.getItem('leaderboardViews') || '0')
+      localStorage.setItem('leaderboardViews', (views + 1).toString())
+      
       const userId = localStorage.getItem('ratGameUserId');
       if (!userId) return;
 

@@ -123,8 +123,13 @@ export default function SurveyPage() {
         </div>
         <button
           type="button"
+          disabled={!age || !gender || !firstName || !lastName}
           onClick={handleNext}
-          className="mt-6 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className={`mt-6 w-full font-semibold py-2 px-4 rounded focus:outline-none focus:ring-2 ${
+            !age || !gender || !firstName || !lastName 
+              ? "bg-gray-400 cursor-not-allowed" 
+              : "bg-blue-600 hover:bg-blue-700 cursor-pointer focus:ring-blue-500"
+          } text-white`}
         >
           Next
         </button>

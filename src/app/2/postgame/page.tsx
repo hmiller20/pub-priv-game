@@ -14,14 +14,23 @@ export default function PublicPostgamePage() {
   const [scorePosted, setScorePosted] = useState(false)
 
   const incrementGamePlay = async () => {
+    // Store score in localStorage
     localStorage.setItem('lastScore', score.toString())
+
+    const skips = parseInt(localStorage.getItem('currentGameSkips') || '0');
+    
+    // Increment gamePlays counter
+    const gamePlays = parseInt(localStorage.getItem('gamePlays') || '0')
+    localStorage.setItem('gamePlays', (gamePlays + 1).toString())
+    
     const userId = localStorage.getItem('ratGameUserId');
     if (!userId) return;
 
     try {
       const gamePlay = {
         score: score,
-        completedAt: new Date()
+        completedAt: new Date(),
+        skips: skips
       };
 
       await fetch(`/api/users/${userId}/gameplay`, {

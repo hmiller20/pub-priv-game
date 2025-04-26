@@ -64,19 +64,22 @@ export default function PrivateGamePage() {
   const [timeLeft, setTimeLeft] = useState(GAME_DURATION)
   const [score, setScore] = useState(0)
   const [feedback, setFeedback] = useState<null | "correct" | "incorrect">(null)
-  const [userId, setUserId] = useState<string | null>(null)
-  const [gameStartTime] = useState(Date.now())
-
-  // Get userId from localStorage when component mounts
-  useEffect(() => {
-    const storedUserId = localStorage.getItem('ratGameUserId');
-    if (!storedUserId) {
-      console.error('No user ID found');
-      router.push('/survey/demographics');
-      return;
+  const [skips, setSkips] = useState(0) // useState(0) means that the skips are set to 0
+  
+  const handleSkip = () => {
+    setScore(prev => Math.max(0, prev - 5));
+    setSkips(prev => prev + 1);
+    // Store current skips count in localStorage
+    localStorage.setItem('currentGameSkips', (skips + 1).toString());
+    
+    if (currentQuestionIndex < RAT_QUESTIONS.length - 1) {
+      setCurrentQuestionIndex(prev => prev + 1);
+      setUserInput("");
+      setFeedback(null);
+    } else {
+      router.push(`/1/postgame?score=${Math.max(0, score - 5)}&userName=${encodeURIComponent(userName)}`);
     }
-    setUserId(storedUserId);
-  }, [router]);
+  }; // tracks and logs the number of skips but I need this to be explained I don't get it
 
   // Auto-focus input on mount and when question changes
   useEffect(() => {
@@ -100,17 +103,6 @@ export default function PrivateGamePage() {
 
     return () => clearInterval(timer)
   }, [router, userName])
-
-  const handleSkip = () => {
-    setScore(prev => Math.max(0, prev - 5));
-    if (currentQuestionIndex < RAT_QUESTIONS.length - 1) {
-      setCurrentQuestionIndex(prev => prev + 1);
-      setUserInput("");
-      setFeedback(null);
-    } else {
-      router.push(`/1/postgame?score=${Math.max(0, score - 5)}&userName=${encodeURIComponent(userName)}`);
-    }
-  };
 
   const handleSubmit = async () => {
     const currentQuestion = RAT_QUESTIONS[currentQuestionIndex];

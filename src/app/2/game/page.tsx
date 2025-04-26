@@ -59,6 +59,22 @@ export default function PublicGamePage() {
   const [feedback, setFeedback] = useState<null | "correct" | "incorrect">(null)
   const [userId, setUserId] = useState<string | null>(null)
   const [gameStartTime] = useState(Date.now())
+  const [skips, setSkips] = useState(0)
+
+  const handleSkip = () => {
+    setScore(prev => Math.max(0, prev - 5));
+    setSkips(prev => prev + 1);
+    // Store current skips count in localStorage
+    localStorage.setItem('currentGameSkips', (skips + 1).toString());
+    
+    if (currentQuestionIndex < RAT_QUESTIONS.length - 1) {
+      setCurrentQuestionIndex(prev => prev + 1);
+      setUserInput("");
+      setFeedback(null);
+    } else {
+      router.push(`/2/postgame?score=${Math.max(0, score - 5)}&userName=${encodeURIComponent(userName)}`);
+    }
+  }; // this function tracks and logs the number of skips
 
   // Get userId from localStorage when component mounts
   useEffect(() => {
@@ -93,17 +109,6 @@ export default function PublicGamePage() {
 
     return () => clearInterval(timer)
   }, [router, userName])
-
-  const handleSkip = () => {
-    setScore(prev => Math.max(0, prev - 5)) // Prevent negative scores
-    if (currentQuestionIndex < RAT_QUESTIONS.length - 1) {
-      setCurrentQuestionIndex(prev => prev + 1)
-      setUserInput("")
-      setFeedback(null)
-    } else {
-      router.push(`/2/postgame?score=${Math.max(0, score - 5)}&userName=${encodeURIComponent(userName)}`)
-    }
-  }
 
   const handleSubmit = async () => {
     const currentQuestion = RAT_QUESTIONS[currentQuestionIndex]
