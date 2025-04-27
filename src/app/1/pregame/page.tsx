@@ -6,24 +6,13 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { BookOpen } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { useLocalStorage } from "@/lib/hooks/useLocalStorage"
 
 export default function PublicPregame() {
   const router = useRouter()
-  const [userName, setUserName] = useState(() => {
-    // If lastScore exists, get the previous username from URL or localStorage
-    const lastScore = localStorage.getItem('lastScore');
-    if (lastScore) {
-      return localStorage.getItem('lastUserName') || 'Player';
-    }
-    return '';
-  })
-  const [hasReadInstructions, setHasReadInstructions] = useState(() => {
-    // User does not have to read instructions again if they:
-    // 1. Have explicitly read them (hasReadInstructions flag)
-    // 2. Have played before (lastScore exists)
-    return localStorage.getItem('hasReadInstructions') === 'true' || 
-           localStorage.getItem('lastScore') !== null
-  })
+  const [userName, setUserName] = useLocalStorage('currentUserName', '')
+  const [lastScore, setLastScore] = useLocalStorage('lastScore', null)
+  const [hasReadInstructions, setHasReadInstructions] = useLocalStorage('hasReadInstructions', false)
   const [showModal, setShowModal] = useState(false)
   const [modalPage, setModalPage] = useState(1)
   const [countdown, setCountdown] = useState(10)
@@ -31,11 +20,14 @@ export default function PublicPregame() {
 
   // Initialize localStorage counters if they don't exist
   useEffect(() => {
-    if (!localStorage.getItem('gamePlays')) {
-      localStorage.setItem('gamePlays', '0')
-    }
-    if (!localStorage.getItem('leaderboardViews')) {
-      localStorage.setItem('leaderboardViews', '0')
+    const isClient = typeof window !== 'undefined';
+    if (isClient) {
+      if (!localStorage.getItem('gamePlays')) {
+        localStorage.setItem('gamePlays', '0')
+      }
+      if (!localStorage.getItem('leaderboardViews')) {
+        localStorage.setItem('leaderboardViews', '0')
+      }
     }
   }, [])
 
@@ -45,11 +37,10 @@ export default function PublicPregame() {
       setIsTimerActive(true)
       setCountdown(10)
     } else if (hasReadInstructions) {
-      // If they've played before, ensure timer is off and countdown is 0
       setIsTimerActive(false)
       setCountdown(0)
     }
-  }, [showModal, modalPage])
+  }, [showModal, hasReadInstructions])
 
   useEffect(() => {
     let timer: NodeJS.Timeout
@@ -70,9 +61,8 @@ export default function PublicPregame() {
       alert("Please enter your username before starting the game")
       return
     }
-    // Store username in localStorage
-    localStorage.setItem('lastUserName', userName)
-    router.push(`/1/game?userName=${encodeURIComponent(userName)}`)
+    setUserName(userName)
+    router.push('/1/game')
   }
 
   const handleGoBack = () => {
@@ -154,13 +144,12 @@ export default function PublicPregame() {
                 placeholder="Your username"
                 value={userName}
                 onChange={(e) => {
-                  // Only allow changes if no lastScore exists
-                  if (!localStorage.getItem('lastScore')) {
-                    setUserName(e.target.value);
+                  if (!lastScore) {
+                    setUserName(e.target.value)
                   }
                 }}
-                disabled={!!localStorage.getItem('lastScore')}
-                className={`w-full ${localStorage.getItem('lastScore') ? 'bg-gray-100' : ''}`}
+                disabled={!!lastScore}
+                className={`w-full ${lastScore ? 'bg-gray-100' : ''}`}
               />
             </div>
             <Button

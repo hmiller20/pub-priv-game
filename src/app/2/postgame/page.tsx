@@ -1,37 +1,46 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, Suspense } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { AlertCircle, Trophy, Award } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
+import { useLocalStorage } from "@/lib/hooks/useLocalStorage"
 
-export default function PublicPostgamePage() {
+function PostGameContent() {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const score = parseInt(searchParams.get("score") || "0")
-  const userName = searchParams.get("userName") || "Player"
+  const [userName] = useLocalStorage('currentUserName', 'Player')
+  const [score] = useLocalStorage('currentScore', 0)
+  const [skips] = useLocalStorage('currentGameSkips', 0)
   const [scorePosted, setScorePosted] = useState(false)
 
-  const incrementGamePlay = async () => {
-    // Store score in localStorage
-    localStorage.setItem('lastScore', score.toString())
+  useEffect(() => {
+    // Clear the game-specific localStorage items after retrieving them
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('currentScore')
+      localStorage.removeItem('currentGameSkips')
+    }
+  }, [])
 
-    const skips = parseInt(localStorage.getItem('currentGameSkips') || '0');
+  const incrementGamePlay = async () => {
+    if (typeof window !== 'undefined') {
+      // Store score in localStorage
+      localStorage.setItem('lastScore', score.toString())
+
+      // Increment gamePlays counter
+      const gamePlays = parseInt(localStorage.getItem('gamePlays') || '0')
+      localStorage.setItem('gamePlays', (gamePlays + 1).toString())
+    }
     
-    // Increment gamePlays counter
-    const gamePlays = parseInt(localStorage.getItem('gamePlays') || '0')
-    localStorage.setItem('gamePlays', (gamePlays + 1).toString())
-    
-    const userId = localStorage.getItem('ratGameUserId');
-    if (!userId) return;
+    const userId = typeof window !== 'undefined' ? localStorage.getItem('ratGameUserId') : null
+    if (!userId) return
 
     try {
       const gamePlay = {
         score: score,
         completedAt: new Date(),
         skips: skips
-      };
+      }
 
       await fetch(`/api/users/${userId}/gameplay`, {
         method: 'POST',
@@ -39,25 +48,25 @@ export default function PublicPostgamePage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(gamePlay),
-      });
+      })
     } catch (error) {
-      console.error('Failed to submit game results:', error);
+      console.error('Failed to submit game results:', error)
     }
-  };
+  }
 
   const handlePlayAgain = async () => {
-    await incrementGamePlay();
-    router.push("/2/pregame");
-  };
+    await incrementGamePlay()
+    router.push("/2/pregame")
+  }
 
   // Handle posting score to leaderboard and concluding study
   const postScoreAndConclude = async () => {
-    await incrementGamePlay();
-    setScorePosted(true);
-    alert(`Score of ${score} for ${userName} has been posted to the leaderboard!`);
+    await incrementGamePlay()
+    setScorePosted(true)
+    alert(`Score of ${score} for ${userName} has been posted to the leaderboard!`)
     // After posting score, redirect to code page
-    router.push(`/code?score=${score}&condition=2`);
-  };
+    router.push(`/code?score=${score}&condition=2`)
+  }
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4 md:p-24 bg-blue-100">
@@ -66,10 +75,9 @@ export default function PublicPostgamePage() {
         <CardContent className="space-y-4">
           <div className="flex flex-col items-center space-y-4 py-8">
             <h2 className="text-2xl font-bold">Game Over!</h2>
-            <p className="text-xl">Your final score: {score}</p>
-            <div className="flex items-center space-x-2">
-              <span>Great job, {userName}!</span>
-            </div>
+            <p className="text-xl">Great job, {userName}!</p>
+            <p className="text-3xl font-bold mb-2">Final Score: {score}</p>
+            <p className="text-lg text-gray-600 dark:text-gray-400">Skips Used: {skips}</p>
             <p className="text-center text-muted-foreground mt-4">
               You can play again to try to improve your score, or you can post your current score to the public leaderboard.
             </p>
@@ -105,5 +113,13 @@ export default function PublicPostgamePage() {
         </CardFooter>
       </Card>
     </main>
+  )
+}
+
+export default function PostGamePage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <PostGameContent />
+    </Suspense>
   )
 } 

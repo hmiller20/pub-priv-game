@@ -6,7 +6,9 @@ import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { CheckCircle2, XCircle, SkipForward } from "lucide-react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
+import { Suspense } from "react"
+import { useLocalStorage } from "@/lib/hooks/useLocalStorage"
 
 // Simplified question set
 const RAT_QUESTIONS = [
@@ -53,33 +55,39 @@ interface QuestionResponse {
   answer: string;
 }
 
-export default function PrivateGamePage() {
+function GameContent() {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const userName = searchParams.get("userName") || "Player"
+  const [userName] = useLocalStorage('currentUserName', 'Player')
+  const [score, setScore] = useState(0)
+  const [skips, setSkips] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
   
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [userInput, setUserInput] = useState("")
   const [timeLeft, setTimeLeft] = useState(GAME_DURATION)
-  const [score, setScore] = useState(0)
   const [feedback, setFeedback] = useState<null | "correct" | "incorrect">(null)
-  const [skips, setSkips] = useState(0) // useState(0) means that the skips are set to 0
-  
+
   const handleSkip = () => {
-    setScore(prev => Math.max(0, prev - 5));
-    setSkips(prev => prev + 1);
-    // Store current skips count in localStorage
-    localStorage.setItem('currentGameSkips', (skips + 1).toString());
+    const newScore = Math.max(0, score - 5);
+    setScore(newScore);
+    const newSkips = skips + 1;
+    setSkips(newSkips);
+    
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('currentGameSkips', newSkips.toString());
+    }
     
     if (currentQuestionIndex < RAT_QUESTIONS.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
       setUserInput("");
       setFeedback(null);
     } else {
-      router.push(`/1/postgame?score=${Math.max(0, score - 5)}&userName=${encodeURIComponent(userName)}`);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('currentScore', newScore.toString());
+      }
+      router.push('/1/postgame');
     }
-  }; // tracks and logs the number of skips but I need this to be explained I don't get it
+  };
 
   // Auto-focus input on mount and when question changes
   useEffect(() => {
@@ -94,22 +102,26 @@ export default function PrivateGamePage() {
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
-          router.push(`/1/postgame?score=${score}&userName=${encodeURIComponent(userName)}`)
-          return 0
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('currentScore', score.toString());
+          }
+          router.push('/1/postgame');
+          return 0;
         }
-        return prev - 1
-      })
-    }, 1000)
+        return prev - 1;
+      });
+    }, 1000);
 
-    return () => clearInterval(timer)
-  }, [router, userName])
+    return () => clearInterval(timer);
+  }, [router, score]);
 
   const handleSubmit = async () => {
     const currentQuestion = RAT_QUESTIONS[currentQuestionIndex];
     const isCorrect = userInput.toLowerCase() === currentQuestion.answer.toLowerCase();
     
     if (isCorrect) {
-      setScore(prev => prev + 20);
+      const newScore = score + 20;
+      setScore(newScore);
       setFeedback("correct");
       
       setTimeout(() => {
@@ -118,7 +130,10 @@ export default function PrivateGamePage() {
           setUserInput("");
           setFeedback(null);
         } else {
-          router.push(`/1/postgame?score=${score + 20}&userName=${encodeURIComponent(userName)}`);
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('currentScore', newScore.toString());
+          }
+          router.push('/1/postgame');
         }
       }, 1000);
     } else {
@@ -207,5 +222,13 @@ export default function PrivateGamePage() {
         </CardContent>
       </Card>
     </main>
+  )
+}
+
+export default function GamePage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <GameContent />
+    </Suspense>
   )
 } 

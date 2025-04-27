@@ -1,12 +1,13 @@
 "use client"
 
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useRef, Suspense } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { CheckCircle2, XCircle, SkipForward } from "lucide-react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { useRouter } from "next/navigation"
+import { useLocalStorage } from "@/lib/hooks/useLocalStorage"
 
 // Simplified question set
 const RAT_QUESTIONS = [
@@ -46,53 +47,39 @@ const RAT_QUESTIONS = [
 
 const GAME_DURATION = 120 // 2 minutes
 
-export default function PublicGamePage() {
+function GameContent() {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const userName = searchParams.get("userName") || "Player"
+  const [userName] = useLocalStorage('currentUserName', 'Player')
+  const [score, setScore] = useState(0)
+  const [skips, setSkips] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
   
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [userInput, setUserInput] = useState("")
   const [timeLeft, setTimeLeft] = useState(GAME_DURATION)
-  const [score, setScore] = useState(0)
   const [feedback, setFeedback] = useState<null | "correct" | "incorrect">(null)
-  const [userId, setUserId] = useState<string | null>(null)
-  const [gameStartTime] = useState(Date.now())
-  const [skips, setSkips] = useState(0)
 
   const handleSkip = () => {
-    setScore(prev => Math.max(0, prev - 5));
-    setSkips(prev => prev + 1);
-    // Store current skips count in localStorage
-    localStorage.setItem('currentGameSkips', (skips + 1).toString());
+    const newScore = Math.max(0, score - 5);
+    setScore(newScore);
+    const newSkips = skips + 1;
+    setSkips(newSkips);
+    
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('currentGameSkips', newSkips.toString());
+    }
     
     if (currentQuestionIndex < RAT_QUESTIONS.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
       setUserInput("");
       setFeedback(null);
     } else {
-      router.push(`/2/postgame?score=${Math.max(0, score - 5)}&userName=${encodeURIComponent(userName)}`);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('currentScore', newScore.toString());
+      }
+      router.push('/2/postgame');
     }
-  }; // this function tracks and logs the number of skips
-
-  // Get userId from localStorage when component mounts
-  useEffect(() => {
-    const storedUserId = localStorage.getItem('ratGameUserId');
-    if (!storedUserId) {
-      console.error('No user ID found');
-      router.push('/survey/demographics');
-      return;
-    }
-    setUserId(storedUserId);
-  }, [router]);
-
-  // Auto-focus input on mount and when question changes
-  useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.focus()
-    }
-  }, [currentQuestionIndex])
+  };
 
   // Basic timer
   useEffect(() => {
@@ -100,34 +87,39 @@ export default function PublicGamePage() {
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
-          router.push(`/2/postgame?score=${score}&userName=${encodeURIComponent(userName)}`)
-          return 0
+          localStorage.setItem('currentScore', score.toString());
+          router.push('/2/postgame');
+          return 0;
         }
-        return prev - 1
-      })
-    }, 1000)
+        return prev - 1;
+      });
+    }, 1000);
 
-    return () => clearInterval(timer)
-  }, [router, userName])
+    return () => clearInterval(timer);
+  }, [router, score]);
 
   const handleSubmit = async () => {
-    const currentQuestion = RAT_QUESTIONS[currentQuestionIndex]
-    if (userInput.toLowerCase() === currentQuestion.answer.toLowerCase()) {
-      setScore(prev => prev + 20)
-      setFeedback("correct")
+    const currentQuestion = RAT_QUESTIONS[currentQuestionIndex];
+    const isCorrect = userInput.toLowerCase() === currentQuestion.answer.toLowerCase();
+    
+    if (isCorrect) {
+      setScore(prev => prev + 20);
+      setFeedback("correct");
+      
       setTimeout(() => {
         if (currentQuestionIndex < RAT_QUESTIONS.length - 1) {
-          setCurrentQuestionIndex(prev => prev + 1)
-          setUserInput("")
-          setFeedback(null)
+          setCurrentQuestionIndex(prev => prev + 1);
+          setUserInput("");
+          setFeedback(null);
         } else {
-          router.push(`/2/postgame?score=${score + 20}&userName=${encodeURIComponent(userName)}`)
+          localStorage.setItem('currentScore', (score + 20).toString());
+          router.push('/2/postgame');
         }
-      }, 1000)
+      }, 1000);
     } else {
-      setFeedback("incorrect")
+      setFeedback("incorrect");
     }
-  }
+  };
 
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
@@ -210,5 +202,13 @@ export default function PublicGamePage() {
         </CardContent>
       </Card>
     </main>
+  )
+}
+
+export default function GamePage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <GameContent />
+    </Suspense>
   )
 } 

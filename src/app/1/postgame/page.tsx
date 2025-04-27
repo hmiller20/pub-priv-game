@@ -4,30 +4,44 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { AlertCircle } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
+import { Suspense } from "react"
+import { useLocalStorage } from "@/lib/hooks/useLocalStorage"
+import { useState, useEffect } from "react"
 
-export default function PrivatePostgamePage() {
+function PostGameContent() {
   const router = useRouter()
-  const searchParams = useSearchParams()
-  const score = parseInt(searchParams.get("score") || "0")
-  const userName = searchParams.get("userName") || "Player"
+  const [userName] = useLocalStorage('currentUserName', 'Player')
+  const [score] = useLocalStorage('currentScore', 0)
+  const [skips] = useLocalStorage('currentGameSkips', 0)
+  const [scorePosted, setScorePosted] = useState(false)
+
+  useEffect(() => {
+    // Clear the game-specific localStorage items after retrieving them
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('currentScore')
+      localStorage.removeItem('currentGameSkips')
+    }
+  }, [])
 
   const incrementGamePlay = async () => {
-    localStorage.setItem('lastScore', score.toString())
+    if (typeof window !== 'undefined') {
+      // Store score in localStorage
+      localStorage.setItem('lastScore', score.toString())
+
+      // Increment gamePlays counter
+      const gamePlays = parseInt(localStorage.getItem('gamePlays') || '0')
+      localStorage.setItem('gamePlays', (gamePlays + 1).toString())
+    }
     
-    const skips = parseInt(localStorage.getItem('currentGameSkips') || '0');
-    
-    const gamePlays = parseInt(localStorage.getItem('gamePlays') || '0')
-    localStorage.setItem('gamePlays', (gamePlays + 1).toString())
-    
-    const userId = localStorage.getItem('ratGameUserId');
-    if (!userId) return;
+    const userId = typeof window !== 'undefined' ? localStorage.getItem('ratGameUserId') : null
+    if (!userId) return
 
     try {
       const gamePlay = {
         score: score,
         completedAt: new Date(),
         skips: skips
-      };
+      }
 
       await fetch(`/api/users/${userId}/gameplay`, {
         method: 'POST',
@@ -35,21 +49,25 @@ export default function PrivatePostgamePage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify(gamePlay),
-      });
+      })
     } catch (error) {
-      console.error('Failed to submit game results:', error);
+      console.error('Failed to submit game results:', error)
     }
-  };
+  }
 
   const handlePlayAgain = async () => {
-    await incrementGamePlay();
-    router.push("/1/pregame");
-  };
+    await incrementGamePlay()
+    router.push("/1/pregame")
+  }
 
-  const handleConclude = async () => {
-    await incrementGamePlay();
-    router.push(`/code?score=${score}&condition=1`);
-  };
+  // Handle posting score and concluding study
+  const postScoreAndConclude = async () => {
+    await incrementGamePlay()
+    setScorePosted(true)
+    alert(`Score of ${score} for ${userName} has been recorded!`)
+    // After posting score, redirect to code page
+    router.push(`/code?score=${score}&condition=1`)
+  }
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4 md:p-24 bg-blue-100">
@@ -75,7 +93,7 @@ export default function PrivatePostgamePage() {
             Play Again
           </Button>
           <Button
-            onClick={handleConclude}
+            onClick={postScoreAndConclude}
             className="w-full bg-black hover:bg-black/90 text-white cursor-pointer"
           >
             Conclude Study
@@ -83,5 +101,13 @@ export default function PrivatePostgamePage() {
         </CardFooter>
       </Card>
     </main>
+  )
+}
+
+export default function PostGamePage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <PostGameContent />
+    </Suspense>
   )
 } 
