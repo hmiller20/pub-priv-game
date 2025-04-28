@@ -1,6 +1,7 @@
 "use client"
 
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
+import { Loader2 } from 'lucide-react'
 
 type Condition = '1' | '2'; // 1 is private, 2 is public
 
@@ -18,11 +19,15 @@ function getCondition(): Condition {
 }
 
 export default function ConditionAssignment() {
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
   useEffect(() => {
     const assignCondition = async () => {
-      const condition = getCondition();
+      setIsLoading(true);
+      setError(null);
+      
       const userId = localStorage.getItem('ratGameUserId');
-
       if (!userId) {
         console.error('No user ID found');
         window.location.href = '/survey/demographics';
@@ -30,6 +35,8 @@ export default function ConditionAssignment() {
       }
 
       try {
+        const condition = getCondition();
+
         // Update user document with assigned condition
         const response = await fetch(`/api/users/${userId}`, {
           method: 'PATCH',
@@ -37,7 +44,7 @@ export default function ConditionAssignment() {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            assignedCondition: condition // Store the raw condition number
+            assignedCondition: condition
           }),
         });
 
@@ -45,11 +52,18 @@ export default function ConditionAssignment() {
           throw new Error('Failed to update user condition');
         }
 
-        // Redirect to the appropriate condition's pregame page
+        // Only redirect after successful database update
         window.location.href = `/${condition}/pregame`;
       } catch (error) {
         console.error('Error updating user condition:', error);
-        alert('There was an error assigning your condition. Please try again.');
+        setError('There was an error assigning your condition. Please wait while we try again...');
+        
+        // Retry after 2 seconds
+        setTimeout(() => {
+          assignCondition();
+        }, 2000);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -57,9 +71,20 @@ export default function ConditionAssignment() {
   }, []);
 
   return (
-    <main className="flex min-h-screen items-center justify-center">
-      <div className="text-center">
-        Loading...
+    <main className="flex min-h-screen flex-col items-center justify-center p-4 bg-blue-100">
+      <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full text-center space-y-4">
+        {isLoading ? (
+          <div className="flex flex-col items-center gap-4">
+            <Loader2 className="h-8 w-8 animate-spin" />
+            <p className="text-lg">Assigning your condition...</p>
+          </div>
+        ) : error ? (
+          <div className="text-red-600">
+            <p>{error}</p>
+          </div>
+        ) : (
+          <p className="text-lg">Redirecting...</p>
+        )}
       </div>
     </main>
   );

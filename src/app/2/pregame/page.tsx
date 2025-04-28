@@ -20,13 +20,16 @@ export default function PublicPregame() {
   
   // Initialize localStorage counters if they don't exist
   useEffect(() => {
-    const isClient = typeof window !== 'undefined';
-    if (isClient) {
-      if (!localStorage.getItem('gamePlays')) {
-        localStorage.setItem('gamePlays', '0')
+    if (typeof window !== 'undefined') {
+      if (!window.localStorage.getItem('gamePlays')) {
+        window.localStorage.setItem('gamePlays', '0')
       }
-      if (!localStorage.getItem('leaderboardViews')) {
-        localStorage.setItem('leaderboardViews', '0')
+      if (!window.localStorage.getItem('leaderboardViews')) {
+        window.localStorage.setItem('leaderboardViews', '0')
+      }
+      // Only set the leaderboard timer if it hasn't been set yet
+      if (!window.localStorage.getItem('leaderboardLastUpdate')) {
+        window.localStorage.setItem('leaderboardLastUpdate', new Date().toISOString())
       }
     }
   }, [])
