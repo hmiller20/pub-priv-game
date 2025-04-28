@@ -81,7 +81,7 @@ function PostGameContent() {
               <span>Great job, {userName}!</span>
             </div>
             <p className="text-center text-muted-foreground mt-4">
-              Your score has been recorded privately for research purposes. You can play again to try to improve your score.
+              Your score has been recorded privately for research purposes. You can play again to try to improve your score. Only your most recent score will be recorded.
             </p>
           </div>
         </CardContent>

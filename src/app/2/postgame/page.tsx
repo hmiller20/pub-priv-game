@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, Suspense } from "react"
+import { useState, useEffect, Suspense, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { AlertCircle, Trophy, Award } from "lucide-react"
@@ -10,44 +10,73 @@ import { useLocalStorage } from "@/lib/hooks/useLocalStorage"
 function PostGameContent() {
   const router = useRouter()
   const [userName] = useLocalStorage('currentUserName', 'Player')
-  const [score] = useLocalStorage('currentScore', 0)
-  const [skips] = useLocalStorage('currentGameSkips', 0)
+  const [displayScore, setDisplayScore] = useState(0)
   const [scorePosted, setScorePosted] = useState(false)
+  const hasWritten = useRef(false)
 
   useEffect(() => {
-    // Clear the game-specific localStorage items after retrieving them
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('currentScore')
-      localStorage.removeItem('currentGameSkips')
+    if (typeof window !== 'undefined' && !hasWritten.current) {
+      const shouldCreate = sessionStorage.getItem('shouldCreateNewPlay') === 'true';
+      let gamePlays = parseInt(localStorage.getItem('gamePlays') || '0');
+      const nextPlay = gamePlays + 1;
+      let score = parseInt(localStorage.getItem('currentScore') || '0');
+      let skips = parseInt(localStorage.getItem('currentGameSkips') || '0');
+      if (shouldCreate) {
+        if (
+          localStorage.getItem(`play${nextPlay}Score`) === null &&
+          localStorage.getItem(`play${nextPlay}Skips`) === null
+        ) {
+          localStorage.setItem('gamePlays', nextPlay.toString());
+          localStorage.setItem(`play${nextPlay}Score`, score.toString());
+          localStorage.setItem(`play${nextPlay}Skips`, skips.toString());
+          localStorage.removeItem('currentScore');
+          localStorage.removeItem('currentGameSkips');
+        }
+        sessionStorage.removeItem('shouldCreateNewPlay');
+        setDisplayScore(score); // set the score for this play
+      } else {
+        // Not a new play, so show the latest playNScore
+        const latestPlay = parseInt(localStorage.getItem('gamePlays') || '1');
+        const latestScore = parseInt(localStorage.getItem(`play${latestPlay}Score`) || '0');
+        setDisplayScore(latestScore);
+      }
+      hasWritten.current = true;
     }
-  }, [])
+  }, []);
+
+  // Helper to get the latest play number
+  const getLatestPlayNumber = () => {
+    if (typeof window === 'undefined') return 1
+    return parseInt(localStorage.getItem('gamePlays') || '1')
+  }
+
+  // Helper to build the gamePerformance object from all plays in localStorage
+  const buildGamePerformance = () => {
+    if (typeof window === 'undefined') return {}
+    const gamePlays = parseInt(localStorage.getItem('gamePlays') || '0')
+    const gamePerformance: Record<string, {score: number, skips: number}> = {}
+    for (let i = 1; i <= gamePlays; i++) {
+      const score = parseInt(localStorage.getItem(`play${i}Score`) || '0')
+      const skips = parseInt(localStorage.getItem(`play${i}Skips`) || '0')
+      const playKey = i === 1 ? 'firstPlay' : i === 2 ? 'secondPlay' : i === 3 ? 'thirdPlay' : `${i}thPlay`
+      gamePerformance[playKey] = { score, skips }
+    }
+    return gamePerformance
+  }
 
   const incrementGamePlay = async () => {
-    if (typeof window !== 'undefined') {
-      // Store score in localStorage
-      localStorage.setItem('lastScore', score.toString())
-
-      // Increment gamePlays counter
-      const gamePlays = parseInt(localStorage.getItem('gamePlays') || '0')
-      localStorage.setItem('gamePlays', (gamePlays + 1).toString())
-    }
-    
     const userId = typeof window !== 'undefined' ? localStorage.getItem('ratGameUserId') : null
     if (!userId) return
 
     try {
-      const gamePlay = {
-        score: score,
-        completedAt: new Date(),
-        skips: skips
-      }
-
+      // Gather all plays for gamePerformance
+      const gamePerformance = buildGamePerformance()
       await fetch(`/api/users/${userId}/gameplay`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(gamePlay),
+        body: JSON.stringify({ gamePerformance }),
       })
     } catch (error) {
       console.error('Failed to submit game results:', error)
@@ -56,6 +85,9 @@ function PostGameContent() {
 
   const handlePlayAgain = async () => {
     await incrementGamePlay()
+    if (typeof window !== 'undefined') {
+      sessionStorage.setItem('fromPostgame', 'true');
+    }
     router.push("/2/pregame")
   }
 
@@ -63,9 +95,9 @@ function PostGameContent() {
   const postScoreAndConclude = async () => {
     await incrementGamePlay()
     setScorePosted(true)
-    alert(`Score of ${score} for ${userName} has been posted to the leaderboard!`)
+    alert(`Score of ${displayScore} for ${userName} has been posted to the leaderboard!`)
     // After posting score, redirect to code page
-    router.push(`/code?score=${score}&condition=2`)
+    router.push(`/code?score=${displayScore}&condition=2`)
   }
 
   return (
@@ -76,10 +108,9 @@ function PostGameContent() {
           <div className="flex flex-col items-center space-y-4 py-8">
             <h2 className="text-2xl font-bold">Game Over!</h2>
             <p className="text-xl">Great job, {userName}!</p>
-            <p className="text-3xl font-bold mb-2">Final Score: {score}</p>
-            <p className="text-lg text-gray-600 dark:text-gray-400">Skips Used: {skips}</p>
+            <p className="text-3xl font-bold mb-2">Final Score: {displayScore}</p>
             <p className="text-center text-muted-foreground mt-4">
-              You can play again to try to improve your score, or you can post your current score to the public leaderboard.
+              You can play again to try to improve your score, or you can post your current score to the public leaderboard. Only your most recent score will be recorded.
             </p>
             {scorePosted && (
               <div className="flex items-center space-x-2 text-green-500">

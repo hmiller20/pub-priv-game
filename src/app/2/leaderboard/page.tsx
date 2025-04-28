@@ -1,10 +1,16 @@
 "use client"
 
-import { useEffect, useState, Suspense } from "react"
+import { useEffect, useState, Suspense, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Trophy, ArrowLeft, ArrowUpIcon, ArrowDownIcon, MinusIcon, Clock } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
+
+declare global {
+  interface Window {
+    _hasIncrementedLeaderboardViews?: boolean;
+  }
+}
 
 const LEADERBOARD_DATA = [
   { userName: "coolbeans47", score: 125, date: "2025-04-13", trend: "up" },
@@ -25,11 +31,42 @@ function LeaderboardContent() {
   const fromPostgame = searchParams.get('from') === 'postgame'
   const [currentTime, setCurrentTime] = useState<Date>(new Date())
   const [lastUpdate, setLastUpdate] = useState<string | null>(null)
+  const hasIncremented = useRef(false)
 
-  // Get the initial timestamp on mount
+  // Track leaderboard views
+  useEffect(() => {
+    if (typeof window !== 'undefined' && !hasIncremented.current) {
+      // Increment leaderboard views in localStorage
+      const currentViews = parseInt(localStorage.getItem('leaderboardViews') || '0')
+      localStorage.setItem('leaderboardViews', (currentViews + 1).toString())
+      
+      // Increment views in MongoDB
+      const userId = localStorage.getItem('ratGameUserId')
+      if (userId) {
+        fetch(`/api/users/${userId}/leaderboard-view`, {
+          method: 'POST',
+        }).catch(error => {
+          console.error('Failed to increment leaderboard views:', error)
+        })
+      }
+
+      hasIncremented.current = true
+    }
+  }, [])
+
+  // Initialize the timer
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      setLastUpdate(window.localStorage.getItem('leaderboardLastUpdate'))
+      // Get the last update time from localStorage
+      const storedLastUpdate = localStorage.getItem('leaderboardLastUpdate')
+      if (storedLastUpdate) {
+        setLastUpdate(storedLastUpdate)
+      } else {
+        // If no stored time, set it to now
+        const now = new Date().toISOString()
+        localStorage.setItem('leaderboardLastUpdate', now)
+        setLastUpdate(now)
+      }
     }
   }, [])
 

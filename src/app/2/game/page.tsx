@@ -76,6 +76,7 @@ function GameContent() {
     } else {
       if (typeof window !== 'undefined') {
         localStorage.setItem('currentScore', newScore.toString());
+        sessionStorage.setItem('shouldCreateNewPlay', 'true');
       }
       router.push('/2/postgame');
     }
@@ -88,6 +89,7 @@ function GameContent() {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           localStorage.setItem('currentScore', score.toString());
+          sessionStorage.setItem('shouldCreateNewPlay', 'true');
           router.push('/2/postgame');
           return 0;
         }
@@ -113,6 +115,7 @@ function GameContent() {
           setFeedback(null);
         } else {
           localStorage.setItem('currentScore', (score + 20).toString());
+          sessionStorage.setItem('shouldCreateNewPlay', 'true');
           router.push('/2/postgame');
         }
       }, 1000);

@@ -6,16 +6,17 @@ import { Loader2 } from 'lucide-react'
 type Condition = '1' | '2'; // 1 is private, 2 is public
 
 function getCondition(): Condition {
-  // Check if condition is already assigned
-  const stored = localStorage.getItem('condition');
-  if (stored && (stored === '1' || stored === '2')) {
-    return stored;
-  }
-
-  // If not, randomly assign one
-  const condition: Condition = Math.random() < 0.5 ? '1' : '2';
-  localStorage.setItem('condition', condition);
-  return condition;
+  // For development, always return condition 2 (public)
+  return '2';
+  
+  // Original random assignment code (commented out)
+  // const stored = localStorage.getItem('condition');
+  // if (stored && (stored === '1' || stored === '2')) {
+  //   return stored;
+  // }
+  // const condition: Condition = Math.random() < 0.5 ? '1' : '2';
+  // localStorage.setItem('condition', condition);
+  // return condition;
 }
 
 export default function ConditionAssignment() {
@@ -73,18 +74,10 @@ export default function ConditionAssignment() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4 bg-blue-100">
       <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full text-center space-y-4">
-        {isLoading ? (
-          <div className="flex flex-col items-center gap-4">
-            <Loader2 className="h-8 w-8 animate-spin" />
-            <p className="text-lg">Assigning your condition...</p>
-          </div>
-        ) : error ? (
-          <div className="text-red-600">
-            <p>{error}</p>
-          </div>
-        ) : (
-          <p className="text-lg">Redirecting...</p>
-        )}
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin" />
+          <p className="text-lg">Loading...</p>
+        </div>
       </div>
     </main>
   );
