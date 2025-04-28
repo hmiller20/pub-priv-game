@@ -89,7 +89,6 @@ function PostGameContent() {
   const postScoreAndConclude = async () => {
     await incrementGamePlay()
     setScorePosted(true)
-    alert(`Score of ${displayScore} for ${userName} has been recorded!`)
     // After posting score, redirect to code page
     router.push(`/code?score=${displayScore}&condition=1`)
   }
