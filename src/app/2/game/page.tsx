@@ -59,6 +59,13 @@ function GameContent() {
   const [timeLeft, setTimeLeft] = useState(GAME_DURATION)
   const [feedback, setFeedback] = useState<null | "correct" | "incorrect">(null)
 
+  // Auto-focus input on mount and when question changes
+  useEffect(() => {
+    if (inputRef.current) {
+      inputRef.current.focus()
+    }
+  }, [currentQuestionIndex])
+
   const handleSkip = () => {
     const newScore = Math.max(0, score - 5);
     setScore(newScore);

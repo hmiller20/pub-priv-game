@@ -4,6 +4,7 @@ import { ObjectId } from 'mongodb';
 
 export interface GamePlay {
   score: number;
+  skips: number;
   completedAt: Date;
 }
 
@@ -21,8 +22,7 @@ export interface UserDocument {
   gamePlays: number;
   leaderboardViews: number;
   gamePerformance: {
-    firstPlay: GamePlay;
-    secondPlay?: GamePlay;
+    [key: `play${number}`]: GamePlay;
   };
   surveyResponses?: SurveyResponses;
   createdAt: Date;

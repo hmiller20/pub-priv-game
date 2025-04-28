@@ -6,17 +6,14 @@ import { Loader2 } from 'lucide-react'
 type Condition = '1' | '2'; // 1 is private, 2 is public
 
 function getCondition(): Condition {
-  // For development, always return condition 2 (public)
-  return '2';
-  
-  // Original random assignment code (commented out)
-  // const stored = localStorage.getItem('condition');
-  // if (stored && (stored === '1' || stored === '2')) {
-  //   return stored;
-  // }
-  // const condition: Condition = Math.random() < 0.5 ? '1' : '2';
-  // localStorage.setItem('condition', condition);
-  // return condition;
+
+  const stored = localStorage.getItem('condition');
+  if (stored && (stored === '1' || stored === '2')) {
+    return stored;
+  }
+  const condition: Condition = Math.random() < 0.5 ? '1' : '2';
+  localStorage.setItem('condition', condition);
+  return condition;
 }
 
 export default function ConditionAssignment() {

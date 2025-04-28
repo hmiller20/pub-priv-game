@@ -50,33 +50,27 @@ function PostGameContent() {
     return parseInt(localStorage.getItem('gamePlays') || '1')
   }
 
-  // Helper to build the gamePerformance object from all plays in localStorage
-  const buildGamePerformance = () => {
-    if (typeof window === 'undefined') return {}
-    const gamePlays = parseInt(localStorage.getItem('gamePlays') || '0')
-    const gamePerformance: Record<string, {score: number, skips: number}> = {}
-    for (let i = 1; i <= gamePlays; i++) {
-      const score = parseInt(localStorage.getItem(`play${i}Score`) || '0')
-      const skips = parseInt(localStorage.getItem(`play${i}Skips`) || '0')
-      const playKey = i === 1 ? 'firstPlay' : i === 2 ? 'secondPlay' : i === 3 ? 'thirdPlay' : `${i}thPlay`
-      gamePerformance[playKey] = { score, skips }
-    }
-    return gamePerformance
-  }
-
   const incrementGamePlay = async () => {
     const userId = typeof window !== 'undefined' ? localStorage.getItem('ratGameUserId') : null
     if (!userId) return
 
     try {
-      // Gather all plays for gamePerformance
-      const gamePerformance = buildGamePerformance()
+      const latestPlay = getLatestPlayNumber()
+      const score = parseInt(localStorage.getItem(`play${latestPlay}Score`) || '0')
+      const skips = parseInt(localStorage.getItem(`play${latestPlay}Skips`) || '0')
+      
+      const gamePlay = {
+        score: score,
+        skips: skips,
+        completedAt: new Date()
+      }
+
       await fetch(`/api/users/${userId}/gameplay`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ gamePerformance }),
+        body: JSON.stringify(gamePlay),
       })
     } catch (error) {
       console.error('Failed to submit game results:', error)
