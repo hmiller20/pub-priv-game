@@ -69,6 +69,12 @@ export default function SurveyPage() {
   }, [responses])
 
   const handleNext = () => { 
+    // Save mastery responses to localStorage before navigating
+    const masteryResponses = questions
+      .filter(q => q.id.startsWith('mastery'))
+      .map(q => responses[q.id]);
+    localStorage.setItem('masteryResponses', JSON.stringify(masteryResponses));
+    
     // Navigate to next survey page
     router.push('/survey/items2');
   }
