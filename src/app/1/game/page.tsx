@@ -136,13 +136,23 @@ const RAT_QUESTIONS = [
 
 const GAME_DURATION = 120 // 2 minutes
 
+// Fisher-Yates shuffle algorithm
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
+
 function GameContent() {
   const router = useRouter()
-  const [userName] = useLocalStorage('currentUserName', 'Player')
   const [score, setScore] = useState(0)
   const [skips, setSkips] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
   
+  const [questions] = useState(() => shuffleArray(RAT_QUESTIONS))
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [userInput, setUserInput] = useState("")
   const [timeLeft, setTimeLeft] = useState(GAME_DURATION)
@@ -158,7 +168,7 @@ function GameContent() {
       localStorage.setItem('currentGameSkips', newSkips.toString());
     }
     
-    if (currentQuestionIndex < RAT_QUESTIONS.length - 1) {
+    if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
       setUserInput("");
       setFeedback(null);
@@ -199,7 +209,7 @@ function GameContent() {
   }, [router, score]);
 
   const handleSubmit = async () => {
-    const currentQuestion = RAT_QUESTIONS[currentQuestionIndex];
+    const currentQuestion = questions[currentQuestionIndex];
     const isCorrect = userInput.toLowerCase() === currentQuestion.answer.toLowerCase();
     
     if (isCorrect) {
@@ -208,7 +218,7 @@ function GameContent() {
       setFeedback("correct");
       
       setTimeout(() => {
-        if (currentQuestionIndex < RAT_QUESTIONS.length - 1) {
+        if (currentQuestionIndex < questions.length - 1) {
           setCurrentQuestionIndex(prev => prev + 1);
           setUserInput("");
           setFeedback(null);
@@ -231,7 +241,7 @@ function GameContent() {
     return `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`
   }
 
-  const currentQuestion = RAT_QUESTIONS[currentQuestionIndex]
+  const currentQuestion = questions[currentQuestionIndex]
 
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-4 bg-blue-100">

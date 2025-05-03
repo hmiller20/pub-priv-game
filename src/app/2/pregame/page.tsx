@@ -10,7 +10,8 @@ import { useLocalStorage } from "@/lib/hooks/useLocalStorage"
 
 export default function PublicPregame() {
   const router = useRouter()
-  const [userName, setUserName] = useLocalStorage('currentUserName', '')
+  const [firstName, setFirstName] = useLocalStorage('currentFirstName', '')
+  const [lastInitial, setLastInitial] = useLocalStorage('currentLastInitial', '')
   const [lastScore, setLastScore] = useLocalStorage('lastScore', null)
   const [hasReadInstructions, setHasReadInstructions] = useLocalStorage('hasReadInstructions', false)
   const [showModal, setShowModal] = useState(false)
@@ -66,11 +67,12 @@ export default function PublicPregame() {
   }, [isTimerActive, countdown])
 
   const handleStartGame = () => {
-    if (!userName.trim()) {
-      alert("Please enter your username before starting the game")
+    if (!firstName.trim() || !lastInitial.trim()) {
+      alert("Please enter both your first name and last initial before starting the game")
       return
     }
-    setUserName(userName)
+    setFirstName(firstName)
+    setLastInitial(lastInitial)
     router.push('/2/game')
   }
 
@@ -150,24 +152,48 @@ export default function PublicPregame() {
       <Card className="w-full max-w-md bg-white">
         <CardContent className="space-y-4">
           <div className="flex flex-col items-center space-y-4 py-8">
-            <div className="w-full space-y-2 mb-4">
-              <label htmlFor="userName" className="text-sm font-medium">
-                Enter Your Username
-              </label>
-              <Input
-                id="userName"
-                type="text"
-                placeholder="Your username"
-                value={userName}
-                onChange={(e) => {
-                  if (!lastScore) {
-                    setUserName(e.target.value)
-                  }
-                }}
-                disabled={disableUsername}
-                style={disableUsername ? { backgroundColor: '#f3f4f6', color: '#a1a1aa', cursor: 'not-allowed' } : {}}
-                className={`w-full ${lastScore ? 'bg-gray-100' : ''}`}
-              />
+            <div className="w-full space-y-4 mb-4">
+              <div className="space-y-2">
+                <label htmlFor="firstName" className="text-sm font-medium">
+                  Enter Your First Name
+                </label>
+                <Input
+                  id="firstName"
+                  type="text"
+                  placeholder="Your first name"
+                  value={firstName}
+                  onChange={(e) => {
+                    if (!lastScore) {
+                      setFirstName(e.target.value)
+                    }
+                  }}
+                  disabled={disableUsername}
+                  style={disableUsername ? { backgroundColor: '#f3f4f6', color: '#a1a1aa', cursor: 'not-allowed' } : {}}
+                  className={`w-full ${lastScore ? 'bg-gray-100' : ''}`}
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="lastInitial" className="text-sm font-medium">
+                  Enter Your Last Initial
+                </label>
+                <Input
+                  id="lastInitial"
+                  type="text"
+                  placeholder="Your last initial"
+                  value={lastInitial}
+                  onChange={(e) => {
+                    if (!lastScore) {
+                      // Only allow a single character
+                      const value = e.target.value.slice(0, 1).toUpperCase()
+                      setLastInitial(value)
+                    }
+                  }}
+                  disabled={disableUsername}
+                  style={disableUsername ? { backgroundColor: '#f3f4f6', color: '#a1a1aa', cursor: 'not-allowed' } : {}}
+                  className={`w-full ${lastScore ? 'bg-gray-100' : ''}`}
+                  maxLength={1}
+                />
+              </div>
             </div>
             <Button
               onClick={() => setShowModal(true)}

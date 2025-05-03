@@ -3,13 +3,14 @@
 import { useState, useEffect, Suspense, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
-import { AlertCircle, Trophy, Award } from "lucide-react"
-import { useRouter, useSearchParams } from "next/navigation"
+import { Award } from "lucide-react"
+import { useRouter } from "next/navigation"
 import { useLocalStorage } from "@/lib/hooks/useLocalStorage"
 
 function PostGameContent() {
   const router = useRouter()
-  const [userName] = useLocalStorage('currentUserName', 'Player')
+  const [firstName] = useLocalStorage('currentFirstName', 'Player')
+  const [lastInitial] = useLocalStorage('currentLastInitial', '')
   const [displayScore, setDisplayScore] = useState(0)
   const [scorePosted, setScorePosted] = useState(false)
   const hasWritten = useRef(false)
@@ -100,7 +101,7 @@ function PostGameContent() {
         <CardContent className="space-y-4">
           <div className="flex flex-col items-center space-y-4 py-8">
             <h2 className="text-2xl font-bold">Game Over!</h2>
-            <p className="text-xl">Great job, {userName}!</p>
+            <p className="text-xl">Great job, {firstName} {lastInitial}!</p>
             <p className="text-3xl font-bold mb-2">Final Score: {displayScore}</p>
             <p className="text-center text-muted-foreground mt-4">
               You can play again to try to improve your score, post your current score to the public leaderboard, or proceed to the next part of the study.

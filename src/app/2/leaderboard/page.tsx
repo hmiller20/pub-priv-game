@@ -13,16 +13,16 @@ declare global {
 }
 
 const LEADERBOARD_DATA = [
-  { userName: "coolbeans47", score: 125, date: "2025-04-13", trend: "up" },
-  { userName: "skibidi", score: 110, date: "2025-04-12", trend: "neutral" },
-  { userName: "taylorpolish", score: 95, date: "2025-04-11", trend: "down" },
-  { userName: "dave1994", score: 80, date: "2025-04-10", trend: "up" },
-  { userName: "xXshadowXx", score: 80, date: "2025-04-09", trend: "down" },
-  { userName: "basketball_enjoyer", score: 75, date: "2025-04-08", trend: "neutral" },
-  { userName: "ucantseeme", score: 70, date: "2025-04-07", trend: "up" },
-  { userName: "toast_monster", score: 60, date: "2025-04-06", trend: "neutral" },
-  { userName: "ilikepizza~", score: 45, date: "2025-04-05", trend: "neutral" },
-  { userName: "jeff", score: 30, date: "2025-04-04", trend: "down" },
+  { userName: "Caleb L", score: 125, date: "2025-04-13", trend: "up" },
+  { userName: "Samantha P", score: 110, date: "2025-04-12", trend: "neutral" },
+  { userName: "Taylor R", score: 95, date: "2025-04-11", trend: "down" },
+  { userName: "David B", score: 80, date: "2025-04-10", trend: "up" },
+  { userName: "Will S", score: 80, date: "2025-04-09", trend: "down" },
+  { userName: "Landon M", score: 75, date: "2025-04-08", trend: "neutral" },
+  { userName: "Anna M", score: 70, date: "2025-04-07", trend: "up" },
+  { userName: "Kylie C", score: 60, date: "2025-04-06", trend: "neutral" },
+  { userName: "Drew N", score: 45, date: "2025-04-05", trend: "neutral" },
+  { userName: "Jeff M", score: 30, date: "2025-04-04", trend: "down" },
 ] as const;
 
 function LeaderboardContent() {
