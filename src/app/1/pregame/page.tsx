@@ -66,7 +66,7 @@ export default function PublicPregame() {
   }
 
   const handleGoBack = () => {
-    setModalPage(1)
+    setModalPage(prev => prev - 1)
     if (!hasReadInstructions) {
       setIsTimerActive(true)
       setCountdown(10)
@@ -74,8 +74,8 @@ export default function PublicPregame() {
   }
 
   const handleModalNext = () => {
-    if (modalPage === 1) {
-      setModalPage(2)
+    if (modalPage < 3) {
+      setModalPage(prev => prev + 1)
       if (!hasReadInstructions) {
         setIsTimerActive(true)
         setCountdown(10)
@@ -115,13 +115,20 @@ export default function PublicPregame() {
       content: (
         <CardContent className="space-y-4">
           <p>
-            Versions of this exercise have been used in psychological research for decades to predict performance in a number of domains, from career success to relationship satisfaction.
+          The task you’ll be performing measures mental acuity and the ability to create connections across concepts, which are basic elements of <span className="font-bold">intelligence</span> and <span className="font-bold">creativity</span>. Performance on this task has been shown to predict a number of important outcomes including <span className="font-bold">career success</span>, <span className="font-bold">salary</span>, and even people’s ability to form <span className="font-bold">satisfying relationships</span>.
           </p>
           <p>
-            Therefore, it is important that you try your best to solve the questions. Your participation will help us better understand how people solve these kinds of cognitive challenges.
+          Therefore, it is important that you try your best to solve the questions. Your participation will help us better understand how different forms of intelligence and creativity contribute to <span className="font-bold">positive life outcomes</span>.
           </p>
+        </CardContent>
+      )
+    },
+    3: {
+      title: "Your Score",
+      content: (
+        <CardContent className="space-y-4">
           <p className="text-blue-600 font-large font-bold">
-            Finally, your score will be kept private and used only for research purposes, so make sure to give it your best shot!
+          Finally, your score will be kept private and used only for research purposes, so make sure to give it your best shot!
           </p>
         </CardContent>
       )
@@ -181,15 +188,15 @@ export default function PublicPregame() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
           <Card className="w-full max-w-lg bg-white">
             <CardHeader>
-              <CardTitle>{modalContent[modalPage as 1 | 2].title}</CardTitle>
+              <CardTitle>{modalContent[modalPage as 1 | 2 | 3].title}</CardTitle>
             </CardHeader>
-            {modalContent[modalPage as 1 | 2].content}
+            {modalContent[modalPage as 1 | 2 | 3].content}
             <CardFooter className="flex justify-between items-center">
               <div className="flex items-center gap-4">
                 <div className="text-sm text-gray-500">
-                  Page {modalPage} of 2
+                  Page {modalPage} of 3
                 </div>
-                {modalPage === 2 && (
+                {modalPage > 1 && (
                   <Button
                     onClick={handleGoBack}
                     variant="ghost"
