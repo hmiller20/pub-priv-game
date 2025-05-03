@@ -85,12 +85,12 @@ function PostGameContent() {
     router.push("/1/pregame")
   }
 
-  // Handle posting score and concluding study
-  const postScoreAndConclude = async () => {
+  // Handle posting score and proceeding to survey
+  const postScoreAndContinue = async () => {
     await incrementGamePlay()
     setScorePosted(true)
-    // After posting score, redirect to code page
-    router.push(`/code?score=${displayScore}&condition=1`)
+    // After posting score, redirect to survey
+    router.push('/survey/demographics')
   }
 
   return (
@@ -103,14 +103,9 @@ function PostGameContent() {
             <p className="text-xl">Great job, {userName}!</p>
             <p className="text-3xl font-bold mb-2">Final Score: {displayScore}</p>
             <p className="text-center text-muted-foreground mt-4">
-              Your score has been recorded privately for research purposes. You can play again to try to improve your score. Only your most recent score will be recorded.
+              Your score has been recorded privately for research purposes. You can play again to try to improve your score, or proceed to the next part of the study.
             </p>
-            {scorePosted && (
-              <div className="flex items-center space-x-2 text-green-500">
-                <Trophy size={18} />
-                <span>Your score has been recorded!</span>
-              </div>
-            )}
+            {scorePosted}
           </div>
         </CardContent>
         <CardFooter className="flex flex-col space-y-2">
@@ -121,11 +116,11 @@ function PostGameContent() {
             Play Again
           </Button>
           <Button
-            onClick={postScoreAndConclude}
+            onClick={postScoreAndContinue}
             className="w-full bg-black hover:bg-black/90 text-white cursor-pointer"
             disabled={scorePosted}
           >
-            {scorePosted ? "Score Recorded" : "Record My Score and Conclude Study"}
+            {scorePosted ? "Score Recorded" : "Record My Score and Continue"}
           </Button>
         </CardFooter>
       </Card>

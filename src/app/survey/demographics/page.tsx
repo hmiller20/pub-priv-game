@@ -8,13 +8,13 @@ export default function SurveyPage() {
   const [age, setAge] = useState('');
   const [gender, setGender] = useState('');
 
-    // Check for previous failures on component mount
-    useEffect(() => {
-      const hasFailed = localStorage.getItem('attentionCheckFailed')
-      if (hasFailed === 'true') {
-        router.push('/survey/page5')
-      }
-    }, [router])
+  // Check for previous failures on component mount
+  useEffect(() => {
+    const hasFailed = localStorage.getItem('attentionCheckFailed')
+    if (hasFailed === 'true') {
+      router.push('/survey/page5')
+    }
+  }, [router])
 
   const handleNext = async () => {
     if (!age || !gender) {
@@ -23,9 +23,15 @@ export default function SurveyPage() {
     }
 
     try {
-      // Create user document with demographic info
-      const response = await fetch('/api/users', {
-        method: 'POST',
+      // Get the stored userId
+      const userId = localStorage.getItem('ratGameUserId');
+      if (!userId) {
+        throw new Error('No user ID found');
+      }
+
+      // Update user document with demographic info
+      const response = await fetch(`/api/users/${userId}`, {
+        method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
@@ -35,23 +41,17 @@ export default function SurveyPage() {
                  gender === 'female' ? 1 : 
                  gender === 'non-binary' ? 2 : 
                  gender === 'prefer-not' ? 3 : 4, // 4 is "other"
-          gamePlays: 0,
-          leaderboardViews: 0,
-          gamePerformance: {}
         }),
       });
 
-      const data = await response.json();
-      if (data.success) {
-        // Store userId for later use
-        localStorage.setItem('ratGameUserId', data.userId);
+      if (response.ok) {
         // Navigate to the next survey page
         router.push('/survey/prompt');
       } else {
-        throw new Error('Failed to create user');
+        throw new Error('Failed to update user demographics');
       }
     } catch (error) {
-      console.error('Error creating user:', error);
+      console.error('Error updating user demographics:', error);
       alert('There was an error. Please try again.');
     }
   };
@@ -60,7 +60,7 @@ export default function SurveyPage() {
     <main className="flex min-h-screen items-center justify-center p-4 bg-blue-100">
       <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-lg">
         <h1 className="text-2xl font-bold mb-4 text-center">
-          Welcome! Please tell us about yourself.
+          Now, please tell us about yourself.
         </h1>
         <div className="mt-4">
           <label htmlFor="age" className="block text-sm font-medium text-gray-700">How old are you?</label>

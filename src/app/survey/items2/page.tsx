@@ -110,8 +110,8 @@ export default function SurveyPage() {
     
     // Fail if they don't remember or answer incorrectly
     const isManipCheckCorrect = 
-      (assignedCondition === 'private' && manipCheckResponse === MANIP_CHECK_VALUES.PRIVATE) ||
-      (assignedCondition === 'public' && manipCheckResponse === MANIP_CHECK_VALUES.PUBLIC);
+      (assignedCondition === '1' && manipCheckResponse === MANIP_CHECK_VALUES.PRIVATE) ||
+      (assignedCondition === '2' && manipCheckResponse === MANIP_CHECK_VALUES.PUBLIC);
 
     if (!isManipCheckCorrect || manipCheckResponse === MANIP_CHECK_VALUES.DONT_REMEMBER) {
       localStorage.setItem('manipulationCheckFailed', 'true');
@@ -169,8 +169,13 @@ export default function SurveyPage() {
         throw new Error('Failed to save survey responses');
       }
 
-      // Proceed to condition assignment
-      router.push('/condition-assignment');
+      // Get the latest score for the code page
+      const latestPlay = parseInt(localStorage.getItem('gamePlays') || '1');
+      const latestScore = parseInt(localStorage.getItem(`play${latestPlay}Score`) || '0');
+      const assignedCondition = localStorage.getItem('assignedCondition');
+
+      // Proceed to code page with score and condition
+      router.push(`/code?score=${latestScore}&condition=${assignedCondition}`);
     } catch (error) {
       console.error('Error saving survey responses:', error);
       alert('There was an error saving your responses. Please try again.');
