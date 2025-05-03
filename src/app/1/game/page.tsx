@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation"
 import { Suspense } from "react"
 import { useLocalStorage } from "@/lib/hooks/useLocalStorage"
 
-// Simplified question set
+// 30 questions
 const RAT_QUESTIONS = [
   {
     words: ["CREAM", "SKATE", "WATER"],
@@ -43,17 +43,98 @@ const RAT_QUESTIONS = [
   {
     words: ["SANDWICH", "HOUSE", "GOLF"],
     answer: "CLUB"
+  },
+  {
+    words: ["LOSER", "THROAT", "SPOT"],
+    answer: "SORE"
+  },
+  {
+    words: ["SHOW", "LIFE", "ROW"],
+    answer: "BOAT"
+  },
+  {
+    words: ["NIGHT", "WRIST", "STOP"],
+    answer: "WATCH"
+  },
+  {
+    words: ["DUCK", "FOLD", "DOLLAR"],
+    answer: "BILL"
+  },
+  {
+    words: ["ROCKING", "WHEEL", "HIGH"],
+    answer: "CHAIR"
+  },
+  {
+    words: ["DEW", "COMB", "BEE"],
+    answer: "HONEY"
+  },
+  {
+    words: ["FOUNTAIN", "BAKING", "POP"],
+    answer: "SODA"
+  },
+  {
+    words: ["AID", "RUBBER", "WAGON"],
+    answer: "BAND"
+  },
+  {
+    words: ["FLAKE", "MOBILE", "CONE"],
+    answer: "SNOW"
+  },
+  {
+    words: ["CRACKER", "FLY", "FIGHTER"],
+    answer: "FIRE"
+  },
+  {
+    words: ["SAFETY", "CUSHION", "POINT"],
+    answer: "PIN"
+  },
+  {
+    words: ["CANE", "DADDY", "PLUM"],
+    answer: "SUGAR"
+  },
+  {
+    words: ["DREAM", "BREAK", "LIGHT"],
+    answer: "DAY"
+  },
+  {
+    words: ["FISH", "MINE", "RUSH"],
+    answer: "GOLD"
+  },
+  {
+    words: ["POLITICAL", "SURPRISE", "LINE"],
+    answer: "PARTY"
+  },
+  {
+    words: ["TRAP", "POLAR", "CLAW"],
+    answer: "BEAR"
+  },
+  {
+    words: ["CINDER", "BUILDING", "BLOCK"],
+    answer: "BUSTER"
+  },
+  {
+    words: ["THORN", "WHACK", "ROSE"],
+    answer: "BUSH"
+  },
+  {
+    words: ["GARBAGE", "BEER", "PAINT"],
+    answer: "CAN"
+  },
+  {
+    words: ["SCAN", "NAP", "BURGLAR"],
+    answer: "CAT"
+  },
+  {
+    words: ["TRAP", "BACK", "SCREEN"],
+    answer: "DOOR"
+  },
+  {
+    words: ["POLISH", "FINGER", "NAIL"],
+    answer: "DOWN"
   }
 ]
 
 const GAME_DURATION = 120 // 2 minutes
-
-interface QuestionResponse {
-  questionId: string;
-  isCorrect: boolean;
-  attempts: number;
-  answer: string;
-}
 
 function GameContent() {
   const router = useRouter()
