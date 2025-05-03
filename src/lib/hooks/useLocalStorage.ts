@@ -1,3 +1,5 @@
+// provides a simple way for components to store and retrieve data in the browser's localStorage
+
 import { useState, useEffect } from 'react';
 
 export function useLocalStorage<T>(key: string, initialValue: T): [T, (value: T) => void] {

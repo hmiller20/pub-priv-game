@@ -1,3 +1,5 @@
+// handles the actual connection to the database
+
 import { MongoClient } from 'mongodb';
 
 if (!process.env.MONGODB_URI) {

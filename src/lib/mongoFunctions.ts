@@ -1,5 +1,11 @@
+// this file contains the functions that interact with the database
+// it is used by the API routes to create, update, and get users
+// you can think of this file like a "factory" 
+// that creates "tools" (functions) using "instructions" (types)
+// for "workers" (API routes, components, etc.) to import and use
+
 import { ObjectId } from 'mongodb';
-import clientPromise from './mongodb';
+import clientPromise from './mongoConnection'; // this establishes the connection to the database
 import { UserDocument, SurveyResponses, GamePlay } from '@/types/mongodb';
 
 const DATABASE_NAME = 'rat-game';
@@ -91,14 +97,6 @@ export async function addGamePlay(userId: string, gamePlay: GamePlay) {
   );
   
   return result;
-}
-
-function getPlayKey(playNumber: number): string {
-  const numberWords = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth', 'ninth', 'tenth'];
-  if (playNumber <= numberWords.length) {
-    return `${numberWords[playNumber - 1]}Play`;
-  }
-  return `play${playNumber}`;
 }
 
 export async function updateSurveyResponses(userId: string, responses: SurveyResponses) {

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { updateSurveyResponses } from '@/lib/db';
+import { updateSurveyResponses } from '@/lib/mongoFunctions';
 
 export async function POST(
   request: Request,

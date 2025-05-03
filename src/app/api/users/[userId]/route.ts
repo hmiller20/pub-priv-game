@@ -1,5 +1,14 @@
+// we don't really need this file because we are not updating the user
+// but it's a standard part of a REST API
+// so I'm keeping it here for now
+
+// the brackets in the file name mean that this is a dynamic route
+// it's a next.js convention to use square brackets to denote dynamic routes
+// the userId is passed in the URL
+// the brackets are what make the route dynamic and able to handle any user ID value
+
 import { NextResponse } from 'next/server';
-import { updateUser } from '@/lib/db';
+import { updateUser } from '@/lib/mongoFunctions';
 
 export async function PATCH(
   request: Request,
@@ -16,4 +25,4 @@ export async function PATCH(
       { status: 500 }
     );
   }
-} 
+}
