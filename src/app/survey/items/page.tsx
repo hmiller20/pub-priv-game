@@ -68,9 +68,11 @@ export default function SurveyPage() {
     return questions.every((q) => typeof responses[q.id] === 'number')
   }, [responses])
 
-  const handleNext = () => {
-    // Store mastery responses for the next page
-    const masteryResponses = questions.map(q => responses[q.id]);
+  const handleNext = () => { 
+    // Save mastery responses to localStorage before navigating
+    const masteryResponses = questions
+      .filter(q => q.id.startsWith('mastery'))
+      .map(q => responses[q.id]);
     localStorage.setItem('masteryResponses', JSON.stringify(masteryResponses));
     
     // Navigate to next survey page

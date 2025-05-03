@@ -5,8 +5,6 @@ import { useRouter } from 'next/navigation';
 
 export default function SurveyPage() {
   const router = useRouter();
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
   const [age, setAge] = useState('');
   const [gender, setGender] = useState('');
 
@@ -39,12 +37,7 @@ export default function SurveyPage() {
                  gender === 'prefer-not' ? 3 : 4, // 4 is "other"
           gamePlays: 0,
           leaderboardViews: 0,
-          gamePerformance: {
-            firstPlay: {
-              score: 0,
-              completedAt: new Date()
-            }
-          }
+          gamePerformance: {}
         }),
       });
 
@@ -69,30 +62,6 @@ export default function SurveyPage() {
         <h1 className="text-2xl font-bold mb-4 text-center">
           Welcome! Please tell us about yourself.
         </h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">First Name</label>
-            <input
-              id="firstName"
-              type="text"
-              required
-              value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
-              className="mt-1 block w-full border border-gray-300 rounded-md p-2"
-            />
-          </div>
-          <div>
-            <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">Last Name</label>
-            <input
-              id="lastName"
-              type="text"
-              required
-              value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
-              className="mt-1 block w-full border border-gray-300 rounded-md p-2"
-            />
-          </div>
-        </div>
         <div className="mt-4">
           <label htmlFor="age" className="block text-sm font-medium text-gray-700">How old are you?</label>
           <input
@@ -123,10 +92,10 @@ export default function SurveyPage() {
         </div>
         <button
           type="button"
-          disabled={!age || !gender || !firstName || !lastName}
+          disabled={!age || !gender}
           onClick={handleNext}
           className={`mt-6 w-full font-semibold py-2 px-4 rounded focus:outline-none focus:ring-2 ${
-            !age || !gender || !firstName || !lastName 
+            !age || !gender
               ? "bg-gray-400 cursor-not-allowed" 
               : "bg-blue-600 hover:bg-blue-700 cursor-pointer focus:ring-blue-500"
           } text-white`}

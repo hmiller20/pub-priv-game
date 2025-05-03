@@ -75,18 +75,15 @@ export async function addGamePlay(userId: string, gamePlay: GamePlay) {
   const collection = client.db(DATABASE_NAME).collection(COLLECTION_NAME);
   
   const user = await collection.findOne({ _id: new ObjectId(userId) });
-  const isSecondPlay = user?.gamePlays === 1;
+  const playNumber = (user?.gamePlays || 0) + 1;
   
-  const update: any = {
+  const update = {
     $inc: { gamePlays: 1 },
-    $set: { updatedAt: new Date() }
+    $set: {
+      updatedAt: new Date(),
+      [`gamePerformance.play${playNumber}`]: gamePlay
+    }
   };
-  
-  if (isSecondPlay) {
-    update.$set['gamePerformance.secondPlay'] = gamePlay;
-  } else {
-    update.$set['gamePerformance.firstPlay'] = gamePlay;
-  }
   
   const result = await collection.updateOne(
     { _id: new ObjectId(userId) },
@@ -94,6 +91,14 @@ export async function addGamePlay(userId: string, gamePlay: GamePlay) {
   );
   
   return result;
+}
+
+function getPlayKey(playNumber: number): string {
+  const numberWords = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth', 'ninth', 'tenth'];
+  if (playNumber <= numberWords.length) {
+    return `${numberWords[playNumber - 1]}Play`;
+  }
+  return `play${playNumber}`;
 }
 
 export async function updateSurveyResponses(userId: string, responses: SurveyResponses) {

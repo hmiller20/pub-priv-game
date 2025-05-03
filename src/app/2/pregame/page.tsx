@@ -17,6 +17,7 @@ export default function PublicPregame() {
   const [modalPage, setModalPage] = useState(1)
   const [countdown, setCountdown] = useState(10)
   const [isTimerActive, setIsTimerActive] = useState(false)
+  const [disableUsername, setDisableUsername] = useState(false)
   
   // Initialize localStorage counters if they don't exist
   useEffect(() => {
@@ -30,6 +31,11 @@ export default function PublicPregame() {
       // Only set the leaderboard timer if it hasn't been set yet
       if (!window.localStorage.getItem('leaderboardLastUpdate')) {
         window.localStorage.setItem('leaderboardLastUpdate', new Date().toISOString())
+      }
+      // Check for fromPostgame flag
+      if (sessionStorage.getItem('fromPostgame') === 'true') {
+        setDisableUsername(true);
+        sessionStorage.removeItem('fromPostgame');
       }
     }
   }, [])
@@ -105,7 +111,7 @@ export default function PublicPregame() {
             The answer would be: <strong>ICE</strong>
           </p>
           <p>
-            You can either submit your answer or skip to the next question. Correct answers <span className="font-bold text-green-600">earn</span> points, while skipping <span className="font-bold text-red-600">deducts</span> points.
+            You can either submit your answer or skip to the next question. Correct answers <span className="font-bold text-green-600">earn</span> 20 points, while skipping <span className="font-bold text-red-600">deducts</span> 5 points. Incorrect answers do not change your point total.
           </p>
         </CardContent>
       )
@@ -148,7 +154,8 @@ export default function PublicPregame() {
                     setUserName(e.target.value)
                   }
                 }}
-                disabled={!!lastScore}
+                disabled={disableUsername}
+                style={disableUsername ? { backgroundColor: '#f3f4f6', color: '#a1a1aa', cursor: 'not-allowed' } : {}}
                 className={`w-full ${lastScore ? 'bg-gray-100' : ''}`}
               />
             </div>
