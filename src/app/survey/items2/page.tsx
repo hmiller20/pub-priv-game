@@ -49,7 +49,25 @@ const questions = [
     text: "I usually try harder when people are watching.",
     category: "likert",
   },
+  {
+    id: "manip_check",
+    text: "In this study, how will your score be used?",
+    category: "manipulation",
+    options: [
+      "My score is private and will be used only for research purposes",
+      "My score will be shown to other participants on the leaderboard",
+      "I don't remember"
+    ]
+  },
 ];
+
+type ManipCheckValue = 1 | 2 | 3;
+
+const MANIP_CHECK_VALUES = {
+  PRIVATE: 1 as ManipCheckValue,
+  PUBLIC: 2 as ManipCheckValue,
+  DONT_REMEMBER: 3 as ManipCheckValue
+} as const;
 
 export default function SurveyPage() {
   const [responses, setResponses] = useState<Record<string, number>>({})
@@ -86,6 +104,21 @@ export default function SurveyPage() {
       return;
     }
 
+    // Check if manipulation check was answered correctly
+    const assignedCondition = localStorage.getItem('assignedCondition');
+    const manipCheckResponse = responses['manip_check'];
+    
+    // Fail if they don't remember or answer incorrectly
+    const isManipCheckCorrect = 
+      (assignedCondition === 'private' && manipCheckResponse === MANIP_CHECK_VALUES.PRIVATE) ||
+      (assignedCondition === 'public' && manipCheckResponse === MANIP_CHECK_VALUES.PUBLIC);
+
+    if (!isManipCheckCorrect || manipCheckResponse === MANIP_CHECK_VALUES.DONT_REMEMBER) {
+      localStorage.setItem('manipulationCheckFailed', 'true');
+      router.push('/survey/page5');
+      return;
+    }
+
     try {
       // Get the stored userId
       const userId = localStorage.getItem('ratGameUserId');
@@ -116,6 +149,9 @@ export default function SurveyPage() {
       
       // Add attention check response
       publicObj['attn_3'] = responses['attn_3'];
+
+      // Add manipulation check response
+      publicObj['manipCheck'] = responses['manip_check'];
 
       // Save survey responses
       const response = await fetch(`/api/users/${userId}/survey`, {
@@ -150,29 +186,46 @@ export default function SurveyPage() {
           {questions.map((question) => (
             <div key={question.id} className="mb-8">
               <Label className="text-lg mb-4 block">{question.text}</Label>
-              <div className="space-y-3">
-                <div className="flex justify-between text-sm text-muted-foreground px-0">
-                  <span>Strongly disagree</span>
-                  <span>Strongly agree</span>
-                </div>
+              {question.category === 'manipulation' ? (
                 <RadioGroup
                   onValueChange={(value) => handleResponse(question.id, parseInt(value))}
                   value={responses[question.id]?.toString()}
-                  className="flex justify-between px-10"
+                  className="space-y-3"
                 >
-                  {[1, 2, 3, 4, 5, 6, 7].map((value) => (
-                    <div key={value} className="flex flex-col items-center gap-2">
-                      <RadioGroupItem value={value.toString()} id={`${question.id}-${value}`} />
-                      <Label 
-                        htmlFor={`${question.id}-${value}`}
-                        className="cursor-pointer text-md"
-                      >
-                        {value}
+                  {question.options?.map((option, index) => (
+                    <div key={index} className="flex items-center space-x-2">
+                      <RadioGroupItem value={(index + 1).toString()} id={`${question.id}-${index + 1}`} />
+                      <Label htmlFor={`${question.id}-${index + 1}`} className="cursor-pointer">
+                        {option}
                       </Label>
                     </div>
                   ))}
                 </RadioGroup>
-              </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="flex justify-between text-sm text-muted-foreground px-0">
+                    <span>Strongly disagree</span>
+                    <span>Strongly agree</span>
+                  </div>
+                  <RadioGroup
+                    onValueChange={(value) => handleResponse(question.id, parseInt(value))}
+                    value={responses[question.id]?.toString()}
+                    className="flex justify-between px-10"
+                  >
+                    {[1, 2, 3, 4, 5, 6, 7].map((value) => (
+                      <div key={value} className="flex flex-col items-center gap-2">
+                        <RadioGroupItem value={value.toString()} id={`${question.id}-${value}`} />
+                        <Label 
+                          htmlFor={`${question.id}-${value}`}
+                          className="cursor-pointer text-md"
+                        >
+                          {value}
+                        </Label>
+                      </div>
+                    ))}
+                  </RadioGroup>
+                </div>
+              )}
             </div>
           ))}
 

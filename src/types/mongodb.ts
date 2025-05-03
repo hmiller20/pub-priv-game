@@ -12,7 +12,8 @@ export interface SurveyResponses {
   mastery: number[];  // Array of responses to mastery questions
   public: number[];   // Array of responses to public/private questions
   attention: string[]; // Array of responses to attention check questions
-}
+  manipCheck?: number; // Response to manipulation check question
+} // what is the ? for manipCheck?
 
 export interface UserDocument {
   _id?: ObjectId;
