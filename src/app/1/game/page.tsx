@@ -159,7 +159,7 @@ function GameContent() {
   const [feedback, setFeedback] = useState<null | "correct" | "incorrect">(null)
 
   const handleSkip = () => {
-    const newScore = Math.max(0, score - 5);
+    const newScore = score - 5;
     setScore(newScore);
     const newSkips = skips + 1;
     setSkips(newSkips);
