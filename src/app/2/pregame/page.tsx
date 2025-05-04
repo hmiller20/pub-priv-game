@@ -116,7 +116,7 @@ export default function PublicPregame() {
             The answer would be: <strong>ICE</strong>
           </p>
           <p>
-            You can either submit your answer or skip to the next question. Correct answers <span className="font-bold text-green-600">earn</span> 20 points, while skipping <span className="font-bold text-red-600">deducts</span> 5 points. Incorrect answers do not change your point total.
+            You can either submit your answer or skip to the next question. You will have two minutes to answer as many questions as you can. Correct answers <span className="font-bold text-green-600">earn</span> 20 points, while skipping <span className="font-bold text-red-600">deducts</span> 5 points. Incorrect answers do not change your point total.
           </p>
         </CardContent>
       )

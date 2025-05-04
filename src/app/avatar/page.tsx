@@ -150,7 +150,7 @@ export default function AvatarPage() {
                     <SelectTrigger>
                       <SelectValue placeholder="Select body type" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="max-h-[200px] overflow-y-auto">
                       {['checkered', 'rounded', 'squared'].map((type) => (
                         <SelectItem key={type} value={type}>
                           {type.charAt(0).toUpperCase() + type.slice(1)}
@@ -169,7 +169,7 @@ export default function AvatarPage() {
                     <SelectTrigger>
                       <SelectValue placeholder="Select clothing color" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="max-h-[200px] overflow-y-auto">
                       {['6dbb58', '54d7c7', '456dff', '7555ca', 'e24553', 'f3b63a', 'f55d81'].map((color) => (
                         <SelectItem key={color} value={color}>
                           <div className="flex items-center gap-2">
@@ -194,7 +194,7 @@ export default function AvatarPage() {
                     <SelectTrigger>
                       <SelectValue placeholder="Select eye style" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="max-h-[200px] overflow-y-auto">
                       {['glasses', 'happy', 'open', 'sleep', 'sunglasses', 'wink'].map((style) => (
                         <SelectItem key={style} value={style}>
                           {style.charAt(0).toUpperCase() + style.slice(1)}
@@ -213,7 +213,7 @@ export default function AvatarPage() {
                     <SelectTrigger>
                       <SelectValue placeholder="Select hair style" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="max-h-[200px] overflow-y-auto">
                       {[
                         'bald', 'balding', 'beanie', 'bobBangs', 'bobCut', 'bunUndercut', 'buzzcut',
                         'cap', 'curly', 'curlyBun', 'curlyHighTop', 'fade', 'long',
@@ -236,7 +236,7 @@ export default function AvatarPage() {
                     <SelectTrigger>
                       <SelectValue placeholder="Select hair color" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="max-h-[200px] overflow-y-auto">
                       {['6c4545', '362c47', 'dee1f5', 'e15c66', 'e16381', 'f27d65', 'f29c65'].map((color) => (
                         <SelectItem key={color} value={color}>
                           <div className="flex items-center gap-2">
@@ -261,7 +261,7 @@ export default function AvatarPage() {
                     <SelectTrigger>
                       <SelectValue placeholder="Select mouth style" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="max-h-[200px] overflow-y-auto">
                       {['bigSmile', 'lips', 'smile', 'smirk', 'surprise'].map((style) => (
                         <SelectItem key={style} value={style}>
                           {style.replace(/([A-Z])/g, ' $1').trim()}
@@ -280,7 +280,7 @@ export default function AvatarPage() {
                     <SelectTrigger>
                       <SelectValue placeholder="Select nose style" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="max-h-[200px] overflow-y-auto">
                       {['mediumRound', 'smallRound', 'wrinkles'].map((style) => (
                         <SelectItem key={style} value={style}>
                           {style.replace(/([A-Z])/g, ' $1').trim()}
@@ -299,7 +299,7 @@ export default function AvatarPage() {
                     <SelectTrigger>
                       <SelectValue placeholder="Select skin color" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent className="max-h-[200px] overflow-y-auto">
                       {['623d36', '92594b', 'b16a5b', 'd78774', 'e5a07e', 'e7a391', 'eeb4a4'].map((color) => (
                         <SelectItem key={color} value={color}>
                           <div className="flex items-center gap-2">
