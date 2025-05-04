@@ -139,7 +139,7 @@ export default function PublicPregame() {
       content: (
         <CardContent className="space-y-4">
           <p className="text-blue-600 font-large font-bold">
-            Finally, your name and score will be posted on the public leaderboard, so make sure to give it your best shot!
+            Finally, your name and score will be shared with your group and posted on the public leaderboard, so make sure to give it your best shot!
           </p>
         </CardContent>
       )
