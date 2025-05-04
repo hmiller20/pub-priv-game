@@ -23,7 +23,7 @@ export default function SurveyPage2() {
   }, []);
 
   const handleNext = () => {
-    router.push('/survey/items');
+    router.replace('/survey/items');
   };
 
   return (

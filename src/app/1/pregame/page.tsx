@@ -64,7 +64,7 @@ export default function PublicPregame() {
     }
     setFirstName(firstName)
     setLastInitial(lastInitial)
-    router.push('/1/game')
+    router.replace('/1/game')
   }
 
   const handleGoBack = () => {
@@ -117,10 +117,10 @@ export default function PublicPregame() {
       content: (
         <CardContent className="space-y-4">
           <p>
-          The task you'll be performing measures mental acuity and the ability to create connections across concepts, which are basic elements of <span className="font-bold">intelligence</span> and <span className="font-bold">creativity</span>. Performance on this task has been shown to predict a number of important outcomes including <span className="font-bold">career success</span>, <span className="font-bold">salary</span>, and even people's ability to form <span className="font-bold">satisfying relationships</span>.
+            The task you'll be performing measures mental acuity and the ability to create connections across concepts, which are basic elements of <span className="font-bold">intelligence</span> and <span className="font-bold">creativity</span>. Performance on this task has been shown to predict a number of important outcomes including <span className="font-bold">career success</span>, <span className="font-bold">salary</span>, and even people's ability to form <span className="font-bold">satisfying relationships</span>.
           </p>
           <p>
-          Therefore, it is important that you try your best to solve the questions. Your participation will help us better understand how different forms of intelligence and creativity contribute to <span className="font-bold">positive life outcomes</span>.
+            Therefore, it is important that you try your best to solve the questions. Your participation will help us better understand how different forms of intelligence and creativity contribute to <span className="font-bold">positive life outcomes</span>.
           </p>
         </CardContent>
       )
@@ -130,7 +130,7 @@ export default function PublicPregame() {
       content: (
         <CardContent className="space-y-4">
           <p className="text-blue-600 font-large font-bold">
-          Finally, your score will be kept private and used only for research purposes, so make sure to give it your best shot!
+            Finally, your score will be kept private and used only for research purposes, so make sure to give it your best shot!
           </p>
         </CardContent>
       )
@@ -240,7 +240,7 @@ export default function PublicPregame() {
                     : "bg-black hover:bg-black/90 text-white"
                 }`}
               >
-                {countdown > 0 ? `You may advance in ${countdown}` : modalPage === 1 ? "Next" : "I Understand"}
+                {countdown > 0 ? `You may advance in ${countdown}` : "Next"}
               </Button>
             </CardFooter>
           </Card>

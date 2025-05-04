@@ -90,7 +90,7 @@ export default function ConditionAssignment() {
         }
 
         // Use Next.js router for navigation
-        router.push(`/${condition}/pregame`);
+        router.replace(`/${condition}/pregame`);
       } catch (error) {
         console.error('Error in initialization:', error);
         setError('There was an error initializing your session. Please wait while we try again...');

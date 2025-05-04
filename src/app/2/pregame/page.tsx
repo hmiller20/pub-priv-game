@@ -73,7 +73,7 @@ export default function PublicPregame() {
     }
     setFirstName(firstName)
     setLastInitial(lastInitial)
-    router.push('/2/game')
+    router.replace('/2/game')
   }
 
   const handleGoBack = () => {
@@ -206,7 +206,7 @@ export default function PublicPregame() {
         </CardContent>
         <CardFooter className="flex flex-col space-y-2 pt-0">
           <Button 
-            onClick={() => router.push("/2/leaderboard")} 
+            onClick={() => router.replace("/2/leaderboard")} 
             disabled={!hasReadInstructions} // disabled until they read the instructions
             variant="outline" 
             className="w-full flex items-center gap-2 hover:bg-blue-50 hover:text-yellow-700 transition-colors cursor-pointer"
@@ -259,7 +259,7 @@ export default function PublicPregame() {
                     : "bg-black hover:bg-black/90 text-white"
                 }`}
               >
-                {countdown > 0 ? `You may advance in ${countdown}` : modalPage === 1 ? "Next" : "I Understand"}
+                {countdown > 0 ? `You may advance in ${countdown}` : "Next"}
               </Button>
             </CardFooter>
           </Card>

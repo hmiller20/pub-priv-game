@@ -84,7 +84,7 @@ export default function SurveyPage() {
   useEffect(() => {
     const hasFailed = localStorage.getItem('attentionCheckFailed')
     if (hasFailed === 'true') {
-      router.push('/survey/page5')
+      router.replace('/survey/page5')
     }
   }, [router])
 
@@ -100,7 +100,7 @@ export default function SurveyPage() {
     if (responses['attn_3'] !== 3) {
       // Store the failure in local storage
       localStorage.setItem('attentionCheckFailed', 'true')
-      router.push('/survey/page5')
+      router.replace('/survey/page5')
       return;
     }
 
@@ -115,7 +115,7 @@ export default function SurveyPage() {
 
     if (!isManipCheckCorrect || manipCheckResponse === MANIP_CHECK_VALUES.DONT_REMEMBER) {
       localStorage.setItem('manipulationCheckFailed', 'true');
-      router.push('/survey/page5');
+      router.replace('/survey/page5');
       return;
     }
 
@@ -175,7 +175,7 @@ export default function SurveyPage() {
       const assignedCondition = localStorage.getItem('assignedCondition');
 
       // Proceed to code page with score and condition
-      router.push(`/code?score=${latestScore}&condition=${assignedCondition}`);
+      router.replace(`/code?score=${latestScore}&condition=${assignedCondition}`);
     } catch (error) {
       console.error('Error saving survey responses:', error);
       alert('There was an error saving your responses. Please try again.');

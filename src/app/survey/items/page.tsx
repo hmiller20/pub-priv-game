@@ -76,7 +76,7 @@ export default function SurveyPage() {
     localStorage.setItem('masteryResponses', JSON.stringify(masteryResponses));
     
     // Navigate to next survey page
-    router.push('/survey/items2');
+    router.replace('/survey/items2');
   }
 
   return (

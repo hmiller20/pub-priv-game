@@ -12,7 +12,7 @@ export default function SurveyPage() {
   useEffect(() => {
     const hasFailed = localStorage.getItem('attentionCheckFailed')
     if (hasFailed === 'true') {
-      router.push('/survey/page5')
+      router.replace('/survey/page5')
     }
   }, [router])
 
@@ -46,7 +46,7 @@ export default function SurveyPage() {
 
       if (response.ok) {
         // Navigate to the next survey page
-        router.push('/survey/prompt');
+        router.replace('/survey/prompt');
       } else {
         throw new Error('Failed to update user demographics');
       }

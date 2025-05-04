@@ -83,7 +83,7 @@ function PostGameContent() {
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('fromPostgame', 'true');
     }
-    router.push("/2/pregame")
+    router.replace("/2/pregame")
   }
 
   // Handle posting score to leaderboard and proceeding to survey
@@ -91,7 +91,7 @@ function PostGameContent() {
     await incrementGamePlay()
     setScorePosted(true)
     // After posting score, redirect to survey
-    router.push('/survey/demographics')
+    router.replace('/survey/demographics')
   }
 
   return (
@@ -124,7 +124,7 @@ function PostGameContent() {
             {scorePosted ? "Score Posted" : "Post My Score and Continue"}
           </Button>
           <Button
-            onClick={() => router.push("/2/leaderboard?from=postgame")}
+            onClick={() => router.replace("/2/leaderboard?from=postgame")}
             className="w-full bg-black hover:bg-black/90 text-white flex items-center gap-2 cursor-pointer"
           >
             <Award className="h-4 w-4" />

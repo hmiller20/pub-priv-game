@@ -82,7 +82,7 @@ function PostGameContent() {
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('fromPostgame', 'true');
     }
-    router.push("/1/pregame")
+    router.replace("/1/pregame")
   }
 
   // Handle posting score and proceeding to survey
@@ -90,7 +90,7 @@ function PostGameContent() {
     await incrementGamePlay()
     setScorePosted(true)
     // After posting score, redirect to survey
-    router.push('/survey/demographics')
+    router.replace('/survey/demographics')
   }
 
   return (

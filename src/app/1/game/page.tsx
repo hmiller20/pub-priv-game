@@ -177,7 +177,7 @@ function GameContent() {
         localStorage.setItem('currentScore', newScore.toString());
         sessionStorage.setItem('shouldCreateNewPlay', 'true');
       }
-      router.push('/1/postgame');
+      router.replace('/1/postgame');
     }
   };
 
@@ -198,7 +198,7 @@ function GameContent() {
             localStorage.setItem('currentScore', score.toString());
             sessionStorage.setItem('shouldCreateNewPlay', 'true');
           }
-          router.push('/1/postgame');
+          router.replace('/1/postgame');
           return 0;
         }
         return prev - 1;
@@ -227,7 +227,7 @@ function GameContent() {
             localStorage.setItem('currentScore', newScore.toString());
             sessionStorage.setItem('shouldCreateNewPlay', 'true');
           }
-          router.push('/1/postgame');
+          router.replace('/1/postgame');
         }
       }, 1000);
     } else {
