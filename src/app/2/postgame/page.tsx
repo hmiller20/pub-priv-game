@@ -9,8 +9,8 @@ import { useLocalStorage } from "@/lib/hooks/useLocalStorage"
 
 function PostGameContent() {
   const router = useRouter()
-  const [firstName] = useLocalStorage('currentFirstName', 'Player')
-  const [lastInitial] = useLocalStorage('currentLastInitial', '')
+  const [firstName] = useLocalStorage('avatarFirstName', 'Player')
+  const [lastInitial] = useLocalStorage('avatarLastInitial', '')
   const [displayScore, setDisplayScore] = useState(0)
   const [scorePosted, setScorePosted] = useState(false)
   const hasWritten = useRef(false)
@@ -83,7 +83,7 @@ function PostGameContent() {
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('fromPostgame', 'true');
     }
-    router.replace("/2/pregame")
+    router.replace("/2/instructions")
   }
 
   // Handle posting score to leaderboard and proceeding to survey
@@ -118,10 +118,9 @@ function PostGameContent() {
           </Button>
           <Button
             onClick={postScoreAndContinue}
-            className="w-full bg-black hover:bg-black/90 text-white cursor-pointer"
-            disabled={scorePosted}
+            className="w-full bg-black hover:bg-black/90 text-white"
           >
-            {scorePosted ? "Score Posted" : "Post My Score and Continue"}
+            Post Score and Continue
           </Button>
           <Button
             onClick={() => router.replace("/2/leaderboard?from=postgame")}

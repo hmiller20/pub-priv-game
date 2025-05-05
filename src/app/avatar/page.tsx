@@ -27,8 +27,6 @@ type AvatarConfig = {
 
 const generateInitialAvatar = (): AvatarConfig => {
   const parameters = {
-    body: ['checkered', 'rounded', 'squared'],
-    clothingColor: ['6dbb58', '54d7c7', '456dff', '7555ca', 'e24553', 'f3b63a', 'f55d81'],
     eyes: ['glasses', 'happy', 'open', 'sleep', 'sunglasses', 'wink'],
     facialHair: ['beardMustache', 'goatee', 'pyramid', 'shadow', 'soulPatch', 'walrus'],
     hair: [
@@ -38,20 +36,19 @@ const generateInitialAvatar = (): AvatarConfig => {
     ],
     hairColor: ['6c4545', '362c47', 'dee1f5', 'e15c66', 'e16381', 'f27d65', 'f29c65'],
     mouth: ['bigSmile', 'lips', 'smile', 'smirk', 'surprise'],
-    nose: ['mediumRound', 'smallRound', 'wrinkles'],
     skinColor: ['623d36', '92594b', 'b16a5b', 'd78774', 'e5a07e', 'e7a391', 'eeb4a4']
   };
 
   return {
     seed: 'CustomAvatar',
-    body: parameters.body[Math.floor(Math.random() * parameters.body.length)],
-    clothingColor: parameters.clothingColor[Math.floor(Math.random() * parameters.clothingColor.length)],
+    body: 'rounded',
+    clothingColor: '456dff',
     eyes: parameters.eyes[Math.floor(Math.random() * parameters.eyes.length)],
     facialHair: parameters.facialHair[Math.floor(Math.random() * parameters.facialHair.length)],
     hair: parameters.hair[Math.floor(Math.random() * parameters.hair.length)],
     hairColor: parameters.hairColor[Math.floor(Math.random() * parameters.hairColor.length)],
     mouth: parameters.mouth[Math.floor(Math.random() * parameters.mouth.length)],
-    nose: parameters.nose[Math.floor(Math.random() * parameters.nose.length)],
+    nose: 'mediumRound',
     skinColor: parameters.skinColor[Math.floor(Math.random() * parameters.skinColor.length)]
   };
 };
@@ -142,50 +139,6 @@ export default function AvatarPage() {
             <div className="flex-1">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label>Body Type</Label>
-                  <Select
-                    value={avatarConfig.body}
-                    onValueChange={(value: string) => handleUpdateAvatar({ body: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select body type" />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-[200px] overflow-y-auto">
-                      {['checkered', 'rounded', 'squared'].map((type) => (
-                        <SelectItem key={type} value={type}>
-                          {type.charAt(0).toUpperCase() + type.slice(1)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Clothing Color</Label>
-                  <Select
-                    value={avatarConfig.clothingColor}
-                    onValueChange={(value: string) => handleUpdateAvatar({ clothingColor: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select clothing color" />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-[200px] overflow-y-auto">
-                      {['6dbb58', '54d7c7', '456dff', '7555ca', 'e24553', 'f3b63a', 'f55d81'].map((color) => (
-                        <SelectItem key={color} value={color}>
-                          <div className="flex items-center gap-2">
-                            <div 
-                              className="w-4 h-4 rounded-full" 
-                              style={{ backgroundColor: `#${color}` }}
-                            />
-                            {color}
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
                   <Label>Eyes</Label>
                   <Select
                     value={avatarConfig.eyes}
@@ -263,25 +216,6 @@ export default function AvatarPage() {
                     </SelectTrigger>
                     <SelectContent className="max-h-[200px] overflow-y-auto">
                       {['bigSmile', 'lips', 'smile', 'smirk', 'surprise'].map((style) => (
-                        <SelectItem key={style} value={style}>
-                          {style.replace(/([A-Z])/g, ' $1').trim()}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="space-y-2">
-                  <Label>Nose</Label>
-                  <Select
-                    value={avatarConfig.nose}
-                    onValueChange={(value: string) => handleUpdateAvatar({ nose: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select nose style" />
-                    </SelectTrigger>
-                    <SelectContent className="max-h-[200px] overflow-y-auto">
-                      {['mediumRound', 'smallRound', 'wrinkles'].map((style) => (
                         <SelectItem key={style} value={style}>
                           {style.replace(/([A-Z])/g, ' $1').trim()}
                         </SelectItem>

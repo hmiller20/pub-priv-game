@@ -174,7 +174,7 @@ function LeaderboardContent() {
         </CardContent>
         <CardFooter className="flex justify-center">
           <Button
-            onClick={() => router.replace(fromPostgame ? '/2/postgame' : '/2/pregame')}
+            onClick={() => router.replace(fromPostgame ? '/2/postgame' : '/2/instructions')}
             className="flex items-center gap-2 bg-black text-white hover:bg-gray-800"
           >
             <ArrowLeft className="h-4 w-4" />
