@@ -9,7 +9,7 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   title: "Category Story",
-  description: "A game about categories",
+  description: "A game about categories and stories",
   icons: {
     icon: [
       {

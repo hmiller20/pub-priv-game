@@ -10,6 +10,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
+import FloatingBubbles from "../floating-bubbles"
 
 // Add type for avatar configuration
 type AvatarConfig = {
@@ -87,17 +88,35 @@ export default function AvatarPage() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-4 bg-blue-100">
-      <h1 className="mb-8 text-3xl font-bold">Create Your Avatar</h1>
-      <Card className="w-full max-w-4xl bg-white flex flex-col justify-between min-h-[500px] relative">
+    <main
+      className="flex min-h-screen flex-col items-center justify-center p-4 relative overflow-hidden"
+      style={{
+        background: "linear-gradient(135deg, #f6faff 0%, #f8f6ff 100%)",
+      }}
+    >
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <FloatingBubbles />
+      </div>
+      <h1
+        className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight text-center leading-[1.1] py-4 mb-4 z-10 relative"
+        style={{
+          background: "linear-gradient(90deg, #4f46e5 0%, #9333ea 100%)",
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+          backgroundClip: "text",
+        }}
+      >
+        Create Your Avatar
+      </h1>
+      <Card className="w-full max-w-4xl bg-white flex flex-col justify-between min-h-[350px] relative rounded-3xl shadow-2xl border border-blue-100 p-4 md:p-8 z-10">
         <CardHeader>
-          <CardTitle className="italic text-center">Build an avatar that feels like you!</CardTitle>
+          <CardTitle className="italic text-center text-xl text-blue-800">Build an avatar that feels like you!</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6 pb-2">
           <div className="flex flex-col md:flex-row gap-8">
-            {/* Left side: Avatar preview */}
+            {/* Left side: Avatar preview and text fields */}
             <div className="flex-1 flex flex-col items-center justify-center">
-              <div className="w-64 h-64 mb-4">
+              <div className="w-48 h-48 md:w-64 md:h-64 mb-4">
                 <Avatar className="w-full h-full">
                   <AvatarImage
                     src={`https://api.dicebear.com/7.x/personas/svg?seed=${avatarConfig.seed}&body=${avatarConfig.body}&clothingColor=${avatarConfig.clothingColor}&eyes=${avatarConfig.eyes}&facialHair=${avatarConfig.facialHair}&hair=${avatarConfig.hair}&hairColor=${avatarConfig.hairColor}&mouth=${avatarConfig.mouth}&nose=${avatarConfig.nose}&skinColor=${avatarConfig.skinColor}`}
@@ -114,10 +133,10 @@ export default function AvatarPage() {
                     placeholder="Your first name"
                     value={firstName}
                     onChange={(e) => setFirstName(e.target.value)}
-                    className="w-full"
+                    className="w-full rounded-xl border-blue-100 focus:ring-2 focus:ring-blue-200"
                   />
                 </div>
-                <div className="space-y-2 pb-6"> {/* pb is specifically used to create BOTTOM PADDING */}
+                <div className="space-y-2 pb-2">
                   <Label htmlFor="lastInitial">Enter Your Last Initial</Label>
                   <Input
                     id="lastInitial"
@@ -129,14 +148,14 @@ export default function AvatarPage() {
                       setLastInitial(value)
                     }}
                     maxLength={1}
-                    className="w-full"
+                    className="w-full rounded-xl border-blue-100 focus:ring-2 focus:ring-blue-200"
                   />
                 </div>
               </div>
             </div>
 
-            {/* Right side: Customization options */}
-            <div className="flex-1">
+            {/* Right side: Customization options and Continue button */}
+            <div className="flex-1 flex flex-col justify-between">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Eyes</Label>
@@ -249,17 +268,30 @@ export default function AvatarPage() {
                   </Select>
                 </div>
               </div>
+              <div className="hidden md:flex justify-end mt-8">
+                <button
+                  onClick={handleContinue}
+                  className="px-8 py-4 rounded-2xl bg-white text-blue-700 font-semibold text-lg shadow-lg border border-blue-100 transition-all duration-200 flex items-center gap-2 group hover:scale-105 hover:-translate-y-1 hover:shadow-2xl"
+                  style={{ boxShadow: "0 4px 16px 0 rgba(80, 112, 255, 0.08)" }}
+                >
+                  <span className="transition-all duration-200">Continue</span>
+                  <span className="text-xl transition-all duration-200 group-hover:translate-x-1">→</span>
+                </button>
+              </div>
             </div>
           </div>
+          {/* Mobile: Continue button below everything */}
+          <div className="flex md:hidden justify-center mt-8">
+            <button
+              onClick={handleContinue}
+              className="px-8 py-4 rounded-2xl bg-white text-blue-700 font-semibold text-lg shadow-lg border border-blue-100 transition-all duration-200 flex items-center gap-2 group hover:scale-105 hover:-translate-y-1 hover:shadow-2xl"
+              style={{ boxShadow: "0 4px 16px 0 rgba(80, 112, 255, 0.08)" }}
+            >
+              <span className="transition-all duration-200 group-hover:italic">Continue</span>
+              <span className="text-xl transition-all duration-200 group-hover:translate-x-1">→</span>
+            </button>
+          </div>
         </CardContent>
-        <div className="absolute bottom-0 right-0 p-6">
-          <Button 
-            onClick={handleContinue}
-            className="bg-black hover:bg-black/90 text-white text-md px-4 py-2"
-          >
-            Continue to Waiting Room
-          </Button>
-        </div>
       </Card>
     </main>
   )

@@ -5,6 +5,7 @@
 import { useState, useEffect } from "react"
 import { Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { FloatingBubbles } from "../floating-bubbles" // the brackets are important. { FloatingBubbles } gets just the bubbles animation
 
 // Function to get condition (1 or 2)
 const getCondition = () => {
@@ -108,13 +109,17 @@ export default function ConditionAssignment() {
   }, [router]);
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-4 bg-blue-100">
-      <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full text-center space-y-4">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="h-8 w-8 animate-spin" />
-          <p className="text-lg">Loading...</p>
-          {error && <p className="text-red-500 text-sm">{error}</p>}
-        </div>
+    <main
+      className="flex min-h-screen flex-col items-center justify-center p-4 relative overflow-hidden"
+      style={{
+        background: "linear-gradient(135deg, #f6faff 0%, #f8f6ff 100%)",
+      }}
+    >
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <FloatingBubbles />
+      </div>
+      <div className="relative z-10 flex flex-col items-center justify-center">
+        <Loader2 className="h-16 w-16 text-blue-400 animate-spin" />
       </div>
     </main>
   );

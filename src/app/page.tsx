@@ -1,14 +1,19 @@
 "use client"
 
-import { useEffect } from "react"
 import { useRouter } from "next/navigation"
+import FloatingBubblesBackground from "./floating-bubbles"
 
 export default function Home() {
   const router = useRouter()
 
-  useEffect(() => {
-    router.replace('/avatar')
-  }, [router])
+  const handleClick = () => {
+    router.push('/avatar')
+  }
 
-  return null
+  return (
+    <FloatingBubblesBackground 
+      title="Category Story" 
+      onButtonClick={handleClick}
+    />
+  )
 }

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { useRouter } from "next/navigation"
 import { useLocalStorage } from "@/lib/hooks/useLocalStorage"
+import { StartGameButton } from "@/components/ui/send-start-buttons"
 
 export default function Importance() {
   const router = useRouter()
@@ -34,9 +35,24 @@ export default function Importance() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-4 md:p-24 bg-blue-100">
-      <h1 className="mb-8 text-3xl font-bold">Category Story</h1>
-      <Card className="w-full max-w-lg bg-white">
+    <main
+      className="flex min-h-screen flex-col items-center justify-center p-4 relative overflow-hidden"
+      style={{
+        background: "linear-gradient(135deg, #f6faff 0%, #f8f6ff 100%)",
+      }}
+    >
+      <h1
+        className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight text-center leading-[1.1] py-4 mb-4 z-10 relative"
+        style={{
+          background: "linear-gradient(90deg, #4f46e5 0%, #9333ea 100%)",
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+          backgroundClip: "text",
+        }}
+      >
+        Category Story
+      </h1>
+      <Card className="w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-blue-100 p-6">
         <CardHeader>
           <CardTitle>Why This Matters</CardTitle>
         </CardHeader>
@@ -49,24 +65,20 @@ export default function Importance() {
           </p>
         </CardContent>
         <CardFooter className="flex justify-between">
-          <Button
+          <StartGameButton
             onClick={handleBack}
-            variant="ghost"
-            className="text-gray-600 hover:text-gray-900"
+            className="bg-white text-gray-600 hover:text-gray-900 border border-blue-100 min-w-[100px] px-6 py-2 mr-2"
+            style={{ minWidth: 0 }}
           >
             Go Back
-          </Button>
-          <Button
+          </StartGameButton>
+          <StartGameButton
             onClick={handleNext}
             disabled={countdown > 0}
-            className={`${
-              countdown > 0
-                ? "bg-gray-300 text-gray-600 cursor-not-allowed"
-                : "bg-black hover:bg-black/90 text-white"
-            }`}
+            className={countdown > 0 ? "bg-gray-300 text-gray-600 cursor-not-allowed" : ""}
           >
             {countdown > 0 ? `You may advance in ${countdown}` : "Next"}
-          </Button>
+          </StartGameButton>
         </CardFooter>
       </Card>
     </main>
