@@ -83,7 +83,7 @@ function PostGameContent() {
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('fromPostgame', 'true');
     }
-    router.replace("/1/instructions")
+    router.replace("/1/game")
   }
 
   // Handle posting score and proceeding to survey
