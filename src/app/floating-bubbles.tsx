@@ -93,13 +93,16 @@ export default function FloatingBubblesBackground({
         </h1>
         <button
           onClick={onButtonClick}
-          className="px-8 py-4 rounded-2xl bg-white text-blue-700 font-semibold text-lg shadow-lg border border-blue-100 transition-all duration-200 flex items-center gap-2 group hover:scale-105 hover:-translate-y-1 hover:shadow-2xl"
+          className="mt-6 px-8 py-4 rounded-2xl bg-white text-blue-700 font-semibold text-lg shadow-lg border border-blue-100 transition-all duration-200 flex items-center gap-2 group hover:scale-105 hover:-translate-y-1 hover:shadow-2xl"
           style={{ boxShadow: "0 4px 16px 0 rgba(80, 112, 255, 0.08)" }}
         >
           <span className="transition-all duration-200 ">Create my avatar</span>
-          <span className="text-xl transition-all duration-200 group-hover:translate-x-1">→</span>
+          <span className="text-xl transition-all duration-200 group-hover:translate-x-1"></span>
         </button>
       </div>
+      <footer className="fixed left-0 right-0 bottom-4 text-center text-xs text-gray-400 z-20">
+        © PsycTech 2025. All rights reserved.
+      </footer>
     </div>
   )
 }

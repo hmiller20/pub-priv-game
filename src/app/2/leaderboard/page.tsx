@@ -5,6 +5,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Trophy, ArrowLeft, ArrowUpIcon, ArrowDownIcon, MinusIcon, Clock } from "lucide-react"
 import { useRouter, useSearchParams } from "next/navigation"
+import { StartGameButton } from "@/components/ui/send-start-buttons"
+import { FloatingBubbles } from "../../floating-bubbles"
 
 declare global {
   interface Window {
@@ -120,13 +122,29 @@ function LeaderboardContent() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-4 md:p-24 bg-blue-100">
-      <h1 className="mb-4 text-3xl font-bold flex items-center gap-2">
+    <main
+      className="flex min-h-screen flex-col items-center justify-center p-4 relative overflow-hidden"
+      style={{
+        background: "linear-gradient(135deg, #f6faff 0%, #f8f6ff 100%)",
+      }}
+    >
+      <div className="absolute inset-0 z-0 pointer-events-none">
+        <FloatingBubbles />
+      </div>
+      <h1
+        className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight text-center leading-[1.1] py-4 mb-4 z-10 relative flex items-center gap-2"
+        style={{
+          background: "linear-gradient(90deg, #4f46e5 0%, #9333ea 100%)",
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+          backgroundClip: "text",
+        }}
+      >
         <Trophy className="h-8 w-8 text-yellow-500" />
         Category Story Leaderboard
         <Trophy className="h-8 w-8 text-yellow-500" />
       </h1>
-      <Card className="w-full max-w-4xl bg-white">
+      <Card className="w-full max-w-4xl bg-white rounded-3xl shadow-2xl border border-blue-100 p-6 z-10 relative">
         <CardHeader>
           <CardTitle className="text-center flex flex-col items-center gap-2">
             <div className="flex items-center gap-2">
@@ -173,13 +191,11 @@ function LeaderboardContent() {
           </p>
         </CardContent>
         <CardFooter className="flex justify-center">
-          <Button
+          <StartGameButton
             onClick={() => router.replace(fromPostgame ? '/2/postgame' : '/2/instructions')}
-            className="flex items-center gap-2 bg-black text-white hover:bg-gray-800"
           >
-            <ArrowLeft className="h-4 w-4" />
             Return to Game
-          </Button>
+          </StartGameButton>
         </CardFooter>
       </Card>
     </main>

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { StartGameButton } from "@/components/ui/send-start-buttons"
 
 // Start with just one question for testing
 const questions = [
@@ -80,8 +81,8 @@ export default function SurveyPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-blue-100">
-      <Card className="w-full max-w-2xl">
+    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: "linear-gradient(135deg, #f6faff 0%, #f8f6ff 100%)" }}>
+      <Card className="w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-blue-100">
         <CardContent className="p-6">
           <h2 className="text-2xl font-bold mb-6">Now, please rate how much you agree with each statement.</h2>
           
@@ -115,13 +116,13 @@ export default function SurveyPage() {
           ))}
 
           <div className="flex justify-end">
-            <Button
+            <StartGameButton
               onClick={handleNext}
               className="w-1/5 py-2 text-md"
               disabled={!isComplete}
             >
               Next
-            </Button>
+            </StartGameButton>
           </div>
         </CardContent>
       </Card>

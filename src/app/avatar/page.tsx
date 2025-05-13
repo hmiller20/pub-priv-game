@@ -11,6 +11,11 @@ import { cn } from "@/lib/utils"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import FloatingBubbles from "../floating-bubbles"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
+import { StartGameButton } from "@/components/ui/send-start-buttons"
+import { Checkbox } from "@/components/ui/checkbox"
+import { useTextToSpeech } from "@/lib/hooks/useTextToSpeech"
+import { Volume2, VolumeX } from "lucide-react"
 
 // Add type for avatar configuration
 type AvatarConfig = {
@@ -56,10 +61,26 @@ const generateInitialAvatar = (): AvatarConfig => {
 
 export default function AvatarPage() {
   const router = useRouter()
+  const [showWelcomeModal, setShowWelcomeModal] = useState(true)
+  const [countdown, setCountdown] = useState(10)
+  const [isTimerActive, setIsTimerActive] = useState(true)
   const [firstName, setFirstName] = useLocalStorage('currentFirstName', '')
   const [lastInitial, setLastInitial] = useLocalStorage('currentLastInitial', '')
   const [avatarUrl, setAvatarUrl] = useLocalStorage('currentAvatarUrl', '')
   const [avatarConfig, setAvatarConfig] = useState<AvatarConfig | null>(null)
+  const [currentStep, setCurrentStep] = useState(1)
+  const [canProceed, setCanProceed] = useState(false)
+  const [stepCountdown, setStepCountdown] = useState(3)
+  const totalSteps = 3
+  const [agreementChecked, setAgreementChecked] = useState(false)
+  const [hasInitialized, setHasInitialized] = useState(false)
+  const { playText, stopPlaying, isPlaying, isLoading } = useTextToSpeech();
+
+  const modalSteps = [
+    "Welcome! You're about to participate in an interactive study where you'll play a game with other participants.",
+    "First, you'll create a unique avatar that will represent you throughout the study.",
+    "After creating your avatar, you'll enter a waiting room where you'll be matched with other participants."
+  ];
 
   useEffect(() => {
     const config = generateInitialAvatar()
@@ -73,6 +94,59 @@ export default function AvatarPage() {
     setAvatarUrl(url)
   }, [avatarConfig, setAvatarUrl])
 
+  useEffect(() => {
+    let timer: NodeJS.Timeout
+    
+    if (isTimerActive && countdown > 0) {
+      timer = setInterval(() => {
+        setCountdown(prev => prev - 1)
+      }, 1000)
+    } else if (countdown === 0) {
+      setIsTimerActive(false)
+    }
+
+    return () => clearInterval(timer)
+  }, [isTimerActive, countdown])
+
+  useEffect(() => {
+    // Reset step timer and canProceed when step changes
+    setCanProceed(false)
+    setStepCountdown(3)
+    
+    // Start countdown timer
+    const timer = setInterval(() => {
+      setStepCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(timer)
+          setCanProceed(true)
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [currentStep])
+
+  useEffect(() => {
+    // Auto-play the current step's text when it changes
+    if (hasInitialized && currentStep <= modalSteps.length) {
+      playText(modalSteps[currentStep - 1]);
+    } else {
+      setHasInitialized(true);
+    }
+
+    return () => {
+      stopPlaying();
+    }
+  }, [currentStep, playText, stopPlaying, hasInitialized]);
+
+  const handleCloseModal = () => {
+    if (countdown === 0 && canProceed) {
+      setShowWelcomeModal(false)
+    }
+  }
+
   if (!avatarConfig) return null
 
   const handleUpdateAvatar = (updates: Partial<AvatarConfig>) => {
@@ -84,8 +158,18 @@ export default function AvatarPage() {
       alert("Please enter both your first name and last initial")
       return
     }
-    router.replace('/waitingRoom')
+    router.replace('/queue')
   }
+
+  const handleTextToSpeech = () => {
+    if (currentStep <= modalSteps.length) {
+      if (isPlaying) {
+        stopPlaying();
+      } else {
+        playText(modalSteps[currentStep - 1]);
+      }
+    }
+  };
 
   return (
     <main
@@ -97,6 +181,149 @@ export default function AvatarPage() {
       <div className="absolute inset-0 z-0 pointer-events-none">
         <FloatingBubbles />
       </div>
+
+      <Dialog
+        open={showWelcomeModal}
+        onOpenChange={() => { /* Prevent closing via outside click or Escape */ }}
+        modal={true}
+      >
+        <DialogContent className="sm:max-w-md [&>button]:hidden">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-semibold text-center">Welcome!</DialogTitle>
+            <div className="flex justify-center gap-2 mt-4 mb-6">
+              {Array.from({ length: totalSteps }).map((_, index) => (
+                <div
+                  key={index}
+                  className={`w-2 h-2 rounded-full transition-colors duration-200 ${
+                    index + 1 === currentStep
+                      ? "bg-blue-500"
+                      : index + 1 < currentStep
+                      ? "bg-blue-300"
+                      : "bg-gray-200"
+                  }`}
+                />
+              ))}
+            </div>
+            <DialogDescription className="text-center mt-2 text-base text-black space-y-4 py-6">
+              {currentStep === 1 && (
+                <div className="space-y-3">
+                  <div className="space-y-4">
+                    <p className="text-left">{modalSteps[0]}</p>
+                    <div className="flex justify-center">
+                      <Button
+                        variant="ghost"
+                        onClick={handleTextToSpeech}
+                        disabled={isLoading}
+                        className="rounded-full hover:bg-gray-100 transition-colors h-10 w-10 p-0 flex items-center justify-center"
+                        aria-label={isPlaying ? "Stop audio" : "Play audio"}
+                      >
+                        {isLoading ? (
+                          <div className="w-6 h-6 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+                        ) : isPlaying ? (
+                          <VolumeX className="h-6 w-6" />
+                        ) : (
+                          <Volume2 className="h-6 w-6" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {currentStep === 2 && (
+                <div className="space-y-3">
+                  <div className="space-y-4">
+                    <p className="text-left">{modalSteps[1]}</p>
+                    <div className="flex justify-center">
+                      <Button
+                        variant="ghost"
+                        onClick={handleTextToSpeech}
+                        disabled={isLoading}
+                        className="rounded-full hover:bg-gray-100 transition-colors h-10 w-10 p-0 flex items-center justify-center"
+                        aria-label={isPlaying ? "Stop audio" : "Play audio"}
+                      >
+                        {isLoading ? (
+                          <div className="w-6 h-6 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+                        ) : isPlaying ? (
+                          <VolumeX className="h-6 w-6" />
+                        ) : (
+                          <Volume2 className="h-6 w-6" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {currentStep === 3 && (
+                <div className="space-y-3">
+                  <div className="space-y-4">
+                    <p className="text-left">{modalSteps[2]}</p>
+                    <div className="flex justify-center">
+                      <Button
+                        variant="ghost"
+                        onClick={handleTextToSpeech}
+                        disabled={isLoading}
+                        className="rounded-full hover:bg-gray-100 transition-colors h-10 w-10 p-0 flex items-center justify-center"
+                        aria-label={isPlaying ? "Stop audio" : "Play audio"}
+                      >
+                        {isLoading ? (
+                          <div className="w-6 h-6 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+                        ) : isPlaying ? (
+                          <VolumeX className="h-6 w-6" />
+                        ) : (
+                          <Volume2 className="h-6 w-6" />
+                        )}
+                      </Button>
+                    </div>
+                  </div>
+                  <div className="mt-8">
+                    <Checkbox
+                      id="respect-agreement"
+                      checked={agreementChecked}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAgreementChecked(e.target.checked)}
+                      className="mt-4"
+                      label={<i>I understand that showing respect for other participants is essential. By advancing, I agree to treat all participants with kindness and consideration during chat sessions.</i>}
+                    />
+                  </div>
+                </div>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="relative min-h-[64px] mt-6">
+            <StartGameButton
+              onClick={() => setCurrentStep(prev => prev - 1)}
+              disabled={currentStep === 1}
+              className={`absolute left-0 bottom-0 bg-white text-gray-600 hover:text-gray-900 border border-blue-100 min-w-[100px] px-6 py-2 m-2 shadow-sm rounded-xl transition-all duration-200 ${
+                currentStep === 1 ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+              style={{ minWidth: 0 }}
+            >
+              Previous
+            </StartGameButton>
+            {currentStep < totalSteps ? (
+              <StartGameButton
+                onClick={() => setCurrentStep(prev => prev + 1)}
+                disabled={!canProceed}
+                className={`absolute right-0 bottom-0 ml-auto m-2 min-w-[100px] px-6 py-2 shadow-sm rounded-xl transition-all duration-200 ${
+                  !canProceed ? "bg-gray-300 text-gray-600 cursor-not-allowed" : "bg-white text-blue-600 hover:text-blue-800 border border-blue-100"
+                }`}
+              >
+                {!canProceed ? `Continue in ${stepCountdown}` : "Continue"}
+              </StartGameButton>
+            ) : (
+              <StartGameButton
+                onClick={handleCloseModal}
+                disabled={countdown > 0 || !canProceed || !agreementChecked}
+                className={`absolute right-0 bottom-0 ml-auto m-2 min-w-[100px] px-6 py-2 shadow-sm rounded-xl transition-all duration-200 ${
+                  (countdown > 0 || !canProceed || !agreementChecked) ? "bg-gray-300 text-gray-600 cursor-not-allowed" : "bg-white text-blue-600 hover:text-blue-800 border border-blue-100"
+                }`}
+              >
+                {countdown > 0 ? `You may continue in ${countdown}` : "Get Started"}
+              </StartGameButton>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <h1
         className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight text-center leading-[1.1] py-4 mb-4 z-10 relative"
         style={{

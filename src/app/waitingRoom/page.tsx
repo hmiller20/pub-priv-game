@@ -8,6 +8,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { useLocalStorage } from "@/lib/hooks/useLocalStorage"
 import FloatingBubbles from "../floating-bubbles"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
+import { SendButton, StartGameButton } from "@/components/ui/send-start-buttons"
 
 // Add loading spinner component
 const LoadingSpinner = () => (
@@ -40,6 +42,10 @@ export default function WaitingRoom() {
   const [currentAvatarUrl] = useLocalStorage('currentAvatarUrl', '')
   const timeoutRefs = useRef<NodeJS.Timeout[]>([])
   const chatEndRef = useRef<HTMLDivElement | null>(null)
+  const [currentStep, setCurrentStep] = useState(1)
+  const [canProceed, setCanProceed] = useState(false)
+  const [stepCountdown, setStepCountdown] = useState(3)
+  const totalSteps = 2
 
   const [botReplyCounts, setBotReplyCounts] = useState({
     "Alex K.": 0,
@@ -132,6 +138,26 @@ timeoutRefs.current.push(alexGreetingTimeout);
     }
   }, [currentFirstName, currentLastInitial, currentAvatarUrl])
 
+  useEffect(() => {
+    // Reset step timer and canProceed when step changes
+    setCanProceed(false)
+    setStepCountdown(3)
+    
+    // Start countdown timer
+    const timer = setInterval(() => {
+      setStepCountdown(prev => {
+        if (prev <= 1) {
+          clearInterval(timer)
+          setCanProceed(true)
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+
+    return () => clearInterval(timer)
+  }, [currentStep])
+
   const addChatMessage = (message: string) => {
     const newMessage: ChatMessage = {
       id: Date.now(),
@@ -160,7 +186,7 @@ timeoutRefs.current.push(alexGreetingTimeout);
     for (const player of players) {
       if (player.name !== `${currentFirstName} ${currentLastInitial}.`) {
         // Prevent Alex from replying to the user's first message since he already greeted them
-        if (player.name === "Alex K." && !alexGreeted && userMessageCount === 0) {
+        if (player.name === "Alex K." && alexGreeted && userMessageCount === 0) {
           continue;
         }
         const shouldReply = Math.random() < 0.7; // 70% chance to reply
@@ -239,6 +265,11 @@ timeoutRefs.current.push(alexGreetingTimeout);
     }
   }, [chatMessages])
 
+  const modalSteps = [
+    "Use the group chat to send a greeting to your groupmates!",
+    "Once all participants have joined, the game will begin automatically."
+  ];
+
   return (
     <main
       className="flex min-h-screen flex-col items-center justify-center p-4 relative overflow-hidden"
@@ -246,6 +277,72 @@ timeoutRefs.current.push(alexGreetingTimeout);
         background: "linear-gradient(135deg, #f6faff 0%, #f8f6ff 100%)",
       }}
     >
+      <Dialog 
+        open={currentStep > 0 && currentStep <= totalSteps} 
+        onOpenChange={(open) => {
+          if (!open && currentStep === totalSteps && canProceed) {
+            setCurrentStep(0);
+          }
+        }}
+        modal={true}
+      >
+        {currentStep > 0 && currentStep <= totalSteps && (
+          <DialogContent className="sm:max-w-md [&>button]:hidden">
+            <DialogHeader>
+              <div className="flex justify-center gap-2">
+                {Array.from({ length: totalSteps }).map((_, index) => (
+                  <div
+                    key={index}
+                    className={`w-2 h-2 rounded-full transition-colors duration-200 ${
+                      index + 1 === currentStep
+                        ? "bg-blue-500"
+                        : index + 1 < currentStep
+                        ? "bg-blue-300"
+                        : "bg-gray-200"
+                    }`}
+                  />
+                ))}
+              </div>
+              <DialogDescription className="text-center mt-2 text-base text-black space-y-4 py-6">
+                <p className="text-center">{modalSteps[currentStep - 1]}</p>
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="relative min-h-[64px] mt-6">
+              <StartGameButton
+                onClick={() => setCurrentStep(prev => prev - 1)}
+                disabled={currentStep === 1}
+                className={`absolute left-0 bottom-0 bg-white text-gray-600 hover:text-gray-900 border border-blue-100 min-w-[100px] px-6 py-2 m-2 shadow-sm rounded-xl transition-all duration-200 ${
+                  currentStep === 1 ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+                style={{ minWidth: 0 }}
+              >
+                Previous
+              </StartGameButton>
+              {currentStep < totalSteps ? (
+                <StartGameButton
+                  onClick={() => setCurrentStep(prev => prev + 1)}
+                  disabled={!canProceed}
+                  className={`absolute right-0 bottom-0 ml-auto m-2 min-w-[100px] px-6 py-2 shadow-sm rounded-xl transition-all duration-200 ${
+                    !canProceed ? "bg-gray-300 text-gray-600 cursor-not-allowed" : "bg-white text-blue-600 hover:text-blue-800 border border-blue-100"
+                  }`}
+                >
+                  {!canProceed ? `Continue in ${stepCountdown}` : "Continue"}
+                </StartGameButton>
+              ) : (
+                <StartGameButton
+                  onClick={() => setCurrentStep(0)}
+                  disabled={!canProceed}
+                  className={`absolute right-0 bottom-0 ml-auto m-2 min-w-[100px] px-6 py-2 shadow-sm rounded-xl transition-all duration-200 ${
+                    !canProceed ? "bg-gray-300 text-gray-600 cursor-not-allowed" : "bg-white text-blue-600 hover:text-blue-800 border border-blue-100"
+                  }`}
+                >
+                  {!canProceed ? `Continue in ${stepCountdown}` : "Got it!"}
+                </StartGameButton>
+              )}
+            </DialogFooter>
+          </DialogContent>
+        )}
+      </Dialog>
       <div className="absolute inset-0 z-0 pointer-events-none">
         <FloatingBubbles />
       </div>

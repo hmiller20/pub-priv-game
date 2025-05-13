@@ -9,6 +9,7 @@ import { CheckCircle2, XCircle, SkipForward } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { Suspense } from "react"
 import { useLocalStorage } from "@/lib/hooks/useLocalStorage"
+import { StartGameButton, SendButton } from "@/components/ui/send-start-buttons"
 
 // 30 questions
 const RAT_QUESTIONS = [
@@ -244,9 +245,24 @@ function GameContent() {
   const currentQuestion = questions[currentQuestionIndex]
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-4 bg-blue-100">
-      <h1 className="mb-8 text-3xl font-bold">Category Story</h1>
-      <Card className="w-full max-w-md bg-white">
+    <main
+      className="flex min-h-screen flex-col items-center justify-center p-4 relative overflow-hidden"
+      style={{
+        background: "linear-gradient(135deg, #f6faff 0%, #f8f6ff 100%)",
+      }}
+    >
+      <h1
+        className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight text-center leading-[1.1] py-4 mb-4 z-10 relative"
+        style={{
+          background: "linear-gradient(90deg, #4f46e5 0%, #9333ea 100%)",
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+          backgroundClip: "text",
+        }}
+      >
+        Category Story
+      </h1>
+      <Card className="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-blue-100 p-6">
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <Badge variant="outline" className="text-lg font-bold">
@@ -266,7 +282,6 @@ function GameContent() {
               </div>
             ))}
           </div>
-
           <div className="flex gap-2">
             <Input
               ref={inputRef}
@@ -279,25 +294,19 @@ function GameContent() {
                 feedback === "incorrect" ? "border-red-500" : ""
               }
             />
-            <Button 
-              onClick={handleSubmit}
-              className="bg-black hover:bg-black/90 text-white"
-            >
+            <SendButton onClick={handleSubmit}>
               Submit
-            </Button>
+            </SendButton>
           </div>
-
           <div className="flex justify-end">
-            <Button
+            <StartGameButton
               onClick={handleSkip}
-              variant="ghost"
-              className="text-muted-foreground hover:bg-gray-100"
+              className="bg-white text-gray-600 hover:text-gray-900 border border-blue-100 min-w-[140px] px-6 py-2"
+              style={{ minWidth: 0 }}
             >
-              <SkipForward className="mr-1 h-4 w-4" />
               Skip (-5 pts)
-            </Button>
+            </StartGameButton>
           </div>
-
           {feedback && (
             <div className="absolute bottom-2 left-2 flex items-center space-x-2 bg-white/80 backdrop-blur-sm rounded-lg px-3 py-2 shadow-sm">
               {feedback === "correct" ? (

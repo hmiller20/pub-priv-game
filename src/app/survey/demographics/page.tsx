@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { Card, CardContent } from "@/components/ui/card"
+import { StartGameButton } from "@/components/ui/send-start-buttons"
 
 export default function SurveyPage() {
   const router = useRouter();
@@ -57,52 +59,57 @@ export default function SurveyPage() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center p-4 bg-blue-100">
-      <div className="bg-white p-6 rounded-lg shadow-md w-full max-w-lg">
-        <h1 className="text-2xl font-bold mb-4 text-center">
-          Now, please tell us about yourself.
-        </h1>
-        <div className="mt-4">
-          <label htmlFor="age" className="block text-sm font-medium text-gray-700">How old are you?</label>
-          <input
-            id="age"
-            type="number"
-            required
-            value={age}
-            onChange={(e) => setAge(e.target.value)}
-            className="mt-1 block w-full border border-gray-300 rounded-md p-2"
-          />
-        </div>
-        <div className="mt-4">
-          <label htmlFor="gender" className="block text-sm font-medium text-gray-700">What is your gender?</label>
-          <select
-            id="gender"
-            required
-            value={gender}
-            onChange={(e) => setGender(e.target.value)}
-            className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+    <main
+      className="flex min-h-screen flex-col items-center justify-center p-4 relative overflow-hidden"
+      style={{
+        background: "linear-gradient(135deg, #f6faff 0%, #f8f6ff 100%)",
+      }}
+    >
+      <h1
+        className="text-2xl font-bold mb-4 text-center"
+      >
+        Now, please tell us about yourself.
+      </h1>
+      <Card className="w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-blue-100 p-6">
+        <CardContent>
+          <div className="mt-4">
+            <label htmlFor="age" className="block text-sm font-medium text-gray-700">How old are you?</label>
+            <input
+              id="age"
+              type="number"
+              required
+              value={age}
+              onChange={(e) => setAge(e.target.value)}
+              className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+            />
+          </div>
+          <div className="mt-4">
+            <label htmlFor="gender" className="block text-sm font-medium text-gray-700">What is your gender?</label>
+            <select
+              id="gender"
+              required
+              value={gender}
+              onChange={(e) => setGender(e.target.value)}
+              className="mt-1 block w-full border border-gray-300 rounded-md p-2"
+            >
+              <option value="" disabled>Select gender</option>
+              <option value="female">Female</option>
+              <option value="male">Male</option>
+              <option value="non-binary">Non-binary</option>
+              <option value="prefer-not">Prefer not to say</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <StartGameButton
+            type="button"
+            disabled={!age || !gender}
+            onClick={handleNext}
+            className="mt-6 w-full"
           >
-            <option value="" disabled>Select gender</option>
-            <option value="female">Female</option>
-            <option value="male">Male</option>
-            <option value="non-binary">Non-binary</option>
-            <option value="prefer-not">Prefer not to say</option>
-            <option value="other">Other</option>
-          </select>
-        </div>
-        <button
-          type="button"
-          disabled={!age || !gender}
-          onClick={handleNext}
-          className={`mt-6 w-full font-semibold py-2 px-4 rounded focus:outline-none focus:ring-2 ${
-            !age || !gender
-              ? "bg-gray-400 cursor-not-allowed" 
-              : "bg-blue-600 hover:bg-blue-700 cursor-pointer focus:ring-blue-500"
-          } text-white`}
-        >
-          Next
-        </button>
-      </div>
+            Next
+          </StartGameButton>
+        </CardContent>
+      </Card>
     </main>
   );
 } 

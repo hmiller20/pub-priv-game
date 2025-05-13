@@ -1,17 +1,44 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import React, { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { useRouter } from "next/navigation"
 import { useLocalStorage } from "@/lib/hooks/useLocalStorage"
 import { StartGameButton } from "@/components/ui/send-start-buttons"
+import { useTextToSpeech } from "@/lib/hooks/useTextToSpeech"
+import { Volume2, VolumeX } from "lucide-react"
 
 export default function Score() {
   const router = useRouter()
   const [countdown, setCountdown] = useState(10)
   const [isTimerActive, setIsTimerActive] = useState(true)
   const [hasReadInstructions, setHasReadInstructions] = useLocalStorage('hasReadInstructions', false)
+  const [hasInitialized, setHasInitialized] = useState(false)
+  const { playText, stopPlaying, isPlaying, isLoading } = useTextToSpeech();
+
+  const scoreText = "Finally, your score will be kept private and used only for research purposes, so make sure to give it your best shot!";
+
+  useEffect(() => {
+    // Auto-play on mount (after initialization)
+    if (hasInitialized) {
+      playText(scoreText);
+    } else {
+      setHasInitialized(true);
+    }
+
+    return () => {
+      stopPlaying();
+    }
+  }, [hasInitialized, playText, stopPlaying]);
+
+  const handleTextToSpeech = () => {
+    if (isPlaying) {
+      stopPlaying();
+    } else {
+      playText(scoreText);
+    }
+  };
 
   useEffect(() => {
     let timer: NodeJS.Timeout
@@ -56,13 +83,31 @@ export default function Score() {
         Category Story
       </h1>
       <Card className="w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-blue-100 p-6">
-        <CardHeader>
-          <CardTitle>Your Score</CardTitle>
-        </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-blue-600 font-large font-bold">
-            Finally, your score will be kept private and used only for research purposes, so make sure to give it your best shot!
-          </p>
+          <div className="space-y-4">
+            <p className="text-left text-lg">
+              Finally, your score will be <span className="underline font-bold">kept private and used only for research purposes</span>, so make sure to give it your best shot!
+            </p>
+            
+            {/* Audio control button */}
+            <div className="flex justify-center">
+              <Button
+                variant="ghost"
+                onClick={handleTextToSpeech}
+                disabled={isLoading}
+                className="rounded-full hover:bg-gray-100 transition-colors h-10 w-10 p-0 flex items-center justify-center"
+                aria-label={isPlaying ? "Stop audio" : "Play audio"}
+              >
+                {isLoading ? (
+                  <div className="w-6 h-6 border-2 border-gray-300 border-t-gray-600 rounded-full animate-spin" />
+                ) : isPlaying ? (
+                  <VolumeX className="h-6 w-6" />
+                ) : (
+                  <Volume2 className="h-6 w-6" />
+                )}
+              </Button>
+            </div>
+          </div>
         </CardContent>
         <CardFooter className="flex justify-between">
           <StartGameButton
@@ -75,9 +120,9 @@ export default function Score() {
           <StartGameButton
             onClick={handleStartGame}
             disabled={countdown > 0}
-            className={countdown > 0 ? "bg-gray-300 text-gray-600 cursor-not-allowed" : ""}
+            className={`${countdown > 0 ? "bg-gray-300 text-gray-600 cursor-not-allowed" : ""} min-w-[200px] px-10`}
           >
-            {countdown > 0 ? `You may start in ${countdown}` : "Start Game"}
+            {countdown > 0 ? `Start in ${countdown}` : "Start Game"}
           </StartGameButton>
         </CardFooter>
       </Card>

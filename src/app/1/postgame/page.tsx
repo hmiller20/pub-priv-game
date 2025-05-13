@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { useRouter } from "next/navigation"
 import { useLocalStorage } from "@/lib/hooks/useLocalStorage"
+import { StartGameButton } from "@/components/ui/send-start-buttons"
 
 function PostGameContent() {
   const router = useRouter()
@@ -94,13 +95,27 @@ function PostGameContent() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-4 md:p-24 bg-blue-100">
-      <h1 className="mb-8 text-3xl font-bold">Category Story</h1>
-      <Card className="w-full max-w-md bg-white">
+    <main
+      className="flex min-h-screen flex-col items-center justify-center p-4 relative overflow-hidden"
+      style={{
+        background: "linear-gradient(135deg, #f6faff 0%, #f8f6ff 100%)",
+      }}
+    >
+      <h1
+        className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight text-center leading-[1.1] py-4 mb-4 z-10 relative"
+        style={{
+          background: "linear-gradient(90deg, #4f46e5 0%, #9333ea 100%)",
+          WebkitBackgroundClip: "text",
+          WebkitTextFillColor: "transparent",
+          backgroundClip: "text",
+        }}
+      >
+        Category Story
+      </h1>
+      <Card className="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-blue-100 p-6">
         <CardContent className="space-y-4">
           <div className="flex flex-col items-center space-y-4 py-8">
-            <h2 className="text-2xl font-bold">Game Over!</h2>
-            <p className="text-xl">Great job, {firstName} {lastInitial}!</p>
+            <h2 className="text-2xl font-bold">Game Over</h2>
             <p className="text-3xl font-bold mb-2">Final Score: {displayScore}</p>
             <p className="text-center text-muted-foreground mt-4">
               Your score has been recorded privately for research purposes. You can play again to try to improve your score, or proceed to the next part of the study.
@@ -109,18 +124,18 @@ function PostGameContent() {
           </div>
         </CardContent>
         <CardFooter className="flex flex-col space-y-2">
-          <Button
+          <StartGameButton
             onClick={handlePlayAgain}
-            className="w-full bg-black hover:bg-black/90 text-white cursor-pointer"
+            className="w-full"
           >
             Play Again
-          </Button>
-          <Button 
-            onClick={postScoreAndContinue} 
-            className="w-full bg-black hover:bg-black/90 text-white"
+          </StartGameButton>
+          <StartGameButton
+            onClick={postScoreAndContinue}
+            className="w-full"
           >
             Continue to Survey
-          </Button>
+          </StartGameButton>
         </CardFooter>
       </Card>
     </main>
