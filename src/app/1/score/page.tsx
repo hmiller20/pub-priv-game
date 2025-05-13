@@ -86,7 +86,7 @@ export default function Score() {
         <CardContent className="space-y-4">
           <div className="space-y-4">
             <p className="text-left text-lg">
-              Finally, your score will be <span className="underline font-bold">kept private and used only for research purposes</span>, so make sure to give it your best shot!
+              Finally, your score will be <span className="underline font-bold">kept PRIVATE and used only for research purposes</span>, so make sure to give it your best shot!
             </p>
             
             {/* Audio control button */}
