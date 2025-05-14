@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { useRouter } from "next/navigation"
@@ -15,22 +15,22 @@ export default function Score() {
   const [isTimerActive, setIsTimerActive] = useState(true)
   const [hasReadInstructions, setHasReadInstructions] = useLocalStorage('hasReadInstructions', false)
   const [hasInitialized, setHasInitialized] = useState(false)
+  const hasPlayedRef = useRef(false)
   const { playText, stopPlaying, isPlaying, isLoading } = useTextToSpeech();
 
   const scoreText = "Finally, your score will be kept private and used only for research purposes, so make sure to give it your best shot!";
 
   useEffect(() => {
-    // Auto-play on mount (after initialization)
-    if (hasInitialized) {
+    // Only play once on mount
+    if (!hasPlayedRef.current) {
       playText(scoreText);
-    } else {
-      setHasInitialized(true);
+      hasPlayedRef.current = true;
     }
 
     return () => {
       stopPlaying();
     }
-  }, [hasInitialized, playText, stopPlaying]);
+  }, [playText, stopPlaying]);
 
   const handleTextToSpeech = () => {
     if (isPlaying) {

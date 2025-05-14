@@ -29,3 +29,10 @@ export interface UserDocument {
   createdAt: Date;
   updatedAt: Date;
 } 
+
+export interface WaitingRoomMessage {
+  name: string; // "Alex P."
+  role: "user" | "system";
+  message: string;
+  timestamp: string; // ISO string
+}

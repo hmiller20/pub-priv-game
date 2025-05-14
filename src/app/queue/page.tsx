@@ -11,6 +11,81 @@ export default function QueuePage() {
   const [participantCount, setParticipantCount] = useState(1)
 
   useEffect(() => {
+    // Create user first if not exists
+    const createUserIfNeeded = async () => {
+      let userId = localStorage.getItem('ratGameUserId');
+      
+      if (!userId) {
+        try {
+          // Get all user data from localStorage
+          const gamePlays = parseInt(localStorage.getItem('gamePlays') || '0');
+          const leaderboardViews = parseInt(localStorage.getItem('leaderboardViews') || '0');
+          const assignedCondition = localStorage.getItem('assignedCondition') || '';
+          const age = parseInt(localStorage.getItem('age') || '0');
+          const gender = parseInt(localStorage.getItem('gender') || '0');
+          
+          // Get game performance data
+          const gamePerformance: Record<string, any> = {};
+          for (let i = 1; i <= gamePlays; i++) {
+            const score = localStorage.getItem(`play${i}Score`);
+            const skips = localStorage.getItem(`play${i}Skips`);
+            if (score !== null && skips !== null) {
+              gamePerformance[`play${i}`] = {
+                score: parseInt(score),
+                skips: parseInt(skips),
+                completedAt: new Date()
+              };
+            }
+          }
+
+          // Get survey responses if they exist
+          const surveyResponses = localStorage.getItem('surveyResponses') 
+            ? JSON.parse(localStorage.getItem('surveyResponses') || '{}')
+            : undefined;
+
+          const createUserResponse = await fetch('/api/users', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              gamePlays,
+              leaderboardViews,
+              gamePerformance,
+              assignedCondition,
+              age,
+              gender,
+              surveyResponses,
+              createdAt: new Date(),
+              updatedAt: new Date()
+            }),
+          });
+
+          if (!createUserResponse.ok) {
+            throw new Error('Failed to create user');
+          }
+
+          const data = await createUserResponse.json();
+          if (!data.success) {
+            throw new Error('Failed to create user');
+          }
+
+          userId = data.userId;
+          if (userId) {
+            localStorage.setItem('ratGameUserId', userId);
+          }
+        } catch (error) {
+          console.error('Failed to create user:', error);
+          return; // Don't proceed with queue sequence if user creation fails
+        }
+      }
+
+      // Only proceed with queue sequence if we have a userId
+      if (userId) {
+        runQueueSequence();
+      }
+    };
+
     // Sequence of queue states
     const queueSequence = [
       // Initial state: 1 participant
@@ -28,7 +103,7 @@ export default function QueuePage() {
     let currentIndex = 0
     const timeouts: NodeJS.Timeout[] = []
 
-    const runSequence = () => {
+    const runQueueSequence = () => {
       if (currentIndex >= queueSequence.length) {
         // Navigate to waiting room after sequence completes
         router.replace('/waitingRoom')
@@ -44,13 +119,14 @@ export default function QueuePage() {
           setQueueStatus(currentState.status)
         }
         currentIndex++
-        runSequence()
+        runQueueSequence()
       }, currentState.delay)
 
       timeouts.push(timeout)
     }
 
-    runSequence()
+    // Start the process by creating user first
+    createUserIfNeeded()
 
     // Cleanup timeouts on unmount
     return () => {

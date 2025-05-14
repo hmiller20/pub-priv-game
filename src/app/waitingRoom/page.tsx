@@ -47,6 +47,38 @@ export default function WaitingRoom() {
   const [stepCountdown, setStepCountdown] = useState(3)
   const totalSteps = 2
 
+  useEffect(() => {
+    const stored = localStorage.getItem("chatMessages");
+    if (stored) setChatMessages(JSON.parse(stored));
+  }, []);
+  
+  useEffect(() => {
+    localStorage.setItem("chatMessages", JSON.stringify(chatMessages));
+  
+    const waitingRoomMessages = chatMessages.map(msg => ({
+      name: msg.playerName,
+      role: msg.playerName === `${currentFirstName} ${currentLastInitial}.` ? "user" : "system",
+      message: msg.message,
+      timestamp: new Date(msg.timestamp).toISOString()
+    }));
+  
+    const userId = localStorage.getItem("ratGameUserId");
+    if (!userId) {
+      console.error("No user ID found in localStorage");
+      return;
+    }
+
+    fetch("/api/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        userId,
+        messages: waitingRoomMessages
+      })
+    });
+  }, [chatMessages, currentFirstName, currentLastInitial]);
+  
+
   const [botReplyCounts, setBotReplyCounts] = useState({
     "Alex K.": 0,
     "Jordan M.": 0,

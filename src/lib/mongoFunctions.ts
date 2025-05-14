@@ -7,6 +7,20 @@
 import { ObjectId } from 'mongodb';
 import clientPromise from './mongoConnection'; // this establishes the connection to the database
 import { UserDocument, SurveyResponses, GamePlay } from '@/types/mongodb';
+import { WaitingRoomMessage } from "@/types/mongodb";
+
+export async function updateWaitingRoomMessages(
+  userId: string,
+  newMessages: WaitingRoomMessage[]
+) {
+  const client = await clientPromise;
+  const collection = client.db('rat-game').collection('users');
+  await collection.updateOne(
+    { _id: new ObjectId(userId) },
+    { $set: { waitingRoomMessages: newMessages } },
+    { upsert: false }
+  );
+}
 
 const DATABASE_NAME = 'rat-game';
 const COLLECTION_NAME = 'users';
