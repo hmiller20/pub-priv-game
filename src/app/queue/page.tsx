@@ -38,7 +38,7 @@ export default function QueuePage() {
       const currentState = queueSequence[currentIndex]
       const timeout = setTimeout(() => {
         if ('count' in currentState) {
-          setParticipantCount(currentState.count)
+          setParticipantCount(currentState.count as number)
           setQueueStatus("waiting")
         } else {
           setQueueStatus(currentState.status)

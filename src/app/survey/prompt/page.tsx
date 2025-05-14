@@ -85,9 +85,9 @@ export default function SurveyPage2() {
         background: "linear-gradient(135deg, #f6faff 0%, #f8f6ff 100%)",
       }}
     >
-      <div className="flex flex-col items-center justify-center w-full max-w-3xl mx-auto">
+      <div className="flex flex-col items-start justify-center w-full max-w-3xl mx-auto px-4">
         <h1
-          className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight text-center leading-[1.2] mb-4 z-10 relative pb-2 min-h-[3.5em]"
+          className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight text-left leading-[1.2] mb-4 z-10 relative pb-2 min-h-[3.5em] w-full"
           style={{
             background: "linear-gradient(90deg, #4f46e5 0%, #9333ea 100%)",
             WebkitBackgroundClip: "text",
@@ -99,7 +99,7 @@ export default function SurveyPage2() {
           {renderWordsSmooth(heading1Words, displayedWords1)}
         </h1>
         <h2
-          className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight text-center leading-[1.2] mb-8 z-10 relative pb-2 min-h-[3.5em]"
+          className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight text-left leading-[1.2] mb-8 z-10 relative pb-2 min-h-[3.5em] w-full"
           style={{
             background: "linear-gradient(90deg, #4f46e5 0%, #9333ea 100%)",
             WebkitBackgroundClip: "text",
@@ -110,17 +110,19 @@ export default function SurveyPage2() {
         >
           {displayedWords1 === heading1Words.length && renderWordsSmooth(heading2Words, displayedWords2)}
         </h2>
-        <StartGameButton
-          onClick={handleNext}
-          disabled={countdown > 0}
-          className={
-            countdown > 0
-              ? "md:w-1/2 bg-gray-300 text-gray-600"
-              : "md:w-1/5"
-          }
-        >
-          {countdown > 0 ? `You may advance in ${countdown}...` : 'Next'}
-        </StartGameButton>
+        <div className="w-full flex justify-center">
+          <StartGameButton
+            onClick={handleNext}
+            disabled={countdown > 0}
+            className={
+              countdown > 0
+                ? "md:w-1/2 bg-gray-300 text-gray-600"
+                : "md:w-1/5"
+            }
+          >
+            {countdown > 0 ? `You may advance in ${countdown}...` : 'Next'}
+          </StartGameButton>
+        </div>
       </div>
       {/* Blinking cursor animation */}
       <style>{`

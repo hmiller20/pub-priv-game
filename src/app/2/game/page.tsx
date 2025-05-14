@@ -13,8 +13,8 @@ import { StartGameButton, SendButton } from "@/components/ui/send-start-buttons"
 // 30 questions
 const RAT_QUESTIONS = [
   {
-    words: ["CREAM", "SKATE", "WATER"],
-    answer: "ICE"
+    words: ["HOUND", "PRESSURE", "SHOT"],
+    answer: "BLOOD"
   },
   {
     words: ["FALLING", "ACTOR", "DUST"],
@@ -256,7 +256,7 @@ function GameContent() {
       >
         Category Story
       </h1>
-      <Card className="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-blue-100 p-6">
+      <Card className="w-full max-w-xl bg-white rounded-3xl shadow-2xl border border-blue-100 p-6">
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <Badge variant="outline" className="text-lg font-bold">
@@ -271,8 +271,8 @@ function GameContent() {
         <CardContent className="space-y-6 p-6 relative">
           <div className="grid grid-cols-3 gap-4">
             {currentQuestion.words.map((word, index) => (
-              <div key={index} className="bg-gray-100 p-3 rounded-lg text-center">
-                <span className="font-bold text-lg">{word}</span>
+              <div key={index} className="bg-gray-100 p-3 rounded-lg text-center min-h-[60px] flex items-center justify-center">
+                <span className="font-bold text-lg break-words">{word}</span>
               </div>
             ))}
           </div>
