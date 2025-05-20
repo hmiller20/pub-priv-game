@@ -46,6 +46,10 @@ export default function WaitingRoom() {
   const [canProceed, setCanProceed] = useState(false)
   const [stepCountdown, setStepCountdown] = useState(3)
   const totalSteps = 2
+  const [showMessageWarning, setShowMessageWarning] = useState(false)
+  const [countdown, setCountdown] = useState<number | null>(null)
+  const countdownRef = useRef<NodeJS.Timeout | null>(null)
+  const initialGreetingsSent = useRef(false)
 
   useEffect(() => {
     const stored = localStorage.getItem("chatMessages");
@@ -134,18 +138,40 @@ export default function WaitingRoom() {
       addChatMessage(`${currentPlayer.name} has joined the group!`)
 
       // Add greeting from Alex after a short delay
-const alexGreetingTimeout = setTimeout(() => {
-  const alexGreeting: ChatMessage = {
-    id: Date.now(),
-    playerName: "Alex K.",
-    message: "Hi i'm alex",
-    timestamp: new Date()
-  };
-  setChatMessages(prev => [...prev, alexGreeting]);
-  setAlexGreeted(true)
-}, 1000); // 1 second delay to feel natural
+      const alexGreetingTimeout = setTimeout(() => {
+        const alexGreeting: ChatMessage = {
+          id: Date.now(),
+          playerName: "Alex K.",
+          message: "Hi i'm alex",
+          timestamp: new Date()
+        };
+        setChatMessages(prev => [...prev, alexGreeting]);
+        setAlexGreeted(true)
+      }, 1000); // 1 second delay to feel natural
 
-timeoutRefs.current.push(alexGreetingTimeout);
+      // Add greeting from Jordan after 5 seconds
+      const jordanGreetingTimeout = setTimeout(() => {
+        const jordanGreeting: ChatMessage = {
+          id: Date.now(),
+          playerName: "Jordan M.",
+          message: "yo",
+          timestamp: new Date()
+        };
+        setChatMessages(prev => [...prev, jordanGreeting]);
+      }, 5000);
+
+      // Add greeting from Taylor after 8 seconds
+      const taylorGreetingTimeout = setTimeout(() => {
+        const taylorGreeting: ChatMessage = {
+          id: Date.now(),
+          playerName: "Taylor R.",
+          message: "hi hi!",
+          timestamp: new Date()
+        };
+        setChatMessages(prev => [...prev, taylorGreeting]);
+      }, 8000);
+
+      timeoutRefs.current.push(alexGreetingTimeout, jordanGreetingTimeout, taylorGreetingTimeout);
     }, 1000)
     timeoutRefs.current.push(userTimeoutId)
 
@@ -200,93 +226,238 @@ timeoutRefs.current.push(alexGreetingTimeout);
     setChatMessages(prev => [...prev, newMessage])
   }
 
+  // Add effect to handle countdown
+  useEffect(() => {
+    console.log('Countdown state:', countdown);
+    
+    if (countdown === null) return;
+
+    if (countdown <= 0) {
+      console.log('Countdown finished, moving to next stage');
+      if (countdownRef.current) {
+        clearInterval(countdownRef.current);
+        countdownRef.current = null;
+      }
+      router.replace('/loading');
+      return;
+    }
+
+    console.log('Starting countdown');
+    countdownRef.current = setInterval(() => {
+      setCountdown(prev => {
+        const newCount = prev !== null ? prev - 1 : null;
+        console.log('Countdown:', newCount);
+        return newCount;
+      });
+    }, 1000);
+
+    return () => {
+      console.log('Cleaning up countdown');
+      if (countdownRef.current) {
+        clearInterval(countdownRef.current);
+        countdownRef.current = null;
+      }
+    };
+  }, [countdown, router]);
+
+  // Add effect for initial greetings
+  useEffect(() => {
+    if (initialGreetingsSent.current) return;
+    if (players.length === 0) return; // Wait for players to be loaded
+
+    const sendGreeting = async (playerName: string, message: string) => {
+      try {
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            message: "hi", // This will be overridden by the AI's greeting
+            playerName: playerName,
+            chatHistory: chatMessages,
+            botReplyCounts: botReplyCounts
+          }),
+        });
+
+        const data = await response.json();
+        if (data.success) {
+          const greetingMessage: ChatMessage = {
+            id: Date.now(),
+            playerName: playerName,
+            message: data.message,
+            timestamp: new Date()
+          };
+          setChatMessages(prev => [...prev, greetingMessage]);
+          setBotReplyCounts(prev => ({
+            ...prev,
+            [playerName as "Alex K." | "Jordan M." | "Taylor R."]: prev[playerName as "Alex K." | "Jordan M." | "Taylor R."] + 1,
+          }));
+        }
+      } catch (error) {
+        console.error('Error sending initial greeting from', playerName, ':', error);
+      }
+    };
+
+    // Send Jordan's greeting after 5 seconds
+    const jordanTimeout = setTimeout(() => {
+      sendGreeting("Jordan M.", "hi");
+    }, 5000);
+
+    // Send Taylor's greeting after 8 seconds
+    const taylorTimeout = setTimeout(() => {
+      sendGreeting("Taylor R.", "hi");
+    }, 8000);
+
+    initialGreetingsSent.current = true;
+
+    return () => {
+      clearTimeout(jordanTimeout);
+      clearTimeout(taylorTimeout);
+    };
+  }, [players, chatMessages, botReplyCounts]);
+
+  // Modify handleSendMessage to start countdown after bot responses
   const handleSendMessage = async () => {
-    if (!currentMessage.trim()) return
+    if (!currentMessage.trim()) return;
+
+    // If countdown has already started, don't process new messages
+    if (countdown !== null) {
+      console.log('Countdown already in progress, ignoring new message');
+      return;
+    }
+
+    // Helper function to detect if a message is a greeting
+    const isGreeting = (message: string): boolean => {
+      const greetingWords = ['hi', 'hello', 'hey', 'yo', 'sup', 'greetings', 'howdy'];
+      const lowerMessage = message.toLowerCase();
+      return greetingWords.some(word => lowerMessage.includes(word));
+    };
+
+    const messageIsGreeting = isGreeting(currentMessage);
+    console.log('Message is greeting:', messageIsGreeting);
 
     const newMessage: ChatMessage = {
       id: Date.now(),
       playerName: `${currentFirstName} ${currentLastInitial}.`,
       message: currentMessage,
       timestamp: new Date()
+    };
+
+    setChatMessages(prev => [...prev, newMessage]);
+    setCurrentMessage("");
+    setUserMessageCount(prev => prev + 1);
+
+    // Get all players that should potentially respond
+    const playersToRespond = players.filter(p => 
+      p.name !== `${currentFirstName} ${currentLastInitial}.` && 
+      !(p.name === "Alex K." && alexGreeted && userMessageCount === 0)
+    );
+
+    let pendingResponses = playersToRespond.length;
+    console.log('Waiting for responses from:', playersToRespond.map(p => p.name).join(', '));
+
+    // If no players need to respond, start countdown immediately
+    if (pendingResponses === 0) {
+      console.log('No other players need to respond, starting countdown');
+      setCountdown(10);
+      return;
     }
 
-    setChatMessages(prev => [...prev, newMessage])
-    setCurrentMessage("")
-    setUserMessageCount(prev => prev + 1)
-
-    // Get responses from AI players
-    for (const player of players) {
-      if (player.name !== `${currentFirstName} ${currentLastInitial}.`) {
-        // Prevent Alex from replying to the user's first message since he already greeted them
-        if (player.name === "Alex K." && alexGreeted && userMessageCount === 0) {
-          continue;
+    // Get responses from other players
+    for (const player of playersToRespond) {
+      // Always respond to greetings, otherwise use random chance
+      const shouldReply = messageIsGreeting ? true : Math.random() < 0.7;
+      
+      if (!shouldReply) {
+        console.log(`${player.name} is not responding to this message`);
+        pendingResponses--;
+        if (pendingResponses === 0 && countdown === null) {  // Only start countdown if not already started
+          console.log('All players have either responded or chosen not to, starting countdown');
+          setCountdown(10);
         }
-        const shouldReply = Math.random() < 0.7; // 70% chance to reply
-        if (!shouldReply) continue; // Skip this bot
-        try {
-          console.log('Sending message to AI player:', player.name);
-          
-          const response = await fetch('/api/chat', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              message: currentMessage,
-              playerName: player.name,
-              chatHistory: chatMessages,
-              botReplyCounts: botReplyCounts
-            }),
-          });
+        continue;
+      }
 
-          const data = await response.json();
-
-          if (!response.ok) {
-            console.error('AI response error:', {
-              status: response.status,
-              error: data.error,
-              details: data.details
-            });
-            throw new Error(data.error || 'Failed to get AI response');
-          }
-
-          if (data.success) {
-            // Add a random delay between 1-3 seconds to make it feel more natural
-            const typingSpeed = 40 + Math.random() * 60; // chars per second
-            const delay = data.message.length * (1000 / typingSpeed); 
-            setTimeout(() => {
-              const aiMessage: ChatMessage = {
-                id: Date.now(),
-                playerName: player.name,
-                message: data.message,
-                timestamp: new Date()
-              };
-              setChatMessages(prev => [...prev, aiMessage]);
-              // Update bot reply count here, after the bot replies
-              setBotReplyCounts(prev => ({
-                ...prev,
-                [player.name as "Alex K." | "Jordan M." | "Taylor R."]: prev[player.name as "Alex K." | "Jordan M." | "Taylor R."] + 1,
-              }));
-            }, delay);
-          } else {
-            console.error('AI response unsuccessful:', data);
-          }
-        } catch (error) {
-          console.error('Failed to get AI response:', error);
-          // Add a fallback message if the AI response fails
-          const fallbackMessage: ChatMessage = {
-            id: Date.now(),
+      try {
+        console.log('Getting response from:', player.name, messageIsGreeting ? '(greeting)' : '');
+        
+        const response = await fetch('/api/chat', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            message: currentMessage,
             playerName: player.name,
-            message: "Sorry, I'm having trouble responding right now. Let's talk about the game!",
-            timestamp: new Date()
-          };
-          setChatMessages(prev => [...prev, fallbackMessage]);
+            chatHistory: chatMessages,
+            botReplyCounts: botReplyCounts
+          }),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          console.error('Error getting response from', player.name, ':', {
+            status: response.status,
+            error: data.error,
+            details: data.details
+          });
+          throw new Error(data.error || 'Failed to get response');
+        }
+
+        if (data.success) {
+          const typingSpeed = 40 + Math.random() * 60;
+          const delay = data.message.length * (1000 / typingSpeed);
+          
+          setTimeout(() => {
+            const aiMessage: ChatMessage = {
+              id: Date.now(),
+              playerName: player.name,
+              message: data.message,
+              timestamp: new Date()
+            };
+            setChatMessages(prev => [...prev, aiMessage]);
+            setBotReplyCounts(prev => ({
+              ...prev,
+              [player.name as "Alex K." | "Jordan M." | "Taylor R."]: prev[player.name as "Alex K." | "Jordan M." | "Taylor R."] + 1,
+            }));
+            
+            pendingResponses--;
+            console.log(`${player.name} has responded, waiting for ${pendingResponses} more responses`);
+            
+            if (pendingResponses === 0 && countdown === null) {  // Only start countdown if not already started
+              console.log('All players have responded, starting countdown');
+              setCountdown(10);
+            }
+          }, delay);
+        }
+      } catch (error) {
+        console.error('Error getting response from', player.name, ':', error);
+        const fallbackMessage: ChatMessage = {
+          id: Date.now(),
+          playerName: player.name,
+          message: "Sorry, I'm having trouble responding right now. Let's talk about the game!",
+          timestamp: new Date()
+        };
+        setChatMessages(prev => [...prev, fallbackMessage]);
+        
+        pendingResponses--;
+        console.log(`${player.name} had trouble responding, waiting for ${pendingResponses} more responses`);
+        
+        if (pendingResponses === 0 && countdown === null) {  // Only start countdown if not already started
+          console.log('All players have either responded or had trouble, starting countdown');
+          setCountdown(10);
         }
       }
     }
-  }
+  };
 
   const handleStartGame = () => {
+    if (userMessageCount === 0) {
+      setShowMessageWarning(true)
+      return
+    }
     router.replace('/loading')
   }
 
@@ -299,7 +470,7 @@ timeoutRefs.current.push(alexGreetingTimeout);
 
   const modalSteps = [
     "Use the group chat to send a greeting to your groupmates!",
-    "Once all participants have joined, the game will begin automatically."
+    "Once all participants have sent a message, the game will begin automatically."
   ];
 
   return (
@@ -309,6 +480,27 @@ timeoutRefs.current.push(alexGreetingTimeout);
         background: "linear-gradient(135deg, #f6faff 0%, #f8f6ff 100%)",
       }}
     >
+      <Dialog 
+        open={showMessageWarning} 
+        onOpenChange={setShowMessageWarning}
+        modal={true}
+      >
+        <DialogContent className="sm:max-w-md [&>button]:hidden">
+          <DialogHeader>
+            <DialogDescription className="text-center mt-2 text-base text-black space-y-4 py-6">
+              Please send a greeting to your groupmates before starting the game.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="relative min-h-[64px] mt-6">
+            <StartGameButton
+              onClick={() => setShowMessageWarning(false)}
+              className="absolute right-0 bottom-0 ml-auto m-2 min-w-[100px] px-6 py-2 shadow-sm rounded-xl transition-all duration-200 bg-white text-blue-600 hover:text-blue-800 border border-blue-100 hover:scale-105 hover:-translate-y-1 hover:shadow-2xl hover:bg-blue-50"
+            >
+              Got it
+            </StartGameButton>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
       <Dialog 
         open={currentStep > 0 && currentStep <= totalSteps} 
         onOpenChange={(open) => {
@@ -474,11 +666,13 @@ timeoutRefs.current.push(alexGreetingTimeout);
                 </button>
                 <button
                   onClick={handleStartGame}
-                  className="h-10 min-w-[120px] bg-white text-blue-700 font-semibold rounded-2xl border border-blue-100 shadow transition-all duration-200 ml-0 md:ml-2 flex items-center gap-2 group hover:scale-105 hover:-translate-y-1 hover:shadow-2xl hover:bg-blue-50 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="h-10 min-w-[120px] bg-white text-blue-700 font-semibold rounded-2xl border border-blue-100 shadow transition-all duration-200 ml-0 md:ml-2 flex items-center gap-2 group hover:scale-105 hover:-translate-y-1 hover:shadow-2xl hover:bg-blue-50"
                   style={{ boxShadow: "0 4px 16px 0 rgba(80, 112, 255, 0.08)" }}
-                  disabled={players.length < 4}
+                  disabled={countdown !== null}
                 >
-                  <span className="transition-all duration-200 mx-auto">Start Game</span>
+                  <span className="transition-all duration-200 mx-auto">
+                    {countdown !== null ? `Starting in ${countdown}...` : "Start Game"}
+                  </span>
                 </button>
               </div>
             </div>

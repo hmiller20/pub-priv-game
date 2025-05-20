@@ -4,135 +4,147 @@ import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent } from "@/components/ui/card"
 import { FloatingBubbles } from "../floating-bubbles"
+import { Button } from "@/components/ui/button"
 
 export default function QueuePage() {
   const router = useRouter()
   const [queueStatus, setQueueStatus] = useState("initializing")
   const [participantCount, setParticipantCount] = useState(1)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
+    let isMounted = true
+    const timeouts: NodeJS.Timeout[] = []
+
     // Create user first if not exists
     const createUserIfNeeded = async () => {
-      let userId = localStorage.getItem('ratGameUserId');
-      
-      if (!userId) {
-        try {
-          // Get all user data from localStorage
-          const gamePlays = parseInt(localStorage.getItem('gamePlays') || '0');
-          const leaderboardViews = parseInt(localStorage.getItem('leaderboardViews') || '0');
-          const assignedCondition = localStorage.getItem('assignedCondition') || '';
-          const age = parseInt(localStorage.getItem('age') || '0');
-          const gender = parseInt(localStorage.getItem('gender') || '0');
-          
-          // Get game performance data
-          const gamePerformance: Record<string, any> = {};
-          for (let i = 1; i <= gamePlays; i++) {
-            const score = localStorage.getItem(`play${i}Score`);
-            const skips = localStorage.getItem(`play${i}Skips`);
+      try {
+        let userId = localStorage.getItem('ratGameUserId')
+        
+        if (!userId) {
+          // Batch localStorage reads
+          const localStorageData = {
+            gamePlays: parseInt(localStorage.getItem('gamePlays') || '0'),
+            leaderboardViews: parseInt(localStorage.getItem('leaderboardViews') || '0'),
+            assignedCondition: localStorage.getItem('assignedCondition') || '',
+            age: parseInt(localStorage.getItem('age') || '0'),
+            gender: parseInt(localStorage.getItem('gender') || '0'),
+            surveyResponses: localStorage.getItem('surveyResponses') 
+              ? JSON.parse(localStorage.getItem('surveyResponses') || '{}')
+              : undefined
+          }
+
+          // Get game performance data in a single loop
+          const gamePerformance: Record<string, any> = {}
+          for (let i = 1; i <= localStorageData.gamePlays; i++) {
+            const score = localStorage.getItem(`play${i}Score`)
+            const skips = localStorage.getItem(`play${i}Skips`)
             if (score !== null && skips !== null) {
               gamePerformance[`play${i}`] = {
                 score: parseInt(score),
                 skips: parseInt(skips),
                 completedAt: new Date()
-              };
+              }
             }
           }
 
-          // Get survey responses if they exist
-          const surveyResponses = localStorage.getItem('surveyResponses') 
-            ? JSON.parse(localStorage.getItem('surveyResponses') || '{}')
-            : undefined;
-
           const createUserResponse = await fetch('/api/users', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              gamePlays,
-              leaderboardViews,
+              ...localStorageData,
               gamePerformance,
-              assignedCondition,
-              age,
-              gender,
-              surveyResponses,
               createdAt: new Date(),
               updatedAt: new Date()
             }),
-          });
+          })
 
           if (!createUserResponse.ok) {
-            throw new Error('Failed to create user');
+            throw new Error('Failed to create user')
           }
 
-          const data = await createUserResponse.json();
-          if (!data.success) {
-            throw new Error('Failed to create user');
+          const data = await createUserResponse.json()
+          if (!data.success || !data.userId) {
+            throw new Error('Failed to create user')
           }
 
-          userId = data.userId;
-          if (userId) {
-            localStorage.setItem('ratGameUserId', userId);
+          userId = data.userId
+          if (typeof userId === 'string') {
+            localStorage.setItem('ratGameUserId', userId)
           }
-        } catch (error) {
-          console.error('Failed to create user:', error);
-          return; // Don't proceed with queue sequence if user creation fails
+        }
+
+        if (userId && isMounted) {
+          runQueueSequence()
+        }
+      } catch (error) {
+        console.error('Failed to create user:', error)
+        if (isMounted) {
+          setError('Failed to initialize queue. Please refresh the page.')
         }
       }
+    }
 
-      // Only proceed with queue sequence if we have a userId
-      if (userId) {
-        runQueueSequence();
-      }
-    };
-
-    // Sequence of queue states
+    // Simplified queue sequence with shorter delays
     const queueSequence = [
-      // Initial state: 1 participant
-      { count: 1, delay: 2000 },
-      // Second state: 2 participants
-      { count: 2, delay: 3000 },
-      // Third state: 3 participants
-      { count: 3, delay: 2000 },
-      // Fourth state: back to 2 participants (someone left)
-      { count: 2, delay: 2000 },
-      // Final state: finding room
-      { status: "finding", delay: 2000 }
-    ]
+      { count: 56, delay: 1000 },
+      { count: 78, delay: 1500 },
+      { count: 77, delay: 1000 },
+      { count: 94, delay: 1000 },
+      { status: "finding", delay: 1000 }
+    ] as const
 
     let currentIndex = 0
-    const timeouts: NodeJS.Timeout[] = []
 
     const runQueueSequence = () => {
-      if (currentIndex >= queueSequence.length) {
-        // Navigate to waiting room after sequence completes
-        router.replace('/waitingRoom')
+      if (!isMounted || currentIndex >= queueSequence.length) {
+        if (isMounted) {
+          router.replace('/waitingRoom')
+        }
         return
       }
 
       const currentState = queueSequence[currentIndex]
       const timeout = setTimeout(() => {
-        if ('count' in currentState) {
-          setParticipantCount(currentState.count as number)
-          setQueueStatus("waiting")
-        } else {
-          setQueueStatus(currentState.status)
+        if (isMounted) {
+          if ('count' in currentState) {
+            setParticipantCount(currentState.count)
+            setQueueStatus("waiting")
+          } else {
+            setQueueStatus(currentState.status)
+          }
+          currentIndex++
+          runQueueSequence()
         }
-        currentIndex++
-        runQueueSequence()
       }, currentState.delay)
 
       timeouts.push(timeout)
     }
 
-    // Start the process by creating user first
     createUserIfNeeded()
 
-    // Cleanup timeouts on unmount
     return () => {
+      isMounted = false
       timeouts.forEach(clearTimeout)
     }
   }, [router])
+
+  if (error) {
+    return (
+      <main className="flex min-h-screen flex-col items-center justify-center p-4">
+        <Card className="w-full max-w-md bg-white/80 backdrop-blur-sm border-red-100 shadow-xl">
+          <CardContent className="p-6">
+            <div className="text-center space-y-2">
+              <p className="text-lg text-red-600">{error}</p>
+              <Button onClick={() => window.location.reload()}>
+                Refresh Page
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </main>
+    )
+  }
 
   return (
     <main
