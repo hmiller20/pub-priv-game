@@ -9,21 +9,29 @@ import clientPromise from './mongoConnection'; // this establishes the connectio
 import { UserDocument, SurveyResponses, GamePlay } from '@/types/mongodb';
 import { WaitingRoomMessage } from "@/types/mongodb";
 
+if (!process.env.MONGODB_DATABASE_NAME) {
+  throw new Error('Please add MONGODB_DATABASE_NAME to .env.local');
+}
+
+if (!process.env.MONGODB_COLLECTION_NAME) {
+  throw new Error('Please add MONGODB_COLLECTION_NAME to .env.local');
+}
+
+const DATABASE_NAME = process.env.MONGODB_DATABASE_NAME;
+const COLLECTION_NAME = process.env.MONGODB_COLLECTION_NAME;
+
 export async function updateWaitingRoomMessages(
   userId: string,
   newMessages: WaitingRoomMessage[]
 ) {
   const client = await clientPromise;
-  const collection = client.db('rat-game').collection('users');
+  const collection = client.db(DATABASE_NAME).collection(COLLECTION_NAME);
   await collection.updateOne(
     { _id: new ObjectId(userId) },
     { $set: { waitingRoomMessages: newMessages } },
     { upsert: false }
   );
 }
-
-const DATABASE_NAME = 'rat-game';
-const COLLECTION_NAME = 'users';
 
 export async function createUser(userData: Omit<UserDocument, '_id' | 'createdAt' | 'updatedAt'>) {
   console.log('DB: Attempting to connect to MongoDB...');

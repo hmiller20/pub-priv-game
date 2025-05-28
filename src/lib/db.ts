@@ -8,8 +8,16 @@ import { ObjectId } from 'mongodb';
 import clientPromise from './mongoConnection'; // this establishes the connection to the database
 import { UserDocument, SurveyResponses, GamePlay } from '@/types/mongodb';
 
-const DATABASE_NAME = 'rat-game';
-const COLLECTION_NAME = 'users';
+if (!process.env.MONGODB_DATABASE_NAME) {
+  throw new Error('Please add MONGODB_DATABASE_NAME to .env.local');
+}
+
+if (!process.env.MONGODB_COLLECTION_NAME) {
+  throw new Error('Please add MONGODB_COLLECTION_NAME to .env.local');
+}
+
+const DATABASE_NAME = process.env.MONGODB_DATABASE_NAME;
+const COLLECTION_NAME = process.env.MONGODB_COLLECTION_NAME;
 
 export async function createUser(userData: Omit<UserDocument, '_id' | 'createdAt' | 'updatedAt'>) {
   console.log('DB: Attempting to connect to MongoDB...');
