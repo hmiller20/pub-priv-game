@@ -246,84 +246,190 @@ function GameContent() {
 
   return (
     <main
-      className="flex min-h-screen flex-col items-center justify-center p-4 relative overflow-hidden"
+      className="flex min-h-screen p-4 relative overflow-hidden"
       style={{
         background: "linear-gradient(135deg, #f6faff 0%, #f8f6ff 100%)",
       }}
     >
-      <h1
-        className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight text-center leading-[1.1] py-4 mb-4 z-10 relative"
-        style={{
-          background: "linear-gradient(90deg, #4f46e5 0%, #9333ea 100%)",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-          backgroundClip: "text",
-        }}
-      >
-        Category Story
-      </h1>
-      <Card className="w-full max-w-xl bg-white rounded-3xl shadow-2xl border border-blue-100 p-6">
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <Badge variant="outline" className="text-lg font-bold">
-              {formatTime(timeLeft)}
-            </Badge>
-            <div className="flex items-center gap-2">
-              <span className="text-xl font-bold">Score:</span>
-              <span className="text-2xl font-bold text-black">{score}</span>
-            </div>
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-6 p-6 relative">
-          <div className="grid grid-cols-3 gap-4">
-            {currentQuestion.words.map((word, index) => (
-              <div key={index} className="bg-gray-100 p-3 rounded-lg text-center min-h-[60px] flex items-center justify-center">
-                <span className="font-bold text-lg break-words">{word}</span>
+      <div className="container mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+        {/* Game Section - Left Side */}
+        <div className="flex flex-col items-center justify-center min-h-screen">
+          <h1
+            className="text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight text-center leading-[1.1] py-4 mb-4 z-10 relative"
+            style={{
+              background: "linear-gradient(90deg, #4f46e5 0%, #9333ea 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}
+          >
+            Category Story
+          </h1>
+          <Card className="w-full max-w-xl bg-white rounded-3xl shadow-2xl border border-blue-100 p-6">
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <Badge variant="outline" className="text-lg font-bold">
+                  {formatTime(timeLeft)}
+                </Badge>
+                <div className="flex items-center gap-2">
+                  <span className="text-xl font-bold">Score:</span>
+                  <span className="text-2xl font-bold text-black">{score}</span>
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6 p-6 relative">
+              <div className="grid grid-cols-3 gap-4">
+                {currentQuestion.words.map((word, index) => (
+                  <div key={index} className="bg-gray-100 p-3 rounded-lg text-center min-h-[60px] flex items-center justify-center">
+                    <span className="font-bold text-lg break-words">{word}</span>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-          <div className="flex gap-2">
-            <Input
-              ref={inputRef}
-              value={userInput}
-              onChange={(e) => setUserInput(e.target.value)}
-              placeholder="Enter answer..."
-              onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-              className={
-                feedback === "correct" ? "border-green-500" : 
-                feedback === "incorrect" ? "border-red-500" : ""
-              }
-            />
-            <SendButton onClick={handleSubmit}>
-              Submit
-            </SendButton>
-          </div>
-          <div className="flex justify-end">
-            <StartGameButton
-              onClick={handleSkip}
-              className="bg-white text-gray-600 hover:text-gray-900 border border-blue-100 min-w-[140px] px-6 py-2"
-              style={{ minWidth: 0 }}
-            >
-              Skip (-5 pts)
-            </StartGameButton>
-          </div>
-          {feedback && (
-            <div className="absolute bottom-2 left-2 flex items-center space-x-2 bg-white/80 backdrop-blur-sm rounded-lg px-3 py-2 shadow-sm">
-              {feedback === "correct" ? (
-                <>
-                  <CheckCircle2 className="text-green-500" />
-                  <span className="text-green-500">Correct!</span>
-                </>
-              ) : (
-                <>
-                  <XCircle className="text-red-500" />
-                  <span className="text-red-500">Try again!</span>
-                </>
+              <div className="flex gap-2">
+                <Input
+                  ref={inputRef}
+                  value={userInput}
+                  onChange={(e) => setUserInput(e.target.value)}
+                  placeholder="Enter answer..."
+                  onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+                  className={
+                    feedback === "correct" ? "border-green-500" : 
+                    feedback === "incorrect" ? "border-red-500" : ""
+                  }
+                />
+                <SendButton onClick={handleSubmit}>
+                  Submit
+                </SendButton>
+              </div>
+              <div className="flex justify-end">
+                <StartGameButton
+                  onClick={handleSkip}
+                  className="bg-white text-gray-600 hover:text-gray-900 border border-blue-100 min-w-[140px] px-6 py-2"
+                  style={{ minWidth: 0 }}
+                >
+                  Skip (-5 pts)
+                </StartGameButton>
+              </div>
+              {feedback && (
+                <div className="absolute bottom-2 left-2 flex items-center space-x-2 bg-white/80 backdrop-blur-sm rounded-lg px-3 py-2 shadow-sm">
+                  {feedback === "correct" ? (
+                    <>
+                      <CheckCircle2 className="text-green-500" />
+                      <span className="text-green-500">Correct!</span>
+                    </>
+                  ) : (
+                    <>
+                      <XCircle className="text-red-500" />
+                      <span className="text-red-500">Try again!</span>
+                    </>
+                  )}
+                </div>
               )}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Decorative Panel - Right Side */}
+        <div className="flex flex-col items-center justify-center min-h-screen">
+          <h2
+            className="text-2xl sm:text-3xl font-semibold tracking-tight text-center leading-[1.1] py-4 mb-4 z-10 relative"
+            style={{
+              background: "linear-gradient(90deg, #4f46e5 0%, #9333ea 100%)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              backgroundClip: "text",
+            }}
+          >
+          </h2>
+          <Card className="w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-blue-100 p-4">
+            <CardContent className="px-4">
+              <div className="space-y-4">
+                {/* Geometric Pattern 1 */}
+                <div className="flex justify-center items-center h-16 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
+                  <div className="flex space-x-2">
+                    <div className="w-4 h-4 bg-blue-200 rounded-full"></div>
+                    <div className="w-6 h-6 bg-purple-200 rounded-sm rotate-45"></div>
+                    <div className="w-4 h-4 bg-indigo-200 rounded-full"></div>
+                    <div className="w-6 h-6 bg-blue-200 rounded-sm rotate-45"></div>
+                    <div className="w-4 h-4 bg-purple-200 rounded-full"></div>
+                  </div>
+                </div>
+
+                {/* Geometric Pattern 2 */}
+                <div className="flex justify-center items-center h-16 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg">
+                  <div className="grid grid-cols-4 gap-2">
+                    <div className="w-3 h-3 bg-green-200 rounded-full"></div>
+                    <div className="w-3 h-3 bg-blue-200 rounded-sm"></div>
+                    <div className="w-3 h-3 bg-teal-200 rounded-full"></div>
+                    <div className="w-3 h-3 bg-green-200 rounded-sm"></div>
+                    <div className="w-3 h-3 bg-blue-200 rounded-sm"></div>
+                    <div className="w-3 h-3 bg-teal-200 rounded-full"></div>
+                    <div className="w-3 h-3 bg-green-200 rounded-full"></div>
+                    <div className="w-3 h-3 bg-blue-200 rounded-sm"></div>
+                  </div>
+                </div>
+
+                {/* Puzzle Piece Pattern */}
+                <div className="flex justify-center items-center h-20 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg">
+                  <div className="flex space-x-3">
+                    <div className="relative">
+                      <div className="w-8 h-8 bg-amber-200 rounded-lg"></div>
+                      <div className="absolute -top-1 left-3 w-2 h-2 bg-amber-200 rounded-full"></div>
+                      <div className="absolute top-3 -right-1 w-2 h-2 bg-amber-200 rounded-full"></div>
+                    </div>
+                    <div className="relative">
+                      <div className="w-8 h-8 bg-orange-200 rounded-lg"></div>
+                      <div className="absolute top-3 -left-1 w-2 h-2 bg-white rounded-full border border-orange-200"></div>
+                      <div className="absolute -bottom-1 left-3 w-2 h-2 bg-orange-200 rounded-full"></div>
+                    </div>
+                    <div className="relative">
+                      <div className="w-8 h-8 bg-yellow-200 rounded-lg"></div>
+                      <div className="absolute -top-1 left-3 w-2 h-2 bg-white rounded-full border border-yellow-200"></div>
+                      <div className="absolute top-3 -right-1 w-2 h-2 bg-yellow-200 rounded-full"></div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Wave Pattern */}
+                <div className="flex justify-center items-center h-16 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg">
+                  <div className="flex items-end space-x-1">
+                    <div className="w-2 h-8 bg-purple-200 rounded-t-full"></div>
+                    <div className="w-2 h-12 bg-pink-200 rounded-t-full"></div>
+                    <div className="w-2 h-6 bg-purple-200 rounded-t-full"></div>
+                    <div className="w-2 h-10 bg-pink-200 rounded-t-full"></div>
+                    <div className="w-2 h-4 bg-purple-200 rounded-t-full"></div>
+                    <div className="w-2 h-8 bg-pink-200 rounded-t-full"></div>
+                    <div className="w-2 h-12 bg-purple-200 rounded-t-full"></div>
+                    <div className="w-2 h-6 bg-pink-200 rounded-t-full"></div>
+                  </div>
+                </div>
+
+                {/* Hexagon Pattern */}
+                <div className="flex justify-center items-center h-16 bg-gradient-to-r from-cyan-50 to-blue-50 rounded-lg">
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="w-6 h-6 bg-cyan-200 rounded rotate-45"></div>
+                    <div className="w-6 h-6 bg-blue-200 rounded-full"></div>
+                    <div className="w-6 h-6 bg-teal-200 rounded rotate-45"></div>
+                    <div className="w-6 h-6 bg-blue-200 rounded-full"></div>
+                    <div className="w-6 h-6 bg-cyan-200 rounded rotate-45"></div>
+                    <div className="w-6 h-6 bg-teal-200 rounded-full"></div>
+                  </div>
+                </div>
+
+                {/* Final Decorative Row */}
+                <div className="flex justify-center items-center h-16 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg">
+                  <div className="flex space-x-4">
+                    <div className="w-8 h-8 border-2 border-indigo-200 rounded-full"></div>
+                    <div className="w-8 h-8 bg-purple-200 rounded-sm rotate-12"></div>
+                    <div className="w-8 h-8 border-2 border-purple-200 rounded-full"></div>
+                    <div className="w-8 h-8 bg-indigo-200 rounded-sm rotate-12"></div>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </main>
   )
 }

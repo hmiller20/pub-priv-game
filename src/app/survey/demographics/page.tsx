@@ -24,6 +24,13 @@ export default function SurveyPage() {
       return;
     }
 
+    // Validate that age is 18 or older
+    const ageValue = parseInt(age);
+    if (isNaN(ageValue) || ageValue < 18) {
+      alert('You must be 18 years or older to participate in this study');
+      return;
+    }
+
     try {
       // Get the stored userId
       const userId = localStorage.getItem('ratGameUserId');

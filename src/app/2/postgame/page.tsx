@@ -137,12 +137,12 @@ function PostGameContent() {
           >
             Post Score and Continue
           </StartGameButton>
-          <StartGameButton
+          {/* <StartGameButton
             onClick={() => router.replace("/2/leaderboard?from=postgame")}
             className="w-full flex items-center gap-2"
           >
             View Leaderboard
-          </StartGameButton>
+          </StartGameButton> */}
         </CardFooter>
       </Card>
     </main>

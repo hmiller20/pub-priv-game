@@ -20,7 +20,7 @@ export default function CodePage() {
           <h1 className="text-2xl font-bold text-center mb-6">Study Complete</h1>
           <div className="space-y-4">
             <p className="text-gray-700">
-              Thank you for participating in our study! Your responses have been recorded.
+              Thank you for participating in our study! Your responses have been recorded. You may now close this window.
             </p>
             <StartGameButton
               className="w-full flex items-center justify-center gap-2"
@@ -28,13 +28,6 @@ export default function CodePage() {
             >
               Debriefing Form
             </StartGameButton>
-            <div className="bg-blue-50 p-4 rounded-lg">
-              <p className="font-medium text-blue-900">Your completion code is:</p>
-              <p className="text-2xl font-bold text-blue-900 text-center mt-2">MASTERY</p>
-            </div>
-            <p className="text-sm text-gray-600">
-              Please copy this code and submit it to receive your compensation.
-            </p>
           </div>
         </CardContent>
       </Card>
