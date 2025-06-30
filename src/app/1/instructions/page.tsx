@@ -80,7 +80,7 @@ export default function Instructions() {
     {
       content: (
         <div className="text-left">
-          Correct answers <span className="font-bold text-green-600">earn</span> 20 points, while skipping <span className="font-bold text-red-600">deducts</span> 5 points.
+          Correct answers <span className="font-bold text-green-600">earn</span> 10 points. Incorrect answers <span className="font-bold text-red-600">lose</span> 5 points. You can skip a question at no cost.
         </div>
       ),
       type: "text"

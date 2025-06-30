@@ -280,7 +280,7 @@ export default function AvatarPage() {
                       id="respect-agreement"
                       checked={agreementChecked}
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) => setAgreementChecked(e.target.checked)}
-                      className="mt-4"
+                      className="mt-4 text-left"
                       label={<i>I understand that showing respect for other participants is essential. By advancing, I agree to treat all participants with kindness and consideration during chat sessions.</i>}
                     />
                   </div>

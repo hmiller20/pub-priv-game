@@ -14,127 +14,157 @@ import { StartGameButton, SendButton } from "@/components/ui/send-start-buttons"
 const RAT_QUESTIONS = [
   {
     words: ["HOUND", "PRESSURE", "SHOT"],
-    answer: "BLOOD"
+    answer: "BLOOD",
+    distractors: ["WATER", "SOUND", "HEART"]
   },
   {
     words: ["FALLING", "ACTOR", "DUST"],
-    answer: "STAR"
+    answer: "STAR",
+    distractors: ["MOVIE", "LIGHT", "SKY"]
   },
   {
     words: ["BROKEN", "CLEAR", "EYE"],
-    answer: "GLASS"
+    answer: "GLASS",
+    distractors: ["WATER", "WINDOW", "MIRROR"]
   },
   {
     words: ["BLUE", "CAKE", "COTTAGE"],
-    answer: "CHEESE"
+    answer: "CHEESE",
+    distractors: ["HOUSE", "CREAM", "WHITE"]
   },
   {
     words: ["PALM", "SHOE", "HOUSE"],
-    answer: "TREE"
+    answer: "TREE",
+    distractors: ["HAND", "FOOT", "HOME"]
   },
   {
     words: ["BASKET", "EIGHT", "SNOW"],
-    answer: "BALL"
+    answer: "BALL",
+    distractors: ["GAME", "WHITE", "ROUND"]
   },
   {
     words: ["CROSS", "RAIN", "TIE"],
-    answer: "BOW"
+    answer: "BOW",
+    distractors: ["KNOT", "STORM", "BIND"]
   },
   {
     words: ["SANDWICH", "HOUSE", "GOLF"],
-    answer: "CLUB"
+    answer: "CLUB",
+    distractors: ["FOOD", "HOME", "GAME"]
   },
   {
     words: ["LOSER", "THROAT", "SPOT"],
-    answer: "SORE"
+    answer: "SORE",
+    distractors: ["PAIN", "NECK", "MARK"]
   },
   {
     words: ["SHOW", "LIFE", "ROW"],
-    answer: "BOAT"
+    answer: "BOAT",
+    distractors: ["WATER", "SAIL", "OARS"]
   },
   {
     words: ["NIGHT", "WRIST", "STOP"],
-    answer: "WATCH"
+    answer: "WATCH",
+    distractors: ["TIME", "GUARD", "LOOK"]
   },
   {
     words: ["DUCK", "FOLD", "DOLLAR"],
-    answer: "BILL"
+    answer: "BILL",
+    distractors: ["MONEY", "BIRD", "PAPER"]
   },
   {
     words: ["ROCKING", "WHEEL", "HIGH"],
-    answer: "CHAIR"
+    answer: "CHAIR",
+    distractors: ["SEAT", "ROUND", "TALL"]
   },
   {
     words: ["DEW", "COMB", "BEE"],
-    answer: "HONEY"
+    answer: "HONEY",
+    distractors: ["SWEET", "HIVE", "BUZZ"]
   },
   {
     words: ["FOUNTAIN", "BAKING", "POP"],
-    answer: "SODA"
+    answer: "SODA",
+    distractors: ["WATER", "CAKE", "DRINK"]
   },
   {
     words: ["AID", "RUBBER", "WAGON"],
-    answer: "BAND"
+    answer: "BAND",
+    distractors: ["HELP", "WHEEL", "MUSIC"]
   },
   {
     words: ["FLAKE", "MOBILE", "CONE"],
-    answer: "SNOW"
+    answer: "SNOW",
+    distractors: ["WHITE", "PHONE", "ICE"]
   },
   {
     words: ["CRACKER", "FLY", "FIGHTER"],
-    answer: "FIRE"
+    answer: "FIRE",
+    distractors: ["FOOD", "INSECT", "PLANE"]
   },
   {
     words: ["SAFETY", "CUSHION", "POINT"],
-    answer: "PIN"
+    answer: "PIN",
+    distractors: ["SOFT", "SHARP", "SAFE"]
   },
   {
     words: ["CANE", "DADDY", "PLUM"],
-    answer: "SUGAR"
+    answer: "SUGAR",
+    distractors: ["SWEET", "FATHER", "FRUIT"]
   },
   {
     words: ["DREAM", "BREAK", "LIGHT"],
-    answer: "DAY"
+    answer: "DAY",
+    distractors: ["NIGHT", "TIME", "SUN"]
   },
   {
     words: ["FISH", "MINE", "RUSH"],
-    answer: "GOLD"
+    answer: "GOLD",
+    distractors: ["WATER", "DIG", "FAST"]
   },
   {
     words: ["POLITICAL", "SURPRISE", "LINE"],
-    answer: "PARTY"
+    answer: "PARTY",
+    distractors: ["VOTE", "SHOCK", "WAIT"]
   },
   {
     words: ["TRAP", "POLAR", "CLAW"],
-    answer: "BEAR"
+    answer: "BEAR",
+    distractors: ["CATCH", "COLD", "SHARP"]
   },
   {
     words: ["CINDER", "BUILDING", "BLOCK"],
-    answer: "BUSTER"
+    answer: "BUSTER",
+    distractors: ["FIRE", "HOUSE", "SQUARE"]
   },
   {
     words: ["THORN", "WHACK", "ROSE"],
-    answer: "BUSH"
+    answer: "BUSH",
+    distractors: ["SHARP", "HIT", "FLOWER"]
   },
   {
     words: ["GARBAGE", "BEER", "PAINT"],
-    answer: "CAN"
+    answer: "CAN",
+    distractors: ["TRASH", "DRINK", "COLOR"]
   },
   {
     words: ["SCAN", "NAP", "BURGLAR"],
-    answer: "CAT"
+    answer: "CAT",
+    distractors: ["READ", "SLEEP", "THIEF"]
   },
   {
     words: ["TRAP", "BACK", "SCREEN"],
-    answer: "DOOR"
+    answer: "DOOR",
+    distractors: ["CATCH", "FRONT", "WINDOW"]
   },
   {
     words: ["POLISH", "FINGER", "NAIL"],
-    answer: "DOWN"
+    answer: "DOWN",
+    distractors: ["SHINE", "HAND", "HARD"]
   }
 ]
 
-const GAME_DURATION = 120 // 2 minutes
+const GAME_DURATION = 600 // 10 minutes
 
 const LEADERBOARD_DATA = [
   { userName: "Caleb L", score: 540, date: "2025-04-13", trend: "up" },
@@ -159,22 +189,39 @@ function shuffleArray<T>(array: T[]): T[] {
   return shuffled;
 }
 
+// Generate shuffled multiple choice options
+function generateChoices(question: typeof RAT_QUESTIONS[0]) {
+  const choices = [question.answer, ...question.distractors];
+  return shuffleArray(choices);
+}
+
 function GameContent() {
   const router = useRouter()
   const [score, setScore] = useState(0)
   const [skips, setSkips] = useState(0)
-  const inputRef = useRef<HTMLInputElement>(null)
   
   const [questions] = useState(() => shuffleArray(RAT_QUESTIONS))
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
-  const [userInput, setUserInput] = useState("")
+  const [selectedChoice, setSelectedChoice] = useState("")
   const [timeLeft, setTimeLeft] = useState(GAME_DURATION)
   const [feedback, setFeedback] = useState<null | "correct" | "incorrect">(null)
+  const [isFirstAttempt, setIsFirstAttempt] = useState(true)
+  const [choices, setChoices] = useState<string[]>([])
 
   // Leaderboard state
   const [currentTime, setCurrentTime] = useState<Date>(new Date())
   const [lastUpdate, setLastUpdate] = useState<string | null>(null)
   const hasIncrementedLeaderboard = useRef(false)
+
+  // Generate choices when question changes
+  useEffect(() => {
+    if (questions[currentQuestionIndex]) {
+      const newChoices = generateChoices(questions[currentQuestionIndex]);
+      setChoices(newChoices);
+      setSelectedChoice("");
+      setIsFirstAttempt(true);
+    }
+  }, [currentQuestionIndex, questions]);
 
   // Track leaderboard views (only once per game session)
   useEffect(() => {
@@ -217,16 +264,8 @@ function GameContent() {
     return () => clearInterval(interval)
   }, [])
 
-  // Auto-focus input on mount and when question changes
-  useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.focus()
-    }
-  }, [currentQuestionIndex])
-
   const handleSkip = () => {
-    const newScore = score - 5;
-    setScore(newScore);
+    // Skipping is now worth 0 points (no score change)
     const newSkips = skips + 1;
     setSkips(newSkips);
     
@@ -236,11 +275,10 @@ function GameContent() {
     
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
-      setUserInput("");
       setFeedback(null);
     } else {
       if (typeof window !== 'undefined') {
-        localStorage.setItem('currentScore', newScore.toString());
+        localStorage.setItem('currentScore', score.toString());
         sessionStorage.setItem('shouldCreateNewPlay', 'true');
       }
       router.replace('/2/postgame');
@@ -266,27 +304,43 @@ function GameContent() {
   }, [router, score]);
 
   const handleSubmit = async () => {
-    const currentQuestion = questions[currentQuestionIndex];
-    const isCorrect = userInput.toLowerCase() === currentQuestion.answer.toLowerCase();
+    if (!selectedChoice) return;
     
+    const currentQuestion = questions[currentQuestionIndex];
+    const isCorrect = selectedChoice === currentQuestion.answer;
+    
+    let newScore;
     if (isCorrect) {
-      setScore(prev => prev + 20);
+      const pointsToAdd = isFirstAttempt ? 15 : 5; // 15 points for first try, 5 for subsequent
+      newScore = score + pointsToAdd;
+      setScore(newScore);
       setFeedback("correct");
-      
-      setTimeout(() => {
-        if (currentQuestionIndex < questions.length - 1) {
-          setCurrentQuestionIndex(prev => prev + 1);
-          setUserInput("");
-          setFeedback(null);
-        } else {
-          localStorage.setItem('currentScore', (score + 20).toString());
-          sessionStorage.setItem('shouldCreateNewPlay', 'true');
-          router.replace('/2/postgame');
-        }
-      }, 1000);
     } else {
+      // Incorrect answers now lose 5 points
+      newScore = score - 5;
+      setScore(newScore);
       setFeedback("incorrect");
     }
+    
+    // Always move to next question after showing feedback, regardless of correctness
+    setTimeout(() => {
+      if (currentQuestionIndex < questions.length - 1) {
+        setCurrentQuestionIndex(prev => prev + 1);
+        setFeedback(null);
+      } else {
+        localStorage.setItem('currentScore', newScore.toString());
+        sessionStorage.setItem('shouldCreateNewPlay', 'true');
+        router.replace('/2/postgame');
+      }
+    }, 1000);
+  };
+
+  const handleEndGame = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('currentScore', score.toString());
+      sessionStorage.setItem('shouldCreateNewPlay', 'true');
+    }
+    router.replace('/2/postgame');
   };
 
   const formatTime = (seconds: number) => {
@@ -365,6 +419,21 @@ function GameContent() {
                 <Badge variant="outline" className="text-lg font-bold">
                   {formatTime(timeLeft)}
                 </Badge>
+                {feedback && (
+                  <div className="flex items-center space-x-2">
+                    {feedback === "correct" ? (
+                      <>
+                        <CheckCircle2 className="text-green-500 h-6 w-6" />
+                        <span className="text-green-500 font-bold text-xl">+{isFirstAttempt ? 15 : 5} pts</span>
+                      </>
+                    ) : (
+                      <>
+                        <XCircle className="text-red-500 h-6 w-6" />
+                        <span className="text-red-500 font-bold text-xl">-5 pts</span>
+                      </>
+                    )}
+                  </div>
+                )}
                 <div className="flex items-center gap-2">
                   <span className="text-xl font-bold">Score:</span>
                   <span className="text-2xl font-bold text-black">{score}</span>
@@ -379,46 +448,52 @@ function GameContent() {
                   </div>
                 ))}
               </div>
-              <div className="flex gap-2">
-                <Input
-                  ref={inputRef}
-                  value={userInput}
-                  onChange={(e) => setUserInput(e.target.value)}
-                  placeholder="Enter answer..."
-                  onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-                  className={
-                    feedback === "correct" ? "border-green-500" : 
-                    feedback === "incorrect" ? "border-red-500" : ""
-                  }
-                />
-                <SendButton onClick={handleSubmit}>
-                  Submit
-                </SendButton>
+              
+              {/* Multiple Choice Options - 2x2 Grid */}
+              <div className="space-y-3">
+                <p className="text-sm text-gray-600 text-center">Select the word that connects all three:</p>
+                <div className="grid grid-cols-2 gap-3">
+                  {choices.map((choice, index) => (
+                    <button
+                      key={choice}
+                      onClick={() => setSelectedChoice(choice)}
+                      className={`p-4 rounded-lg border-2 transition-all duration-200 hover:shadow-md ${
+                        selectedChoice === choice
+                          ? "border-blue-500 bg-blue-50 text-blue-700 shadow-md"
+                          : "border-gray-200 bg-white hover:border-gray-300"
+                      }`}
+                    >
+                      <span className="font-medium text-lg">{choice}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
-              <div className="flex justify-end">
+
+              <div className="flex gap-3 justify-between">
                 <StartGameButton
                   onClick={handleSkip}
-                  className="bg-white text-gray-600 hover:text-gray-900 border border-blue-100 min-w-[140px] px-6 py-2"
-                  style={{ minWidth: 0 }}
+                  className="bg-white text-gray-600 hover:text-gray-900 border border-gray-300 px-6 py-2 flex-1"
                 >
-                  Skip (-5 pts)
+                  Skip
+                </StartGameButton>
+                <SendButton 
+                  onClick={handleSubmit}
+                  disabled={!selectedChoice}
+                  className="flex-1"
+                >
+                  Submit Answer
+                </SendButton>
+              </div>
+              
+              {/* End Game and Advance Button */}
+              <div className="flex justify-center mt-3">
+                <StartGameButton
+                  onClick={handleEndGame}
+                  className="bg-black text-white hover:bg-gray-800 border border-black px-6 py-2"
+                >
+                  End Game and Advance
                 </StartGameButton>
               </div>
-              {feedback && (
-                <div className="absolute bottom-5 left-5 flex items-center space-x-2 bg-white/80 backdrop-blur-sm rounded-lg px-3 py-2 shadow-sm">
-                  {feedback === "correct" ? (
-                    <>
-                      <CheckCircle2 className="text-green-500" />
-                      <span className="text-green-500">Correct!</span>
-                    </>
-                  ) : (
-                    <>
-                      <XCircle className="text-red-500" />
-                      <span className="text-red-500">Try again!</span>
-                    </>
-                  )}
-                </div>
-              )}
             </CardContent>
           </Card>
         </div>

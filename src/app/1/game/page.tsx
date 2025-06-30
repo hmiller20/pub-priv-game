@@ -15,127 +15,157 @@ import { StartGameButton, SendButton } from "@/components/ui/send-start-buttons"
 const RAT_QUESTIONS = [
   {
     words: ["HOUND", "PRESSURE", "SHOT"],
-    answer: "BLOOD"
+    answer: "BLOOD",
+    distractors: ["WATER", "SOUND", "HEART"]
   },
   {
     words: ["FALLING", "ACTOR", "DUST"],
-    answer: "STAR"
+    answer: "STAR",
+    distractors: ["MOVIE", "LIGHT", "SKY"]
   },
   {
     words: ["BROKEN", "CLEAR", "EYE"],
-    answer: "GLASS"
+    answer: "GLASS",
+    distractors: ["WATER", "WINDOW", "MIRROR"]
   },
   {
     words: ["BLUE", "CAKE", "COTTAGE"],
-    answer: "CHEESE"
+    answer: "CHEESE",
+    distractors: ["HOUSE", "CREAM", "WHITE"]
   },
   {
     words: ["PALM", "SHOE", "HOUSE"],
-    answer: "TREE"
+    answer: "TREE",
+    distractors: ["HAND", "FOOT", "HOME"]
   },
   {
     words: ["BASKET", "EIGHT", "SNOW"],
-    answer: "BALL"
+    answer: "BALL",
+    distractors: ["GAME", "WHITE", "ROUND"]
   },
   {
     words: ["CROSS", "RAIN", "TIE"],
-    answer: "BOW"
+    answer: "BOW",
+    distractors: ["KNOT", "STORM", "BIND"]
   },
   {
     words: ["SANDWICH", "HOUSE", "GOLF"],
-    answer: "CLUB"
+    answer: "CLUB",
+    distractors: ["FOOD", "HOME", "GAME"]
   },
   {
     words: ["LOSER", "THROAT", "SPOT"],
-    answer: "SORE"
+    answer: "SORE",
+    distractors: ["PAIN", "NECK", "MARK"]
   },
   {
     words: ["SHOW", "LIFE", "ROW"],
-    answer: "BOAT"
+    answer: "BOAT",
+    distractors: ["WATER", "SAIL", "OARS"]
   },
   {
     words: ["NIGHT", "WRIST", "STOP"],
-    answer: "WATCH"
+    answer: "WATCH",
+    distractors: ["TIME", "GUARD", "LOOK"]
   },
   {
     words: ["DUCK", "FOLD", "DOLLAR"],
-    answer: "BILL"
+    answer: "BILL",
+    distractors: ["MONEY", "BIRD", "PAPER"]
   },
   {
     words: ["ROCKING", "WHEEL", "HIGH"],
-    answer: "CHAIR"
+    answer: "CHAIR",
+    distractors: ["SEAT", "ROUND", "TALL"]
   },
   {
     words: ["DEW", "COMB", "BEE"],
-    answer: "HONEY"
+    answer: "HONEY",
+    distractors: ["SWEET", "HIVE", "BUZZ"]
   },
   {
     words: ["FOUNTAIN", "BAKING", "POP"],
-    answer: "SODA"
+    answer: "SODA",
+    distractors: ["WATER", "CAKE", "DRINK"]
   },
   {
     words: ["AID", "RUBBER", "WAGON"],
-    answer: "BAND"
+    answer: "BAND",
+    distractors: ["HELP", "WHEEL", "MUSIC"]
   },
   {
     words: ["FLAKE", "MOBILE", "CONE"],
-    answer: "SNOW"
+    answer: "SNOW",
+    distractors: ["WHITE", "PHONE", "ICE"]
   },
   {
     words: ["CRACKER", "FLY", "FIGHTER"],
-    answer: "FIRE"
+    answer: "FIRE",
+    distractors: ["FOOD", "INSECT", "PLANE"]
   },
   {
     words: ["SAFETY", "CUSHION", "POINT"],
-    answer: "PIN"
+    answer: "PIN",
+    distractors: ["SOFT", "SHARP", "SAFE"]
   },
   {
     words: ["CANE", "DADDY", "PLUM"],
-    answer: "SUGAR"
+    answer: "SUGAR",
+    distractors: ["SWEET", "FATHER", "FRUIT"]
   },
   {
     words: ["DREAM", "BREAK", "LIGHT"],
-    answer: "DAY"
+    answer: "DAY",
+    distractors: ["NIGHT", "TIME", "SUN"]
   },
   {
     words: ["FISH", "MINE", "RUSH"],
-    answer: "GOLD"
+    answer: "GOLD",
+    distractors: ["WATER", "DIG", "FAST"]
   },
   {
     words: ["POLITICAL", "SURPRISE", "LINE"],
-    answer: "PARTY"
+    answer: "PARTY",
+    distractors: ["VOTE", "SHOCK", "WAIT"]
   },
   {
     words: ["TRAP", "POLAR", "CLAW"],
-    answer: "BEAR"
+    answer: "BEAR",
+    distractors: ["CATCH", "COLD", "SHARP"]
   },
   {
     words: ["CINDER", "BUILDING", "BLOCK"],
-    answer: "BUSTER"
+    answer: "BUSTER",
+    distractors: ["FIRE", "HOUSE", "SQUARE"]
   },
   {
     words: ["THORN", "WHACK", "ROSE"],
-    answer: "BUSH"
+    answer: "BUSH",
+    distractors: ["SHARP", "HIT", "FLOWER"]
   },
   {
     words: ["GARBAGE", "BEER", "PAINT"],
-    answer: "CAN"
+    answer: "CAN",
+    distractors: ["TRASH", "DRINK", "COLOR"]
   },
   {
     words: ["SCAN", "NAP", "BURGLAR"],
-    answer: "CAT"
+    answer: "CAT",
+    distractors: ["READ", "SLEEP", "THIEF"]
   },
   {
     words: ["TRAP", "BACK", "SCREEN"],
-    answer: "DOOR"
+    answer: "DOOR",
+    distractors: ["CATCH", "FRONT", "WINDOW"]
   },
   {
     words: ["POLISH", "FINGER", "NAIL"],
-    answer: "DOWN"
+    answer: "DOWN",
+    distractors: ["SHINE", "HAND", "HARD"]
   }
 ]
 
-const GAME_DURATION = 120 // 2 minutes
+const GAME_DURATION = 600 // 10 minutes
 
 // Fisher-Yates shuffle algorithm
 function shuffleArray<T>(array: T[]): T[] {
@@ -147,21 +177,37 @@ function shuffleArray<T>(array: T[]): T[] {
   return shuffled;
 }
 
+// Generate shuffled multiple choice options
+function generateChoices(question: typeof RAT_QUESTIONS[0]) {
+  const choices = [question.answer, ...question.distractors];
+  return shuffleArray(choices);
+}
+
 function GameContent() {
   const router = useRouter()
   const [score, setScore] = useState(0)
   const [skips, setSkips] = useState(0)
-  const inputRef = useRef<HTMLInputElement>(null)
   
   const [questions] = useState(() => shuffleArray(RAT_QUESTIONS))
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
-  const [userInput, setUserInput] = useState("")
+  const [selectedChoice, setSelectedChoice] = useState("")
   const [timeLeft, setTimeLeft] = useState(GAME_DURATION)
   const [feedback, setFeedback] = useState<null | "correct" | "incorrect">(null)
+  const [isFirstAttempt, setIsFirstAttempt] = useState(true)
+  const [choices, setChoices] = useState<string[]>([])
+
+  // Generate choices when question changes
+  useEffect(() => {
+    if (questions[currentQuestionIndex]) {
+      const newChoices = generateChoices(questions[currentQuestionIndex]);
+      setChoices(newChoices);
+      setSelectedChoice("");
+      setIsFirstAttempt(true);
+    }
+  }, [currentQuestionIndex, questions]);
 
   const handleSkip = () => {
-    const newScore = score - 5;
-    setScore(newScore);
+    // Skipping is now worth 0 points (no score change)
     const newSkips = skips + 1;
     setSkips(newSkips);
     
@@ -171,23 +217,15 @@ function GameContent() {
     
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(prev => prev + 1);
-      setUserInput("");
       setFeedback(null);
     } else {
       if (typeof window !== 'undefined') {
-        localStorage.setItem('currentScore', newScore.toString());
+        localStorage.setItem('currentScore', score.toString());
         sessionStorage.setItem('shouldCreateNewPlay', 'true');
       }
       router.replace('/1/postgame');
     }
   };
-
-  // Auto-focus input on mount and when question changes
-  useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.focus()
-    }
-  }, [currentQuestionIndex])
 
   // Basic timer
   useEffect(() => {
@@ -210,30 +248,45 @@ function GameContent() {
   }, [router, score]);
 
   const handleSubmit = async () => {
-    const currentQuestion = questions[currentQuestionIndex];
-    const isCorrect = userInput.toLowerCase() === currentQuestion.answer.toLowerCase();
+    if (!selectedChoice) return;
     
+    const currentQuestion = questions[currentQuestionIndex];
+    const isCorrect = selectedChoice === currentQuestion.answer;
+    
+    let newScore;
     if (isCorrect) {
-      const newScore = score + 20;
+      const pointsToAdd = isFirstAttempt ? 15 : 5; // 15 points for first try, 5 for subsequent
+      newScore = score + pointsToAdd;
       setScore(newScore);
       setFeedback("correct");
-      
-      setTimeout(() => {
-        if (currentQuestionIndex < questions.length - 1) {
-          setCurrentQuestionIndex(prev => prev + 1);
-          setUserInput("");
-          setFeedback(null);
-        } else {
-          if (typeof window !== 'undefined') {
-            localStorage.setItem('currentScore', newScore.toString());
-            sessionStorage.setItem('shouldCreateNewPlay', 'true');
-          }
-          router.replace('/1/postgame');
-        }
-      }, 1000);
     } else {
+      // Incorrect answers now lose 5 points
+      newScore = score - 5;
+      setScore(newScore);
       setFeedback("incorrect");
     }
+    
+    // Always move to next question after showing feedback, regardless of correctness
+    setTimeout(() => {
+      if (currentQuestionIndex < questions.length - 1) {
+        setCurrentQuestionIndex(prev => prev + 1);
+        setFeedback(null);
+      } else {
+        if (typeof window !== 'undefined') {
+          localStorage.setItem('currentScore', newScore.toString());
+          sessionStorage.setItem('shouldCreateNewPlay', 'true');
+        }
+        router.replace('/1/postgame');
+      }
+    }, 1000);
+  };
+
+  const handleEndGame = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('currentScore', score.toString());
+      sessionStorage.setItem('shouldCreateNewPlay', 'true');
+    }
+    router.replace('/1/postgame');
   };
 
   const formatTime = (seconds: number) => {
@@ -271,6 +324,21 @@ function GameContent() {
                 <Badge variant="outline" className="text-lg font-bold">
                   {formatTime(timeLeft)}
                 </Badge>
+                {feedback && (
+                  <div className="flex items-center space-x-2">
+                    {feedback === "correct" ? (
+                      <>
+                        <CheckCircle2 className="text-green-500 h-6 w-6" />
+                        <span className="text-green-500 font-bold text-xl">+{isFirstAttempt ? 15 : 5} pts</span>
+                      </>
+                    ) : (
+                      <>
+                        <XCircle className="text-red-500 h-6 w-6" />
+                        <span className="text-red-500 font-bold text-xl">-5 pts</span>
+                      </>
+                    )}
+                  </div>
+                )}
                 <div className="flex items-center gap-2">
                   <span className="text-xl font-bold">Score:</span>
                   <span className="text-2xl font-bold text-black">{score}</span>
@@ -285,46 +353,52 @@ function GameContent() {
                   </div>
                 ))}
               </div>
-              <div className="flex gap-2">
-                <Input
-                  ref={inputRef}
-                  value={userInput}
-                  onChange={(e) => setUserInput(e.target.value)}
-                  placeholder="Enter answer..."
-                  onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
-                  className={
-                    feedback === "correct" ? "border-green-500" : 
-                    feedback === "incorrect" ? "border-red-500" : ""
-                  }
-                />
-                <SendButton onClick={handleSubmit}>
-                  Submit
-                </SendButton>
+              
+              {/* Multiple Choice Options - 2x2 Grid */}
+              <div className="space-y-3">
+                <p className="text-sm text-gray-600 text-center">Select the word that connects all three:</p>
+                <div className="grid grid-cols-2 gap-3">
+                  {choices.map((choice, index) => (
+                    <button
+                      key={choice}
+                      onClick={() => setSelectedChoice(choice)}
+                      className={`p-4 rounded-lg border-2 transition-all duration-200 hover:shadow-md ${
+                        selectedChoice === choice
+                          ? "border-blue-500 bg-blue-50 text-blue-700 shadow-md"
+                          : "border-gray-200 bg-white hover:border-gray-300"
+                      }`}
+                    >
+                      <span className="font-medium text-lg">{choice}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
-              <div className="flex justify-end">
+
+              <div className="flex gap-3 justify-between">
                 <StartGameButton
                   onClick={handleSkip}
-                  className="bg-white text-gray-600 hover:text-gray-900 border border-blue-100 min-w-[140px] px-6 py-2"
-                  style={{ minWidth: 0 }}
+                  className="bg-white text-gray-600 hover:text-gray-900 border border-gray-300 px-6 py-2 flex-1"
                 >
-                  Skip (-5 pts)
+                  Skip
+                </StartGameButton>
+                <SendButton 
+                  onClick={handleSubmit}
+                  disabled={!selectedChoice}
+                  className="flex-1"
+                >
+                  Submit Answer
+                </SendButton>
+              </div>
+              
+              {/* End Game and Advance Button */}
+              <div className="flex justify-center mt-3">
+                <StartGameButton
+                  onClick={handleEndGame}
+                  className="bg-black text-white hover:bg-gray-800 border border-black px-6 py-2"
+                >
+                  End Game and Advance
                 </StartGameButton>
               </div>
-              {feedback && (
-                <div className="absolute bottom-2 left-2 flex items-center space-x-2 bg-white/80 backdrop-blur-sm rounded-lg px-3 py-2 shadow-sm">
-                  {feedback === "correct" ? (
-                    <>
-                      <CheckCircle2 className="text-green-500" />
-                      <span className="text-green-500">Correct!</span>
-                    </>
-                  ) : (
-                    <>
-                      <XCircle className="text-red-500" />
-                      <span className="text-red-500">Try again!</span>
-                    </>
-                  )}
-                </div>
-              )}
             </CardContent>
           </Card>
         </div>
@@ -342,89 +416,67 @@ function GameContent() {
           >
           </h2>
           <Card className="w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-blue-100 p-4">
-            <CardContent className="px-4">
-              <div className="space-y-4">
-                {/* Geometric Pattern 1 */}
-                <div className="flex justify-center items-center h-16 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg">
-                  <div className="flex space-x-2">
-                    <div className="w-4 h-4 bg-blue-200 rounded-full"></div>
-                    <div className="w-6 h-6 bg-purple-200 rounded-sm rotate-45"></div>
-                    <div className="w-4 h-4 bg-indigo-200 rounded-full"></div>
-                    <div className="w-6 h-6 bg-blue-200 rounded-sm rotate-45"></div>
-                    <div className="w-4 h-4 bg-purple-200 rounded-full"></div>
-                  </div>
-                </div>
-
-                {/* Geometric Pattern 2 */}
-                <div className="flex justify-center items-center h-16 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg">
-                  <div className="grid grid-cols-4 gap-2">
-                    <div className="w-3 h-3 bg-green-200 rounded-full"></div>
-                    <div className="w-3 h-3 bg-blue-200 rounded-sm"></div>
-                    <div className="w-3 h-3 bg-teal-200 rounded-full"></div>
-                    <div className="w-3 h-3 bg-green-200 rounded-sm"></div>
-                    <div className="w-3 h-3 bg-blue-200 rounded-sm"></div>
-                    <div className="w-3 h-3 bg-teal-200 rounded-full"></div>
-                    <div className="w-3 h-3 bg-green-200 rounded-full"></div>
-                    <div className="w-3 h-3 bg-blue-200 rounded-sm"></div>
-                  </div>
-                </div>
-
-                {/* Puzzle Piece Pattern */}
-                <div className="flex justify-center items-center h-20 bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg">
-                  <div className="flex space-x-3">
-                    <div className="relative">
-                      <div className="w-8 h-8 bg-amber-200 rounded-lg"></div>
-                      <div className="absolute -top-1 left-3 w-2 h-2 bg-amber-200 rounded-full"></div>
-                      <div className="absolute top-3 -right-1 w-2 h-2 bg-amber-200 rounded-full"></div>
-                    </div>
-                    <div className="relative">
-                      <div className="w-8 h-8 bg-orange-200 rounded-lg"></div>
-                      <div className="absolute top-3 -left-1 w-2 h-2 bg-white rounded-full border border-orange-200"></div>
-                      <div className="absolute -bottom-1 left-3 w-2 h-2 bg-orange-200 rounded-full"></div>
-                    </div>
-                    <div className="relative">
-                      <div className="w-8 h-8 bg-yellow-200 rounded-lg"></div>
-                      <div className="absolute -top-1 left-3 w-2 h-2 bg-white rounded-full border border-yellow-200"></div>
-                      <div className="absolute top-3 -right-1 w-2 h-2 bg-yellow-200 rounded-full"></div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Wave Pattern */}
-                <div className="flex justify-center items-center h-16 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg">
-                  <div className="flex items-end space-x-1">
-                    <div className="w-2 h-8 bg-purple-200 rounded-t-full"></div>
-                    <div className="w-2 h-12 bg-pink-200 rounded-t-full"></div>
-                    <div className="w-2 h-6 bg-purple-200 rounded-t-full"></div>
-                    <div className="w-2 h-10 bg-pink-200 rounded-t-full"></div>
-                    <div className="w-2 h-4 bg-purple-200 rounded-t-full"></div>
-                    <div className="w-2 h-8 bg-pink-200 rounded-t-full"></div>
-                    <div className="w-2 h-12 bg-purple-200 rounded-t-full"></div>
-                    <div className="w-2 h-6 bg-pink-200 rounded-t-full"></div>
-                  </div>
-                </div>
-
-                {/* Hexagon Pattern */}
-                <div className="flex justify-center items-center h-16 bg-gradient-to-r from-cyan-50 to-blue-50 rounded-lg">
-                  <div className="grid grid-cols-3 gap-2">
-                    <div className="w-6 h-6 bg-cyan-200 rounded rotate-45"></div>
-                    <div className="w-6 h-6 bg-blue-200 rounded-full"></div>
-                    <div className="w-6 h-6 bg-teal-200 rounded rotate-45"></div>
-                    <div className="w-6 h-6 bg-blue-200 rounded-full"></div>
-                    <div className="w-6 h-6 bg-cyan-200 rounded rotate-45"></div>
-                    <div className="w-6 h-6 bg-teal-200 rounded-full"></div>
-                  </div>
-                </div>
-
-                {/* Final Decorative Row */}
-                <div className="flex justify-center items-center h-16 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg">
-                  <div className="flex space-x-4">
-                    <div className="w-8 h-8 border-2 border-indigo-200 rounded-full"></div>
-                    <div className="w-8 h-8 bg-purple-200 rounded-sm rotate-12"></div>
-                    <div className="w-8 h-8 border-2 border-purple-200 rounded-full"></div>
-                    <div className="w-8 h-8 bg-indigo-200 rounded-sm rotate-12"></div>
-                  </div>
-                </div>
+            <CardContent className="px-4 relative h-96 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+              {/* Scattered geometric shapes */}
+              <div className="absolute top-8 left-8">
+                <div className="w-6 h-6 bg-blue-300 rounded-full opacity-70"></div>
+              </div>
+              <div className="absolute top-16 right-12">
+                <div className="w-8 h-8 bg-purple-300 rounded-sm rotate-45 opacity-60"></div>
+              </div>
+              <div className="absolute top-24 left-1/3">
+                <div className="w-4 h-4 bg-indigo-300 rounded-full opacity-80"></div>
+              </div>
+              <div className="absolute top-32 right-1/4">
+                <div className="w-6 h-6 bg-teal-300 rounded rotate-12 opacity-70"></div>
+              </div>
+              <div className="absolute top-12 left-1/2">
+                <div className="w-5 h-5 border-2 border-green-300 rounded-full opacity-60"></div>
+              </div>
+              
+              {/* Middle section shapes */}
+              <div className="absolute top-1/3 left-12">
+                <div className="w-7 h-7 bg-amber-300 rounded-lg opacity-50"></div>
+              </div>
+              <div className="absolute top-1/3 right-16">
+                <div className="w-5 h-5 bg-orange-300 rounded-full opacity-70"></div>
+              </div>
+              <div className="absolute top-40 left-1/4">
+                <div className="w-6 h-6 bg-yellow-300 rounded rotate-45 opacity-60"></div>
+              </div>
+              <div className="absolute top-44 right-1/3">
+                <div className="w-4 h-4 border-2 border-pink-300 rounded-sm rotate-12 opacity-80"></div>
+              </div>
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2">
+                <div className="w-8 h-8 bg-purple-300 rounded-full opacity-40"></div>
+              </div>
+              
+              {/* Lower section shapes */}
+              <div className="absolute bottom-20 left-10">
+                <div className="w-6 h-6 bg-cyan-300 rounded rotate-45 opacity-70"></div>
+              </div>
+              <div className="absolute bottom-24 right-10">
+                <div className="w-5 h-5 border-2 border-blue-300 rounded-full opacity-60"></div>
+              </div>
+              <div className="absolute bottom-16 left-1/3">
+                <div className="w-7 h-7 bg-indigo-300 rounded-sm rotate-12 opacity-50"></div>
+              </div>
+              <div className="absolute bottom-28 right-1/4">
+                <div className="w-4 h-4 bg-teal-300 rounded-full opacity-80"></div>
+              </div>
+              <div className="absolute bottom-12 left-1/2 transform -translate-x-1/2">
+                <div className="w-6 h-6 bg-green-300 rounded rotate-45 opacity-60"></div>
+              </div>
+              
+              {/* Additional scattered elements */}
+              <div className="absolute top-20 left-2/3">
+                <div className="w-3 h-3 bg-rose-300 rounded-full opacity-70"></div>
+              </div>
+              <div className="absolute bottom-32 left-1/6">
+                <div className="w-5 h-5 border-2 border-amber-300 rounded-sm rotate-45 opacity-60"></div>
+              </div>
+              <div className="absolute top-1/2 right-8">
+                <div className="w-4 h-4 bg-violet-300 rounded-full opacity-80"></div>
               </div>
             </CardContent>
           </Card>
