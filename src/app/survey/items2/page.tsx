@@ -147,10 +147,6 @@ export default function SurveyPage() {
       // Add manipulation check response
       publicObj['manipCheck'] = responses['manip_check'];
 
-      // Add failure flags for analysis
-      publicObj['attentionCheckFailed'] = responses['attn_3'] !== 3;
-      publicObj['manipulationCheckFailed'] = !isManipCheckCorrect || manipCheckResponse === MANIP_CHECK_VALUES.DONT_REMEMBER;
-
       // Save survey responses
       const response = await fetch(`/api/users/${userId}/survey`, {
         method: 'POST',

@@ -23,6 +23,7 @@ function PostGameContent() {
       let score = parseInt(localStorage.getItem('currentScore') || '0');
       let skips = parseInt(localStorage.getItem('currentGameSkips') || '0');
       let questionsAnswered = parseInt(localStorage.getItem('currentGameQuestionsAnswered') || '0');
+      let duration = parseInt(localStorage.getItem('currentGameDuration') || '0');
       if (shouldCreate) {
         if (
           localStorage.getItem(`play${nextPlay}Score`) === null &&
@@ -32,6 +33,7 @@ function PostGameContent() {
           localStorage.setItem(`play${nextPlay}Score`, score.toString());
           localStorage.setItem(`play${nextPlay}Skips`, skips.toString());
           localStorage.setItem(`play${nextPlay}QuestionsAnswered`, questionsAnswered.toString());
+          localStorage.setItem(`play${nextPlay}Duration`, duration.toString());
           localStorage.removeItem('currentScore');
           localStorage.removeItem('currentGameSkips');
           localStorage.removeItem('currentGameQuestionsAnswered');
@@ -66,7 +68,7 @@ function PostGameContent() {
       const skips = parseInt(localStorage.getItem(`play${latestPlay}Skips`) || '0')
       const questionsAnswered = parseInt(localStorage.getItem(`play${latestPlay}QuestionsAnswered`) || '0')
       
-      const duration = parseInt(localStorage.getItem('currentGameDuration') || '0')
+      const duration = parseInt(localStorage.getItem(`play${latestPlay}Duration`) || '0')
       
       const gamePlay = {
         score: score,
