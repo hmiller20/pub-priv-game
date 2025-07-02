@@ -22,6 +22,7 @@ function PostGameContent() {
       const nextPlay = gamePlays + 1;
       let score = parseInt(localStorage.getItem('currentScore') || '0');
       let skips = parseInt(localStorage.getItem('currentGameSkips') || '0');
+      let questionsAnswered = parseInt(localStorage.getItem('currentGameQuestionsAnswered') || '0');
       if (shouldCreate) {
         if (
           localStorage.getItem(`play${nextPlay}Score`) === null &&
@@ -30,8 +31,12 @@ function PostGameContent() {
           localStorage.setItem('gamePlays', nextPlay.toString());
           localStorage.setItem(`play${nextPlay}Score`, score.toString());
           localStorage.setItem(`play${nextPlay}Skips`, skips.toString());
+          localStorage.setItem(`play${nextPlay}QuestionsAnswered`, questionsAnswered.toString());
           localStorage.removeItem('currentScore');
           localStorage.removeItem('currentGameSkips');
+          localStorage.removeItem('currentGameQuestionsAnswered');
+          localStorage.removeItem('currentGameStartTime');
+          localStorage.removeItem('currentGameDuration');
         }
         sessionStorage.removeItem('shouldCreateNewPlay');
         setDisplayScore(score); // set the score for this play
@@ -59,10 +64,15 @@ function PostGameContent() {
       const latestPlay = getLatestPlayNumber()
       const score = parseInt(localStorage.getItem(`play${latestPlay}Score`) || '0')
       const skips = parseInt(localStorage.getItem(`play${latestPlay}Skips`) || '0')
+      const questionsAnswered = parseInt(localStorage.getItem(`play${latestPlay}QuestionsAnswered`) || '0')
+      
+      const duration = parseInt(localStorage.getItem('currentGameDuration') || '0')
       
       const gamePlay = {
         score: score,
         skips: skips,
+        duration: duration,
+        questions_answered: questionsAnswered,
         completedAt: new Date()
       }
 
@@ -82,6 +92,9 @@ function PostGameContent() {
     await incrementGamePlay()
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('fromPostgame', 'true');
+      // Clear timing data for new game session
+      localStorage.removeItem('currentGameStartTime');
+      localStorage.removeItem('currentGameDuration');
     }
     router.replace("/1/game")
   }
@@ -91,7 +104,7 @@ function PostGameContent() {
     await incrementGamePlay()
     setScorePosted(true)
     // After posting score, redirect to survey
-    router.replace('/survey/demographics')
+    router.replace('/survey/prompt')
   }
 
   return (

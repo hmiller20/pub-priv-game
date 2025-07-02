@@ -1,4 +1,4 @@
-// 'loading' on frontend; handles user creation and condition assignment on backend
+// 'loading' on frontend; handles condition assignment (user should already exist from avatar page)
 
 "use client"
 
@@ -19,46 +19,17 @@ export default function ConditionAssignment() {
   const router = useRouter();
 
   useEffect(() => {
-    const initializeUserAndAssignCondition = async () => {
+    const assignConditionAndProceed = async () => {
       setIsLoading(true);
       setError(null);
       
       try {
-        // Check if user already exists
-        let userId = localStorage.getItem('ratGameUserId');
+        // Get existing user ID (should already exist from avatar page)
+        const userId = localStorage.getItem('ratGameUserId');
         
-        if (!userId) {
-          // Create new user if none exists
-          const createUserResponse = await fetch('/api/users', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              gamePlays: 0,
-              leaderboardViews: 0,
-              gamePerformance: {}
-            }),
-          });
-
-          if (!createUserResponse.ok) {
-            throw new Error('Failed to create user');
-          }
-
-          const data = await createUserResponse.json();
-          if (!data.success) {
-            throw new Error('Failed to create user');
-          }
-
-          userId = data.userId;
-          if (userId) {
-            localStorage.setItem('ratGameUserId', userId);
-          }
-        }
-
         // Ensure userId exists before proceeding
         if (!userId) {
-          throw new Error('Failed to get or create user ID');
+          throw new Error('User not found. Please restart from the avatar page.');
         }
 
         // Assign condition
@@ -94,18 +65,18 @@ export default function ConditionAssignment() {
         router.replace(`/${condition}/instructions`);
       } catch (error) {
         console.error('Error in initialization:', error);
-        setError('There was an error initializing your session. Please wait while we try again...');
+        setError('There was an error assigning your condition. Please wait while we try again...');
         
         // Retry after 2 seconds
         setTimeout(() => {
-          initializeUserAndAssignCondition();
+          assignConditionAndProceed();
         }, 2000);
       } finally {
         setIsLoading(false);
       }
     };
 
-    initializeUserAndAssignCondition();
+    assignConditionAndProceed();
   }, [router]);
 
   return (

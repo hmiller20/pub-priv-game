@@ -5,6 +5,8 @@ import { ObjectId } from 'mongodb';
 export interface GamePlay {
   score: number;
   skips: number;
+  duration: number; // Duration in seconds
+  questions_answered: number; // Track how many questions were submitted
   completedAt: Date;
 }
 

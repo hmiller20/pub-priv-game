@@ -187,6 +187,7 @@ function GameContent() {
   const router = useRouter()
   const [score, setScore] = useState(0)
   const [skips, setSkips] = useState(0)
+  const [questionsAnswered, setQuestionsAnswered] = useState(0)
   
   const [questions] = useState(() => shuffleArray(RAT_QUESTIONS))
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
@@ -196,6 +197,28 @@ function GameContent() {
   const [isFirstAttempt, setIsFirstAttempt] = useState(true)
   const [choices, setChoices] = useState<string[]>([])
   const [isProcessingAnswer, setIsProcessingAnswer] = useState(false)
+
+  // Track game start time for duration calculation
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const existingStartTime = localStorage.getItem('currentGameStartTime')
+      if (!existingStartTime) {
+        localStorage.setItem('currentGameStartTime', Date.now().toString())
+      }
+    }
+  }, [])
+
+  // Helper function to calculate and store game duration
+  const calculateAndStoreDuration = () => {
+    if (typeof window === 'undefined') return 0
+    
+    const startTime = localStorage.getItem('currentGameStartTime')
+    if (!startTime) return 0
+    
+    const duration = Math.floor((Date.now() - parseInt(startTime)) / 1000) // Duration in seconds
+    localStorage.setItem('currentGameDuration', duration.toString())
+    return duration
+  }
 
   // Generate choices when question changes
   useEffect(() => {
@@ -222,7 +245,9 @@ function GameContent() {
       setFeedback(null);
     } else {
       if (typeof window !== 'undefined') {
+        calculateAndStoreDuration(); // Track duration when skipping to end
         localStorage.setItem('currentScore', score.toString());
+        localStorage.setItem('currentGameQuestionsAnswered', questionsAnswered.toString());
         sessionStorage.setItem('shouldCreateNewPlay', 'true');
       }
       router.replace('/1/postgame');
@@ -236,7 +261,9 @@ function GameContent() {
       setTimeLeft((prev) => {
         if (prev <= 1) {
           if (typeof window !== 'undefined') {
+            calculateAndStoreDuration(); // Track duration when timer ends
             localStorage.setItem('currentScore', score.toString());
+            localStorage.setItem('currentGameQuestionsAnswered', questionsAnswered.toString());
             sessionStorage.setItem('shouldCreateNewPlay', 'true');
           }
           router.replace('/1/postgame');
@@ -254,12 +281,20 @@ function GameContent() {
     
     setIsProcessingAnswer(true); // Disable pointer events immediately
     
+    // Increment questions answered count
+    const newQuestionsAnswered = questionsAnswered + 1;
+    setQuestionsAnswered(newQuestionsAnswered);
+    
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('currentGameQuestionsAnswered', newQuestionsAnswered.toString());
+    }
+    
     const currentQuestion = questions[currentQuestionIndex];
     const isCorrect = selectedChoice === currentQuestion.answer;
     
     let newScore;
     if (isCorrect) {
-      const pointsToAdd = isFirstAttempt ? 15 : 5; // 15 points for first try, 5 for subsequent
+      const pointsToAdd = isFirstAttempt ? 10 : 5; // 10 points for first try, 5 for subsequent
       newScore = score + pointsToAdd;
       setScore(newScore);
       setFeedback("correct");
@@ -277,7 +312,9 @@ function GameContent() {
         setFeedback(null);
       } else {
         if (typeof window !== 'undefined') {
+          calculateAndStoreDuration(); // Track duration when all questions completed
           localStorage.setItem('currentScore', newScore.toString());
+          localStorage.setItem('currentGameQuestionsAnswered', newQuestionsAnswered.toString());
           sessionStorage.setItem('shouldCreateNewPlay', 'true');
         }
         router.replace('/1/postgame');
@@ -287,7 +324,9 @@ function GameContent() {
 
   const handleEndGame = () => {
     if (typeof window !== 'undefined') {
+      calculateAndStoreDuration(); // Track duration when manually ending game
       localStorage.setItem('currentScore', score.toString());
+      localStorage.setItem('currentGameQuestionsAnswered', questionsAnswered.toString());
       sessionStorage.setItem('shouldCreateNewPlay', 'true');
     }
     router.replace('/1/postgame');
@@ -333,7 +372,7 @@ function GameContent() {
                     {feedback === "correct" ? (
                       <>
                         <CheckCircle2 className="text-green-500 h-6 w-6" />
-                        <span className="text-green-500 font-bold text-xl">+{isFirstAttempt ? 15 : 5} pts</span>
+                        <span className="text-green-500 font-bold text-xl">+{isFirstAttempt ? 10 : 5} pts</span>
                       </>
                     ) : (
                       <>
