@@ -10,6 +10,9 @@ import { useLocalStorage } from "@/lib/hooks/useLocalStorage"
 import FloatingBubbles from "../floating-bubbles"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
 import { SendButton, StartGameButton } from "@/components/ui/send-start-buttons"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { Progress } from "@/components/ui/progress"
+import confetti from "canvas-confetti"
 
 // Add loading spinner component
 const LoadingSpinner = () => (
@@ -47,9 +50,37 @@ export default function WaitingRoom() {
   const [stepCountdown, setStepCountdown] = useState(3)
   const totalSteps = 2
   const [showMessageWarning, setShowMessageWarning] = useState(false)
-  const [countdown, setCountdown] = useState<number | null>(null)
-  const countdownRef = useRef<NodeJS.Timeout | null>(null)
   const initialGreetingsSent = useRef(false)
+
+  const GROUP_NAMES = ["The Puzzlers", "Fightin' Zebras", "Rattlesnakes"] as const
+  const [selectedGroup, setSelectedGroup] = useState<string>("")
+  const [voteSubmitted, setVoteSubmitted] = useState(false)
+  const [totalVotes, setTotalVotes] = useState(0)
+  const [hasUserSentMessage, setHasUserSentMessage] = useState(false)
+  const [showVotingComplete, setShowVotingComplete] = useState(false)
+  const [votingCountdown, setVotingCountdown] = useState<number | null>(null)
+
+  // Move this function outside the useEffect:
+  const handleVote = () => {
+    if (!selectedGroup) return
+    setVoteSubmitted(true)
+    setTotalVotes(1) // User's vote counts as the first vote
+    
+    // Trigger confetti burst
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: ['#4f46e5', '#9333ea', '#06b6d4', '#10b981', '#f59e0b']
+    })
+    
+    try {
+      localStorage.setItem("groupNameVote", selectedGroup)
+      localStorage.setItem("selectedTeamName", selectedGroup)
+    } catch (e) {
+      console.warn("Unable to save vote:", e)
+    }
+  }
 
   useEffect(() => {
     const stored = localStorage.getItem("chatMessages");
@@ -104,19 +135,19 @@ export default function WaitingRoom() {
       {
         id: 1,
         name: "Alex K.",
-        avatarUrl: "https://api.dicebear.com/7.x/personas/svg?seed=AlexK&body=rounded&clothingColor=456dff&eyes=sunglasses&hair=shortCombover&hairColor=6c4545&mouth=smile&nose=mediumRound&skinColor=d78774&facialHairProbability=0",
+        avatarUrl: "https://api.dicebear.com/7.x/personas/svg?seed=AlexK&body=rounded&clothingColor=722F37&eyes=sunglasses&hair=shortCombover&hairColor=6c4545&mouth=smile&nose=mediumRound&skinColor=d78774&facialHairProbability=0",
         joinedAt: firstBotJoinTime
       },
       {
         id: 2,
         name: "Jordan M.",
-        avatarUrl: "https://api.dicebear.com/7.x/personas/svg?seed=JordanM&body=rounded&clothingColor=456dff&eyes=open&hair=buzzcut&hairColor=362c47&mouth=smile&nose=mediumRound&skinColor=92594b&facialHairProbability=0",
+        avatarUrl: "https://api.dicebear.com/7.x/personas/svg?seed=JordanM&body=rounded&clothingColor=722F37&eyes=open&hair=buzzcut&hairColor=362c47&mouth=smile&nose=mediumRound&skinColor=92594b&facialHairProbability=0",
         joinedAt: new Date()
       },
       {
         id: 3,
         name: "Taylor R.",
-        avatarUrl: "https://api.dicebear.com/7.x/personas/svg?seed=TaylorR&body=rounded&clothingColor=456dff&eyes=happy&hair=long&hairColor=362c47&mouth=bigSmile&nose=mediumRound&skinColor=eeb4a4&facialHairProbability=0",
+        avatarUrl: "https://api.dicebear.com/7.x/personas/svg?seed=TaylorR&body=rounded&clothingColor=722F37&eyes=happy&hair=long&hairColor=362c47&mouth=bigSmile&nose=mediumRound&skinColor=eeb4a4&facialHairProbability=0",
         joinedAt: new Date()
       }
     ]
@@ -226,39 +257,7 @@ export default function WaitingRoom() {
     setChatMessages(prev => [...prev, newMessage])
   }
 
-  // Add effect to handle countdown
-  useEffect(() => {
-    console.log('Countdown state:', countdown);
-    
-    if (countdown === null) return;
 
-    if (countdown <= 0) {
-      console.log('Countdown finished, moving to next stage');
-      if (countdownRef.current) {
-        clearInterval(countdownRef.current);
-        countdownRef.current = null;
-      }
-      router.replace('/loading');
-      return;
-    }
-
-    console.log('Starting countdown');
-    countdownRef.current = setInterval(() => {
-      setCountdown(prev => {
-        const newCount = prev !== null ? prev - 1 : null;
-        console.log('Countdown:', newCount);
-        return newCount;
-      });
-    }, 1000);
-
-    return () => {
-      console.log('Cleaning up countdown');
-      if (countdownRef.current) {
-        clearInterval(countdownRef.current);
-        countdownRef.current = null;
-      }
-    };
-  }, [countdown, router]);
 
   // Add effect for initial greetings
   useEffect(() => {
@@ -317,15 +316,49 @@ export default function WaitingRoom() {
     };
   }, [players, chatMessages, botReplyCounts]);
 
-  // Modify handleSendMessage to start countdown after bot responses
-  const handleSendMessage = async () => {
-    if (!currentMessage.trim()) return;
+  // Effect to automatically progress votes when conditions are met
+  useEffect(() => {
+    if (!hasUserSentMessage || !voteSubmitted || totalVotes >= 4) return;
 
-    // If countdown has already started, don't process new messages
-    if (countdown !== null) {
-      console.log('Countdown already in progress, ignoring new message');
+    const interval = setInterval(() => {
+      setTotalVotes(prev => {
+        if (prev >= 4) {
+          clearInterval(interval);
+          return prev;
+        }
+        return prev + 1;
+      });
+    }, 2000); // Increase vote count every 2 seconds
+
+    return () => clearInterval(interval);
+  }, [hasUserSentMessage, voteSubmitted, totalVotes]);
+
+  // Effect to show voting complete popup when all votes are in
+  useEffect(() => {
+    if (totalVotes === 4 && !showVotingComplete) {
+      setShowVotingComplete(true);
+      setVotingCountdown(10); // Start 10 second countdown
+    }
+  }, [totalVotes, showVotingComplete]);
+
+  // Effect to handle voting countdown
+  useEffect(() => {
+    if (votingCountdown === null) return;
+
+    if (votingCountdown <= 0) {
+      router.replace('/loading');
       return;
     }
+
+    const timer = setInterval(() => {
+      setVotingCountdown(prev => prev !== null ? prev - 1 : null);
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [votingCountdown, router]);
+
+  const handleSendMessage = async () => {
+    if (!currentMessage.trim()) return;
 
     // Helper function to detect if a message is a greeting
     const isGreeting = (message: string): boolean => {
@@ -347,6 +380,7 @@ export default function WaitingRoom() {
     setChatMessages(prev => [...prev, newMessage]);
     setCurrentMessage("");
     setUserMessageCount(prev => prev + 1);
+    setHasUserSentMessage(true); // Track that user has sent a message
 
     // Get all players that should potentially respond
     const playersToRespond = players.filter(p => 
@@ -354,15 +388,7 @@ export default function WaitingRoom() {
       !(p.name === "Alex K." && alexGreeted && userMessageCount === 0)
     );
 
-    let pendingResponses = playersToRespond.length;
-    console.log('Waiting for responses from:', playersToRespond.map(p => p.name).join(', '));
-
-    // If no players need to respond, start countdown immediately
-    if (pendingResponses === 0) {
-      console.log('No other players need to respond, starting countdown');
-      setCountdown(10);
-      return;
-    }
+    console.log('Getting responses from:', playersToRespond.map(p => p.name).join(', '));
 
     // Get responses from other players
     for (const player of playersToRespond) {
@@ -371,11 +397,6 @@ export default function WaitingRoom() {
       
       if (!shouldReply) {
         console.log(`${player.name} is not responding to this message`);
-        pendingResponses--;
-        if (pendingResponses === 0 && countdown === null) {  // Only start countdown if not already started
-          console.log('All players have either responded or chosen not to, starting countdown');
-          setCountdown(10);
-        }
         continue;
       }
 
@@ -423,13 +444,7 @@ export default function WaitingRoom() {
               [player.name as "Alex K." | "Jordan M." | "Taylor R."]: prev[player.name as "Alex K." | "Jordan M." | "Taylor R."] + 1,
             }));
             
-            pendingResponses--;
-            console.log(`${player.name} has responded, waiting for ${pendingResponses} more responses`);
-            
-            if (pendingResponses === 0 && countdown === null) {  // Only start countdown if not already started
-              console.log('All players have responded, starting countdown');
-              setCountdown(10);
-            }
+            console.log(`${player.name} has responded`);
           }, delay);
         }
       } catch (error) {
@@ -442,13 +457,7 @@ export default function WaitingRoom() {
         };
         setChatMessages(prev => [...prev, fallbackMessage]);
         
-        pendingResponses--;
-        console.log(`${player.name} had trouble responding, waiting for ${pendingResponses} more responses`);
-        
-        if (pendingResponses === 0 && countdown === null) {  // Only start countdown if not already started
-          console.log('All players have either responded or had trouble, starting countdown');
-          setCountdown(10);
-        }
+        console.log(`${player.name} had trouble responding`);
       }
     }
   };
@@ -470,7 +479,7 @@ export default function WaitingRoom() {
 
   const modalSteps = [
     "Use the group chat to send a greeting to your groupmates!",
-    "Once all participants have sent a message, the game will begin automatically."
+    "Once all participants have sent a message and voted for a group name, the game will begin automatically."
   ];
 
   return (
@@ -567,118 +576,226 @@ export default function WaitingRoom() {
           </DialogContent>
         )}
       </Dialog>
-      <div className="absolute inset-0 z-0 pointer-events-none">
-        <FloatingBubbles />
-      </div>
-      <h1
-        className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight text-center leading-[1.1] py-4 mb-4 z-10 relative"
-        style={{
-          background: "linear-gradient(90deg, #4f46e5 0%, #9333ea 100%)",
-          WebkitBackgroundClip: "text",
-          WebkitTextFillColor: "transparent",
-          backgroundClip: "text",
-        }}
-      >
-        Waiting Room
-      </h1>
-      <div className="w-full max-w-4xl z-10 relative">
-        <Card className="bg-white rounded-3xl shadow-2xl border border-blue-100 p-6">
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              {players.map((player) => (
-                <div key={player.id} className="flex flex-col items-center space-y-2">
-                  <Avatar className="h-16 w-16">
-                    <AvatarImage src={player.avatarUrl} />
-                    <AvatarFallback>{player.name[0]}</AvatarFallback>
-                  </Avatar>
-                  <span className="text-sm font-medium">{player.name}</span>
+
+      {/* Voting Complete Announcement Dialog */}
+      <Dialog open={showVotingComplete} onOpenChange={() => {}} modal={true}>
+        <DialogContent className="sm:max-w-md [&>button]:hidden">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-semibold text-center text-green-600">
+              🎉 Team Name Selected!
+            </DialogTitle>
+            <DialogDescription className="text-center mt-4 text-base text-black space-y-4 py-4">
+              <div className="space-y-3">
+                <p className="text-lg font-medium">
+                  <span className="text-blue-700 font-bold">{selectedGroup}</span> received the most votes!
+                </p>
+                <p className="text-base">
+                  Your team name is <span className="text-blue-700 font-bold">{selectedGroup}.</span>
+                </p>
+                <p className="text-sm text-gray-600">
+                  The game will begin shortly.
+                </p>
+                <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+                  <p className="text-blue-700 font-semibold">
+                    Starting in {votingCountdown} seconds...
+                  </p>
                 </div>
-              ))}
-              {Array(Math.max(0, 4 - players.length)).fill(null).map((_, index) => (
-                <div key={`empty-${index}`} className="flex flex-col items-center space-y-2">
-                  <div className="h-16 w-16 rounded-full bg-gray-100 flex items-center justify-center">
-                    <LoadingSpinner />
-                  </div>
-                  <span className="text-sm text-gray-500">Looking for another player...</span>
-                </div>
-              ))}
-            </div>
-            <div className="border-t border-blue-100 my-4" />
-            {/* Group Chat Section */}
-            <div>
-              <div className="flex items-center mb-4">
-                
               </div>
-              <ScrollArea className="h-[300px] w-full rounded-md border border-blue-100 p-4 bg-blue-50">
-                <div className="space-y-4">
-                  {chatMessages.map((msg, idx) => {
-                    // Determine message type
-                    const isSystem = msg.playerName === "System"
-                    const isUser = msg.playerName === `${currentFirstName} ${currentLastInitial}.`
-                    return (
-                      <div key={msg.id} className={
-                        isSystem
-                          ? "flex justify-center"
-                          : isUser
-                          ? "flex justify-end"
-                          : "flex justify-start"
-                      }>
-                        <div className={
-                          isSystem
-                            ? "bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-xs font-medium max-w-xs"
-                            : isUser
-                            ? "bg-blue-500 text-white px-4 py-2 rounded-lg rounded-br-none shadow max-w-xs"
-                            : "bg-white border border-blue-100 px-4 py-2 rounded-lg rounded-bl-none shadow max-w-xs"
-                        }>
-                          <div className="flex items-center gap-2 mb-1">
-                            {!isSystem && (
-                              <span className="font-semibold text-xs truncate">
-                                {msg.playerName}
-                              </span>
-                            )}
-                            <span className="text-[10px] text-gray-400 font-normal">
-                              {typeof msg.timestamp === 'string' ? new Date(msg.timestamp).toLocaleTimeString() : msg.timestamp.toLocaleTimeString()}
-                            </span>
-                          </div>
-                          <div className="text-sm break-words">{msg.message}</div>
-                        </div>
+            </DialogDescription>
+          </DialogHeader>
+        </DialogContent>
+      </Dialog>
+
+      {/* Master heading and subheading */}
+      <div className="text-center mb-8 z-10 relative">
+        <h1
+          className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight leading-[1.1] py-4 mb-2"
+          style={{
+            background: "linear-gradient(90deg, #4f46e5 0%, #9333ea 100%)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundClip: "text",
+          }}
+        >
+          Waiting Room
+        </h1>
+        <p className="text-lg text-gray-600 font-medium">
+          Chat with your group mates and vote for a group name!
+        </p>
+      </div>
+
+      {/* ---------- TWO-COLUMN LAYOUT ---------- */}
+      <div className={`container mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 items-start transition-all duration-300 ${
+        showVotingComplete ? "opacity-50 pointer-events-none" : ""
+      }`}>
+        {/* ===== Left column – existing Waiting-Room content ===== */}
+        <div className="flex flex-col items-center justify-center">
+          {/* existing card with avatars + chat */}
+          <div className="w-full max-w-4xl z-10 relative">
+            <Card className="bg-white rounded-3xl shadow-2xl border border-blue-100 p-6">
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                  {players.map((player) => (
+                    <div key={player.id} className="flex flex-col items-center space-y-2">
+                      <Avatar className="h-16 w-16">
+                        <AvatarImage src={player.avatarUrl} />
+                        <AvatarFallback>{player.name[0]}</AvatarFallback>
+                      </Avatar>
+                      <span className="text-sm font-medium">{player.name}</span>
+                    </div>
+                  ))}
+                  {Array(Math.max(0, 4 - players.length)).fill(null).map((_, index) => (
+                    <div key={`empty-${index}`} className="flex flex-col items-center space-y-2">
+                      <div className="h-16 w-16 rounded-full bg-gray-100 flex items-center justify-center">
+                        <LoadingSpinner />
                       </div>
-                    )
-                  })}
-                  <div ref={chatEndRef} />
+                      <span className="text-sm text-gray-500">Looking for another player...</span>
+                    </div>
+                  ))}
                 </div>
-              </ScrollArea>
-              <div className="mt-4 flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 items-center">
-                <input
-                  type="text"
-                  value={currentMessage}
-                  onChange={(e) => setCurrentMessage(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                  placeholder="Type a message..."
-                  className="flex-1 rounded-xl border border-blue-100 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200"
-                />
-                <button
-                  onClick={handleSendMessage}
-                  className="h-10 bg-white text-blue-700 font-semibold min-w-[100px] rounded-2xl border border-blue-100 shadow transition-all duration-200 flex items-center gap-2 group hover:scale-105 hover:-translate-y-1 hover:shadow-2xl hover:bg-blue-50"
-                  style={{ boxShadow: "0 4px 16px 0 rgba(80, 112, 255, 0.08)" }}
-                >
-                  <span className="transition-all duration-200 mx-auto">Send</span>
-                </button>
-                <button
-                  onClick={handleStartGame}
-                  className="h-10 min-w-[120px] bg-white text-blue-700 font-semibold rounded-2xl border border-blue-100 shadow transition-all duration-200 ml-0 md:ml-2 flex items-center gap-2 group hover:scale-105 hover:-translate-y-1 hover:shadow-2xl hover:bg-blue-50"
-                  style={{ boxShadow: "0 4px 16px 0 rgba(80, 112, 255, 0.08)" }}
-                  disabled={countdown !== null}
-                >
-                  <span className="transition-all duration-200 mx-auto">
-                    {countdown !== null ? `Starting in ${countdown}...` : "Start Game"}
-                  </span>
-                </button>
+                <div className="border-t border-blue-100 my-4" />
+                {/* Group Chat Section */}
+                <div>
+                  <div className="flex items-center mb-4">
+                    
+                  </div>
+                  <ScrollArea className="h-[300px] w-full rounded-md border border-blue-100 p-4 bg-blue-50">
+                    <div className="space-y-4">
+                      {chatMessages.map((msg, idx) => {
+                        // Determine message type
+                        const isSystem = msg.playerName === "System"
+                        const isUser = msg.playerName === `${currentFirstName} ${currentLastInitial}.`
+                        return (
+                          <div key={msg.id} className={
+                            isSystem
+                              ? "flex justify-center"
+                              : isUser
+                              ? "flex justify-end"
+                              : "flex justify-start"
+                          }>
+                            <div className={
+                              isSystem
+                                ? "bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-xs font-medium max-w-xs"
+                                : isUser
+                                ? "bg-blue-500 text-white px-4 py-2 rounded-lg rounded-br-none shadow max-w-xs"
+                                : "bg-white border border-blue-100 px-4 py-2 rounded-lg rounded-bl-none shadow max-w-xs"
+                            }>
+                              <div className="flex items-center gap-2 mb-1">
+                                {!isSystem && (
+                                  <span className="font-semibold text-xs truncate">
+                                    {msg.playerName}
+                                  </span>
+                                )}
+                                <span className="text-[10px] text-gray-400 font-normal">
+                                  {typeof msg.timestamp === 'string' ? new Date(msg.timestamp).toLocaleTimeString() : msg.timestamp.toLocaleTimeString()}
+                                </span>
+                              </div>
+                              <div className="text-sm break-words">{msg.message}</div>
+                            </div>
+                          </div>
+                        )
+                      })}
+                      <div ref={chatEndRef} />
+                    </div>
+                  </ScrollArea>
+                  <div className="mt-4 flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-2 items-center">
+                    <input
+                      type="text"
+                      value={currentMessage}
+                      onChange={(e) => setCurrentMessage(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && !showVotingComplete && handleSendMessage()}
+                      placeholder={showVotingComplete ? "Voting complete..." : "Type a message..."}
+                      disabled={showVotingComplete}
+                      className={`flex-1 rounded-xl border border-blue-100 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-200 ${
+                        showVotingComplete ? "bg-gray-100 text-gray-500 cursor-not-allowed" : ""
+                      }`}
+                    />
+                    <button
+                      onClick={handleSendMessage}
+                      disabled={showVotingComplete}
+                      className={`h-10 font-semibold min-w-[120px] rounded-2xl border shadow transition-all duration-200 flex items-center gap-2 ${
+                        showVotingComplete 
+                          ? "bg-gray-100 text-gray-500 border-gray-200 cursor-not-allowed"
+                          : "bg-white text-blue-700 border-blue-100 group hover:scale-105 hover:-translate-y-1 hover:shadow-2xl hover:bg-blue-50"
+                      }`}
+                      style={!showVotingComplete ? { boxShadow: "0 4px 16px 0 rgba(80, 112, 255, 0.08)" } : {}}
+                    >
+                      <span className="transition-all duration-200 mx-auto">Send</span>
+                    </button>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* ===== Right column – NEW Group-Name voting card ===== */}
+        <div className="flex flex-col items-center justify-center z-10 relative">
+          <Card className="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-blue-100 p-6 h-[600px]">
+            <CardContent className="space-y-6 h-full flex flex-col">
+              {/* Progress Bar Section */}
+              <div className="space-y-3">
+                <div className="text-center">
+                  <h3 className="text-lg font-semibold text-gray-800">Group Name Voting</h3>
+                  <p className="text-sm text-gray-600">{totalVotes}/4 votes received</p>
+                </div>
+                <Progress value={(totalVotes / 4) * 100} className="w-full" />
               </div>
-            </div>
-          </CardContent>
-        </Card>
+
+              {/* Voting Options Section - Takes up remaining space */}
+              <div className="flex-1 flex flex-col justify-center">
+                {voteSubmitted ? (
+                  <div className="text-center space-y-4">
+                    <div className="text-green-600 font-medium text-lg">
+                      ✓ Thank you for voting!
+                    </div>
+                    <div className="text-sm text-gray-600">
+                      You voted for: <span className="font-semibold text-blue-700">{selectedGroup}</span>
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      Waiting for other group members...
+                    </div>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <p className="text-sm text-gray-600 text-center font-medium">Vote for your favorite group name:</p>
+                    <div className="space-y-3">
+                      {GROUP_NAMES.map((name) => (
+                        <button
+                          key={name}
+                          onClick={() => setSelectedGroup(name)}
+                          className={`w-full p-4 rounded-lg border-2 transition-all duration-200 hover:shadow-md ${
+                            selectedGroup === name
+                              ? "border-blue-500 bg-blue-50 text-blue-700 shadow-md"
+                              : "border-gray-200 bg-white hover:border-gray-300"
+                          }`}
+                        >
+                          <span className="font-medium text-lg">{name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Submit Button Section - Fixed at bottom */}
+              {!voteSubmitted && (
+                <div className="mt-auto">
+                  <Button
+                    onClick={handleVote}
+                    disabled={!selectedGroup}
+                    className="w-full bg-white text-blue-700 font-semibold text-xl py-4 px-8 rounded-2xl border border-blue-100 shadow transition-all duration-200 hover:scale-105 hover:-translate-y-1 hover:shadow-2xl hover:bg-blue-50"
+                    style={{ boxShadow: "0 4px 16px 0 rgba(80, 112, 255, 0.08)" }}
+                  >
+                    Submit Vote
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
+      {/* ---------- end two-column layout ---------- */}
     </main>
   )
 } 

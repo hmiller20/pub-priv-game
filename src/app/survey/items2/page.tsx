@@ -81,13 +81,8 @@ export default function SurveyPage() {
     }))
   }
 
-  // Check for previous failures on component mount
-  useEffect(() => {
-    const hasFailed = localStorage.getItem('attentionCheckFailed')
-    if (hasFailed === 'true') {
-      router.replace('/survey/page5')
-    }
-  }, [router])
+  // Note: Previously checked for attention check failures and routed to page5
+  // Now we continue regardless of failures but log them
 
   // Check if all non-attention-check questions have been answered
   const isComplete = React.useMemo(() => {
@@ -97,27 +92,25 @@ export default function SurveyPage() {
   }, [responses])
 
   const handleNext = async () => {
-    // Check if the attention check question was answered correctly
+    // Check if the attention check question was answered correctly and log failure
     if (responses['attn_3'] !== 3) {
-      // Store the failure in local storage
+      // Store the failure in local storage for logging purposes
       localStorage.setItem('attentionCheckFailed', 'true')
-      router.replace('/survey/page5')
-      return;
+      console.log('Attention check failed: attn_3 answered with', responses['attn_3'], 'instead of 3')
     }
 
-    // Check if manipulation check was answered correctly
+    // Check if manipulation check was answered correctly and log failure
     const assignedCondition = localStorage.getItem('assignedCondition');
     const manipCheckResponse = responses['manip_check'];
     
-    // Fail if they don't remember or answer incorrectly
+    // Check if they answered correctly based on their condition
     const isManipCheckCorrect = 
       (assignedCondition === '1' && manipCheckResponse === MANIP_CHECK_VALUES.PRIVATE) ||
       (assignedCondition === '2' && manipCheckResponse === MANIP_CHECK_VALUES.PUBLIC);
 
     if (!isManipCheckCorrect || manipCheckResponse === MANIP_CHECK_VALUES.DONT_REMEMBER) {
       localStorage.setItem('manipulationCheckFailed', 'true');
-      router.replace('/survey/page5');
-      return;
+      console.log('Manipulation check failed: condition', assignedCondition, 'response', manipCheckResponse)
     }
 
     try {
@@ -153,6 +146,10 @@ export default function SurveyPage() {
 
       // Add manipulation check response
       publicObj['manipCheck'] = responses['manip_check'];
+
+      // Add failure flags for analysis
+      publicObj['attentionCheckFailed'] = responses['attn_3'] !== 3;
+      publicObj['manipulationCheckFailed'] = !isManipCheckCorrect || manipCheckResponse === MANIP_CHECK_VALUES.DONT_REMEMBER;
 
       // Save survey responses
       const response = await fetch(`/api/users/${userId}/survey`, {

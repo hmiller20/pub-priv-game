@@ -16,72 +16,17 @@ export default function QueuePage() {
     let isMounted = true
     const timeouts: NodeJS.Timeout[] = []
 
-    // Create user first if not exists
-    const createUserIfNeeded = async () => {
-      try {
-        let userId = localStorage.getItem('ratGameUserId')
-        
-        if (!userId) {
-          // Batch localStorage reads
-          const localStorageData = {
-            gamePlays: parseInt(localStorage.getItem('gamePlays') || '0'),
-            leaderboardViews: parseInt(localStorage.getItem('leaderboardViews') || '0'),
-            assignedCondition: localStorage.getItem('assignedCondition') || '',
-            age: parseInt(localStorage.getItem('age') || '0'),
-            gender: parseInt(localStorage.getItem('gender') || '0'),
-            surveyResponses: localStorage.getItem('surveyResponses') 
-              ? JSON.parse(localStorage.getItem('surveyResponses') || '{}')
-              : undefined
-          }
+    // Check if user exists (should be created by avatar page)
+    const checkUserAndStartQueue = () => {
+      const userId = localStorage.getItem('ratGameUserId')
+      
+      if (!userId) {
+        setError('User profile not found. Please go back to the avatar page.')
+        return
+      }
 
-          // Get game performance data in a single loop
-          const gamePerformance: Record<string, any> = {}
-          for (let i = 1; i <= localStorageData.gamePlays; i++) {
-            const score = localStorage.getItem(`play${i}Score`)
-            const skips = localStorage.getItem(`play${i}Skips`)
-            if (score !== null && skips !== null) {
-              gamePerformance[`play${i}`] = {
-                score: parseInt(score),
-                skips: parseInt(skips),
-                completedAt: new Date()
-              }
-            }
-          }
-
-          const createUserResponse = await fetch('/api/users', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              ...localStorageData,
-              gamePerformance,
-              createdAt: new Date(),
-              updatedAt: new Date()
-            }),
-          })
-
-          if (!createUserResponse.ok) {
-            throw new Error('Failed to create user')
-          }
-
-          const data = await createUserResponse.json()
-          if (!data.success || !data.userId) {
-            throw new Error('Failed to create user')
-          }
-
-          userId = data.userId
-          if (typeof userId === 'string') {
-            localStorage.setItem('ratGameUserId', userId)
-          }
-        }
-
-        if (userId && isMounted) {
-          runQueueSequence()
-        }
-      } catch (error) {
-        console.error('Failed to create user:', error)
-        if (isMounted) {
-          setError('Failed to initialize queue. Please refresh the page.')
-        }
+      if (isMounted) {
+        runQueueSequence()
       }
     }
 
@@ -121,7 +66,7 @@ export default function QueuePage() {
       timeouts.push(timeout)
     }
 
-    createUserIfNeeded()
+    checkUserAndStartQueue()
 
     return () => {
       isMounted = false

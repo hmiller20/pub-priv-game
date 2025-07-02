@@ -18,7 +18,7 @@ export default function Score() {
   const hasPlayedRef = useRef(false)
   const { playText, stopPlaying, isPlaying, isLoading } = useTextToSpeech();
 
-  const scoreText = "Finally, your name and score will be shared with your group and posted on the public leaderboard, so make sure to give it your best shot!";
+  const scoreText = "Finally, your name and score will be shared with your group and posted on the public FSU leaderboard, so make sure to give it your best shot!";
 
   useEffect(() => {
     // Only play once on mount
@@ -86,7 +86,9 @@ export default function Score() {
         <CardContent className="space-y-4">
           <div className="space-y-4">
             <p className="text-left text-lg">
-              Finally, your name and score will be <span className="underline font-bold">shared with your group and posted on the public leaderboard</span>, so make sure to give it your best shot!
+              {scoreText.replace('shared with your group and posted on the public FSU leaderboard', '')}
+              <span className="underline font-bold">shared with your group and posted on the public FSU leaderboard</span>
+              {scoreText.split('shared with your group and posted on the public FSU leaderboard')[1]}
             </p>
             
             {/* Audio control button */}

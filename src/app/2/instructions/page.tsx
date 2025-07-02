@@ -72,7 +72,7 @@ export default function Instructions() {
     {
       content: (
         <div className="text-left">
-          You will have two minutes to answer as many questions as you can.
+          You will have up to 10 minutes to answer as many questions as you can. We encourage you to play for at least a minute, but you may stop playing at any time.
         </div>
       ),
       type: "text"
@@ -81,14 +81,6 @@ export default function Instructions() {
       content: (
         <div className="text-left">
           Correct answers <span className="font-bold text-green-600">earn</span> 10 points. Incorrect answers <span className="font-bold text-red-600">lose</span> 5 points. You can skip a question at no cost.
-        </div>
-      ),
-      type: "text"
-    },
-    {
-      content: (
-        <div className="text-left">
-          Incorrect answers do not change your point total.
         </div>
       ),
       type: "text"

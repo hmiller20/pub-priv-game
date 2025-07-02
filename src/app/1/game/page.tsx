@@ -195,6 +195,7 @@ function GameContent() {
   const [feedback, setFeedback] = useState<null | "correct" | "incorrect">(null)
   const [isFirstAttempt, setIsFirstAttempt] = useState(true)
   const [choices, setChoices] = useState<string[]>([])
+  const [isProcessingAnswer, setIsProcessingAnswer] = useState(false)
 
   // Generate choices when question changes
   useEffect(() => {
@@ -203,6 +204,7 @@ function GameContent() {
       setChoices(newChoices);
       setSelectedChoice("");
       setIsFirstAttempt(true);
+      setIsProcessingAnswer(false); // Re-enable pointer events for new question
     }
   }, [currentQuestionIndex, questions]);
 
@@ -248,7 +250,9 @@ function GameContent() {
   }, [router, score]);
 
   const handleSubmit = async () => {
-    if (!selectedChoice) return;
+    if (!selectedChoice || isProcessingAnswer) return;
+    
+    setIsProcessingAnswer(true); // Disable pointer events immediately
     
     const currentQuestion = questions[currentQuestionIndex];
     const isCorrect = selectedChoice === currentQuestion.answer;
@@ -361,12 +365,13 @@ function GameContent() {
                   {choices.map((choice, index) => (
                     <button
                       key={choice}
-                      onClick={() => setSelectedChoice(choice)}
+                      onClick={() => !isProcessingAnswer && setSelectedChoice(choice)}
+                      disabled={isProcessingAnswer}
                       className={`p-4 rounded-lg border-2 transition-all duration-200 hover:shadow-md ${
                         selectedChoice === choice
                           ? "border-blue-500 bg-blue-50 text-blue-700 shadow-md"
                           : "border-gray-200 bg-white hover:border-gray-300"
-                      }`}
+                      } ${isProcessingAnswer ? 'pointer-events-none opacity-75' : ''}`}
                     >
                       <span className="font-medium text-lg">{choice}</span>
                     </button>
@@ -383,7 +388,7 @@ function GameContent() {
                 </StartGameButton>
                 <SendButton 
                   onClick={handleSubmit}
-                  disabled={!selectedChoice}
+                  disabled={!selectedChoice || isProcessingAnswer}
                   className="flex-1"
                 >
                   Submit Answer

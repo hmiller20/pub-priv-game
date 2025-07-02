@@ -48,7 +48,7 @@ const generateInitialAvatar = (): AvatarConfig => {
   return {
     seed: 'CustomAvatar',
     body: 'rounded',
-    clothingColor: '456dff',
+    clothingColor: '722F37',
     eyes: parameters.eyes[Math.floor(Math.random() * parameters.eyes.length)],
     facialHair: parameters.facialHair[Math.floor(Math.random() * parameters.facialHair.length)],
     hair: parameters.hair[Math.floor(Math.random() * parameters.hair.length)],
@@ -66,6 +66,10 @@ export default function AvatarPage() {
   const [isTimerActive, setIsTimerActive] = useState(true)
   const [firstName, setFirstName] = useLocalStorage('currentFirstName', '')
   const [lastInitial, setLastInitial] = useLocalStorage('currentLastInitial', '')
+  const [age, setAge] = useLocalStorage('currentAge', '')
+  const [gender, setGender] = useLocalStorage('currentGender', '')
+  const [year, setYear] = useLocalStorage('currentYear', '')
+  const [major, setMajor] = useLocalStorage('currentMajor', '')
   const [avatarUrl, setAvatarUrl] = useLocalStorage('currentAvatarUrl', '')
   const [avatarConfig, setAvatarConfig] = useState<AvatarConfig | null>(null)
   const [currentStep, setCurrentStep] = useState(1)
@@ -74,6 +78,7 @@ export default function AvatarPage() {
   const totalSteps = 3
   const [agreementChecked, setAgreementChecked] = useState(false)
   const [hasInitialized, setHasInitialized] = useState(false)
+  const [isCreatingUser, setIsCreatingUser] = useState(false)
   const { playText, stopPlaying, isPlaying, isLoading } = useTextToSpeech();
 
   const modalSteps = [
@@ -81,6 +86,55 @@ export default function AvatarPage() {
     "First, you'll create a unique avatar that will represent you throughout the study.",
     "After creating your avatar, you'll enter a waiting room where you'll be matched with other participants."
   ];
+
+  // Create user ID if it doesn't exist
+  useEffect(() => {
+    const createUserIfNeeded = async () => {
+      try {
+        let userId = localStorage.getItem('ratGameUserId')
+        
+        if (!userId) {
+          setIsCreatingUser(true)
+          
+          const createUserResponse = await fetch('/api/users', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              gamePlays: 0,
+              leaderboardViews: 0,
+              gamePerformance: {},
+              createdAt: new Date(),
+              updatedAt: new Date()
+            }),
+          })
+
+          if (!createUserResponse.ok) {
+            throw new Error('Failed to create user')
+          }
+
+          const data = await createUserResponse.json()
+          if (!data.success || !data.userId) {
+            throw new Error('Failed to create user')
+          }
+
+          userId = data.userId
+          if (userId) {
+            localStorage.setItem('ratGameUserId', userId)
+            console.log('Created new user with ID:', userId)
+          }
+        } else {
+          console.log('Using existing user ID:', userId)
+        }
+      } catch (error) {
+        console.error('Failed to create user:', error)
+        alert('There was an error initializing your session. Please refresh the page.')
+      } finally {
+        setIsCreatingUser(false)
+      }
+    }
+
+    createUserIfNeeded()
+  }, [])
 
   useEffect(() => {
     const config = generateInitialAvatar()
@@ -153,12 +207,56 @@ export default function AvatarPage() {
     setAvatarConfig(prev => prev ? { ...prev, ...updates } : null)
   }
 
-  const handleContinue = () => {
-    if (!firstName.trim() || !lastInitial.trim()) {
-      alert("Please enter both your first name and last initial")
+  const handleContinue = async () => {
+    if (isCreatingUser) {
+      alert("Please wait while we set up your profile...")
       return
     }
-    router.replace('/queue')
+
+    if (!firstName.trim() || !lastInitial.trim() || !age || !gender || !year.trim() || !major.trim()) {
+      alert("Please respond to all questions!")
+      return
+    }
+
+    // Validate that age is 18 or older
+    const ageValue = parseInt(age);
+    if (isNaN(ageValue) || ageValue < 18) {
+      alert('You must be 18 years or older to participate in this study');
+      return;
+    }
+
+    try {
+      // Get the stored userId
+      const userId = localStorage.getItem('ratGameUserId');
+      if (!userId) {
+        alert('User profile not ready. Please wait a moment and try again.');
+        return;
+      }
+
+      // Update user document with demographic info
+      const response = await fetch(`/api/users/${userId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          age: parseInt(age),
+          gender: gender === 'male' ? 0 : 
+                 gender === 'female' ? 1 : 
+                 gender === 'non-binary' ? 2 : 
+                 gender === 'prefer-not' ? 3 : 4, // 4 is "other"
+        }),
+      });
+
+      if (response.ok) {
+        router.replace('/queue')
+      } else {
+        throw new Error('Failed to update user demographics');
+      }
+    } catch (error) {
+      console.error('Error updating user demographics:', error);
+      alert('There was an error. Please try again.');
+    }
   }
 
   const handleTextToSpeech = () => {
@@ -343,7 +441,7 @@ export default function AvatarPage() {
           <div className="flex flex-col md:flex-row gap-8">
             {/* Left side: Avatar preview and text fields */}
             <div className="flex-1 flex flex-col items-center justify-center">
-              <div className="w-48 h-48 md:w-64 md:h-64 mb-4">
+              <div className="w-40 h-40 md:w-48 md:h-48 mb-3">
                 <Avatar className="w-full h-full">
                   <AvatarImage
                     src={`https://api.dicebear.com/7.x/personas/svg?seed=${avatarConfig.seed}&body=${avatarConfig.body}&clothingColor=${avatarConfig.clothingColor}&eyes=${avatarConfig.eyes}&facialHair=${avatarConfig.facialHair}&hair=${avatarConfig.hair}&hairColor=${avatarConfig.hairColor}&mouth=${avatarConfig.mouth}&nose=${avatarConfig.nose}&skinColor=${avatarConfig.skinColor}`}
@@ -363,7 +461,7 @@ export default function AvatarPage() {
                     className="w-full rounded-xl border-blue-100 focus:ring-2 focus:ring-blue-200"
                   />
                 </div>
-                <div className="space-y-2 pb-2">
+                <div className="space-y-2">
                   <Label htmlFor="lastInitial">Enter Your Last Initial</Label>
                   <Input
                     id="lastInitial"
@@ -378,12 +476,42 @@ export default function AvatarPage() {
                     className="w-full rounded-xl border-blue-100 focus:ring-2 focus:ring-blue-200"
                   />
                 </div>
+                <div className="space-y-2">
+                  <Label htmlFor="age">How old are you?</Label>
+                  <Input
+                    id="age"
+                    type="number"
+                    placeholder="Your age"
+                    value={age}
+                    onChange={(e) => setAge(e.target.value)}
+                    className="w-full rounded-xl border-blue-100 focus:ring-2 focus:ring-blue-200"
+                  />
+                </div>
+                <div className="space-y-2 pb-2">
+                  <Label htmlFor="gender">What is your gender?</Label>
+                  <Select
+                    value={gender}
+                    onValueChange={(value: string) => setGender(value)}
+                  >
+                    <SelectTrigger className="w-full rounded-xl border-blue-100 focus:ring-2 focus:ring-blue-200">
+                      <SelectValue placeholder="Select gender" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="female">Female</SelectItem>
+                      <SelectItem value="male">Male</SelectItem>
+                      <SelectItem value="non-binary">Non-binary</SelectItem>
+                      <SelectItem value="prefer-not">Prefer not to say</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
 
-            {/* Right side: Customization options and Continue button */}
+            {/* Right side: Customization options, Additional info fields, and Continue button */}
             <div className="flex-1 flex flex-col justify-between">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Eyes</Label>
                   <Select
@@ -495,14 +623,60 @@ export default function AvatarPage() {
                   </Select>
                 </div>
               </div>
+              
+              {/* Additional information section */}
+              <div className="mt-6">
+                <p className="text-base font-medium text-center mb-4 text-blue-800">
+                  Share a bit more about yourself for your group!
+                </p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="year">What year are you at FSU?</Label>
+                    <Input
+                      id="year"
+                      type="text"
+                      placeholder="e.g., Sophomore"
+                      value={year}
+                      onChange={(e) => setYear(e.target.value)}
+                      className="w-full rounded-xl border-blue-100 focus:ring-2 focus:ring-blue-200"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="major">What is your major?</Label>
+                    <Input
+                      id="major"
+                      type="text"
+                      placeholder="e.g., Psychology"
+                      value={major}
+                      onChange={(e) => setMajor(e.target.value)}
+                      className="w-full rounded-xl border-blue-100 focus:ring-2 focus:ring-blue-200"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
               <div className="hidden md:flex justify-end mt-8">
                 <button
                   onClick={handleContinue}
-                  className="px-8 py-4 rounded-2xl bg-white text-blue-700 font-semibold text-lg shadow-lg border border-blue-100 transition-all duration-200 flex items-center gap-2 group hover:scale-105 hover:-translate-y-1 hover:shadow-2xl"
+                  disabled={isCreatingUser}
+                  className={`px-8 py-4 rounded-2xl bg-white text-blue-700 font-semibold text-lg shadow-lg border border-blue-100 transition-all duration-200 flex items-center gap-2 group hover:scale-105 hover:-translate-y-1 hover:shadow-2xl ${
+                    isCreatingUser ? 'opacity-50 cursor-not-allowed' : ''
+                  }`}
                   style={{ boxShadow: "0 4px 16px 0 rgba(80, 112, 255, 0.08)" }}
                 >
-                  <span className="transition-all duration-200">Continue</span>
-                  <span className="text-xl transition-all duration-200 group-hover:translate-x-1">→</span>
+                  {isCreatingUser ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                      <span>Setting up...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span className="transition-all duration-200">Continue</span>
+                      <span className="text-xl transition-all duration-200 group-hover:translate-x-1">→</span>
+                    </>
+                  )}
                 </button>
               </div>
             </div>
@@ -511,11 +685,23 @@ export default function AvatarPage() {
           <div className="flex md:hidden justify-center mt-8">
             <button
               onClick={handleContinue}
-              className="px-8 py-4 rounded-2xl bg-white text-blue-700 font-semibold text-lg shadow-lg border border-blue-100 transition-all duration-200 flex items-center gap-2 group hover:scale-105 hover:-translate-y-1 hover:shadow-2xl"
+              disabled={isCreatingUser}
+              className={`px-8 py-4 rounded-2xl bg-white text-blue-700 font-semibold text-lg shadow-lg border border-blue-100 transition-all duration-200 flex items-center gap-2 group hover:scale-105 hover:-translate-y-1 hover:shadow-2xl ${
+                isCreatingUser ? 'opacity-50 cursor-not-allowed' : ''
+              }`}
               style={{ boxShadow: "0 4px 16px 0 rgba(80, 112, 255, 0.08)" }}
             >
-              <span className="transition-all duration-200 group-hover:italic">Continue</span>
-              <span className="text-xl transition-all duration-200 group-hover:translate-x-1">→</span>
+              {isCreatingUser ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+                  <span>Setting up...</span>
+                </>
+              ) : (
+                <>
+                  <span className="transition-all duration-200 group-hover:italic">Continue</span>
+                  <span className="text-xl transition-all duration-200 group-hover:translate-x-1">→</span>
+                </>
+              )}
             </button>
           </div>
         </CardContent>
