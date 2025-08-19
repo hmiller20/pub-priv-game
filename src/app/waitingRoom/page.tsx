@@ -259,62 +259,7 @@ export default function WaitingRoom() {
 
 
 
-  // Add effect for initial greetings
-  useEffect(() => {
-    if (initialGreetingsSent.current) return;
-    if (players.length === 0) return; // Wait for players to be loaded
-
-    const sendGreeting = async (playerName: string, message: string) => {
-      try {
-        const response = await fetch('/api/chat', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            message: "hi", // This will be overridden by the AI's greeting
-            playerName: playerName,
-            chatHistory: chatMessages,
-            botReplyCounts: botReplyCounts
-          }),
-        });
-
-        const data = await response.json();
-        if (data.success) {
-          const greetingMessage: ChatMessage = {
-            id: Date.now(),
-            playerName: playerName,
-            message: data.message,
-            timestamp: new Date()
-          };
-          setChatMessages(prev => [...prev, greetingMessage]);
-          setBotReplyCounts(prev => ({
-            ...prev,
-            [playerName as "Alex K." | "Jordan M." | "Taylor R."]: prev[playerName as "Alex K." | "Jordan M." | "Taylor R."] + 1,
-          }));
-        }
-      } catch (error) {
-        console.error('Error sending initial greeting from', playerName, ':', error);
-      }
-    };
-
-    // Send Jordan's greeting after 5 seconds
-    const jordanTimeout = setTimeout(() => {
-      sendGreeting("Jordan M.", "hi");
-    }, 5000);
-
-    // Send Taylor's greeting after 8 seconds
-    const taylorTimeout = setTimeout(() => {
-      sendGreeting("Taylor R.", "hi");
-    }, 8000);
-
-    initialGreetingsSent.current = true;
-
-    return () => {
-      clearTimeout(jordanTimeout);
-      clearTimeout(taylorTimeout);
-    };
-  }, [players, chatMessages, botReplyCounts]);
+  // Remove the dynamic greeting effect - Alex and Jordan only use hardcoded greetings
 
   // Effect to automatically progress votes when conditions are met
   useEffect(() => {
@@ -382,15 +327,15 @@ export default function WaitingRoom() {
     setUserMessageCount(prev => prev + 1);
     setHasUserSentMessage(true); // Track that user has sent a message
 
-    // Get all players that should potentially respond
+    // Filter players that should potentially respond - Alex and Jordan never respond after their initial greetings
     const playersToRespond = players.filter(p => 
       p.name !== `${currentFirstName} ${currentLastInitial}.` && 
-      !(p.name === "Alex K." && alexGreeted && userMessageCount === 0)
+      p.name === "Taylor R." // Only Taylor responds to user messages
     );
 
     console.log('Getting responses from:', playersToRespond.map(p => p.name).join(', '));
 
-    // Get responses from other players
+    // Get responses from Taylor only
     for (const player of playersToRespond) {
       // Always respond to greetings, otherwise use random chance
       const shouldReply = messageIsGreeting ? true : Math.random() < 0.7;
@@ -428,8 +373,8 @@ export default function WaitingRoom() {
         }
 
         if (data.success) {
-          const typingSpeed = 40 + Math.random() * 60;
-          const delay = data.message.length * (1000 / typingSpeed);
+          // Add 10-14 second delay for Taylor's replies
+          const replyDelay = 10000 + Math.random() * 4000; // 10-14 seconds
           
           setTimeout(() => {
             const aiMessage: ChatMessage = {
@@ -445,7 +390,7 @@ export default function WaitingRoom() {
             }));
             
             console.log(`${player.name} has responded`);
-          }, delay);
+          }, replyDelay);
         }
       } catch (error) {
         console.error('Error getting response from', player.name, ':', error);
@@ -686,8 +631,11 @@ export default function WaitingRoom() {
                                     {msg.playerName}
                                   </span>
                                 )}
-                                <span className="text-[10px] text-gray-400 font-normal">
-                                  {typeof msg.timestamp === 'string' ? new Date(msg.timestamp).toLocaleTimeString() : msg.timestamp.toLocaleTimeString()}
+                                <span className={`text-[10px] font-normal ${isUser ? 'text-white' : 'text-black'}`}>
+                                  {typeof msg.timestamp === 'string' 
+                                    ? new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+                                    : msg.timestamp.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})
+                                  }
                                 </span>
                               </div>
                               <div className="text-sm break-words">{msg.message}</div>
