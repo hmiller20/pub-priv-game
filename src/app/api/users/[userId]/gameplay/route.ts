@@ -1,7 +1,7 @@
 // This file is used to add gameplay data to a user in the database
 
 import { NextResponse } from 'next/server';
-import { addGamePlay } from '@/lib/mongoFunctions';
+import { addGamePlay } from '@/lib/supabaseFunctions';
 
 export async function POST(
   request: Request,

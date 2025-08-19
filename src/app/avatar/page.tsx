@@ -302,7 +302,7 @@ export default function AvatarPage() {
                 />
               ))}
             </div>
-            <DialogDescription className="text-center mt-2 text-base text-black space-y-4 py-6">
+            <div className="text-center mt-2 text-base text-black space-y-4 py-6">
               {currentStep === 1 && (
                 <div className="space-y-3">
                   <div className="space-y-4">
@@ -330,7 +330,6 @@ export default function AvatarPage() {
               {currentStep === 2 && (
                 <div className="space-y-3">
                   <div className="space-y-4">
-                    <p className="text-left">{modalSteps[1]}</p>
                     <div className="flex justify-center">
                       <Button
                         variant="ghost"
@@ -348,6 +347,7 @@ export default function AvatarPage() {
                         )}
                       </Button>
                     </div>
+                    <p className="text-left">{modalSteps[1]}</p>
                   </div>
                 </div>
               )}
@@ -384,7 +384,7 @@ export default function AvatarPage() {
                   </div>
                 </div>
               )}
-            </DialogDescription>
+            </div>
           </DialogHeader>
           <DialogFooter className="relative min-h-[64px] mt-6">
             <StartGameButton

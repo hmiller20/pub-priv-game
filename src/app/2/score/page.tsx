@@ -86,9 +86,7 @@ export default function Score() {
         <CardContent className="space-y-4">
           <div className="space-y-4">
             <p className="text-left text-lg">
-              {scoreText.replace('shared with your group and posted on the public FSU leaderboard', '')}
-              <span className="underline font-bold">shared with your group and posted on the public FSU leaderboard</span>
-              {scoreText.split('shared with your group and posted on the public FSU leaderboard')[1]}
+              Finally, your name and score will be <span className="underline font-bold">shared with your group and posted on the public FSU leaderboard</span>, so make sure to give it your best shot!
             </p>
             
             {/* Audio control button */}

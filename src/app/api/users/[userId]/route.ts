@@ -8,7 +8,7 @@
 // the brackets are what make the route dynamic and able to handle any user ID value
 
 import { NextResponse } from 'next/server';
-import { updateUser } from '@/lib/mongoFunctions';
+import { updateUser } from '@/lib/supabaseFunctions';
 
 export async function PATCH(
   request: Request,

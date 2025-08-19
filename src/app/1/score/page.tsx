@@ -18,7 +18,7 @@ export default function Score() {
   const hasPlayedRef = useRef(false)
   const { playText, stopPlaying, isPlaying, isLoading } = useTextToSpeech();
 
-  const scoreText = "Finally, your score will be kept private and used only for research purposes, so make sure to give it your best shot!";
+  const scoreText = "Finally, your score will be kept PRIVATE and used only for research purposes. Nobody, including your partners, will see your scores. But you should still make sure to give it your best shot!";
 
   useEffect(() => {
     // Only play once on mount

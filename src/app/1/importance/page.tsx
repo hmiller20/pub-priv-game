@@ -66,7 +66,7 @@ export default function Importance() {
     {
       content: (
         <div className="text-left">
-          After you complete the task, you will chat with your group again. You will discuss <span className="font-bold underline">how people approach creative problem solving</span>.
+          After you complete the task, you will chat with your group again. You will discuss <span className="font-bold underline">the role of creativity in well-being and life satisfaction.</span>
         </div>
       ),
       type: "text"

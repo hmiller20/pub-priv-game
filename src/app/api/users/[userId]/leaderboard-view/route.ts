@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { incrementLeaderboardViews } from '@/lib/mongoFunctions';
+import { incrementLeaderboardViews } from '@/lib/supabaseFunctions';
 
 export async function POST(
   request: Request,

@@ -161,8 +161,358 @@ const RAT_QUESTIONS = [
     words: ["POLISH", "FINGER", "NAIL"],
     answer: "DOWN",
     distractors: ["SHINE", "HAND", "HARD"]
-  }
-]
+  },
+  {
+    words: ["CARD", "CHEST", "KING"],
+    answer: "HEART",
+    distractors: ["CLUB", "CROWN", "ACE"]
+  },
+  {
+    words: ["CANDLE", "BIRTHDAY", "WISH"],
+    answer: "CAKE",
+    distractors: ["LIGHT", "PARTY", "FIRE"]
+  },
+  {
+    words: ["BANK", "POOL", "CURRENT"],
+    answer: "RIVER",
+    distractors: ["MONEY", "WATER", "FLOW"]
+  },
+  {
+    words: ["COLD", "SWEAT", "FEVER"],
+    answer: "NIGHT",
+    distractors: ["ILLNESS", "DREAM", "HEAT"]
+  },
+  {
+    words: ["LIGHT", "STORM", "EYE"],
+    answer: "HURRICANE",
+    distractors: ["RAIN", "SKY", "WIND"]
+  }, // the 35th question
+  {
+    words: ["APPLE", "WORM", "TREE"],
+    answer: "FRUIT",
+    distractors: ["ORCHARD", "EAT", "SEED"]
+  },
+  {
+    words: ["FLOOR", "TABLE", "TEN"],
+    answer: "TOP",
+    distractors: ["BOTTOM", "HIGH", "ROOM"]
+  },
+  {
+    words: ["DOG", "CHAIN", "WATCH"],
+    answer: "GUARD",
+    distractors: ["TIME", "PET", "METAL"]
+  },
+  {
+    words: ["BOOK", "WORM", "SHELF"],
+    answer: "READ",
+    distractors: ["PAGE", "LIBRARY", "GLASS"]
+  },
+  {
+    words: ["GROUND", "SHOT", "BREAK"],
+    answer: "UP",
+    distractors: ["DOWN", "EARTH", "FIRE"]
+  },
+  {
+    words: ["TEA", "ICE", "CUBE"],
+    answer: "GLASS",
+    distractors: ["COLD", "DRINK", "LEMON"]
+  },
+  {
+    words: ["GUN", "FINGER", "PRINT"],
+    answer: "TRIGGER",
+    distractors: ["BULLET", "HAND", "MARK"]
+  },
+  {
+    words: ["WINDOW", "PANE", "FRAME"],
+    answer: "GLASS",
+    distractors: ["DOOR", "WOOD", "HOUSE"]
+  },
+  {
+    words: ["BOX", "PUNCH", "GLOVE"],
+    answer: "BOXING",
+    distractors: ["RING", "FIGHT", "SPORT"]
+  }, // 45th question
+  {
+    words: ["SHEET", "PILLOW", "BLANKET"],
+    answer: "BED",
+    distractors: ["TRAY", "THROW", "ROOM"]
+  },
+  {
+    words: ["HAND", "CLOCK", "SECOND"],
+    answer: "MINUTE",
+    distractors: ["HOUR", "WATCH", "TIME"]
+  },
+  {
+    words: ["SCREEN", "PLAY", "STAGE"],
+    answer: "ACTOR",
+    distractors: ["FILM", "GLASS", "RELEASE"]
+  },
+  {
+    words: ["SILVER", "AGE", "SCREEN"],
+    answer: "HOLLYWOOD",
+    distractors: ["MOVIE", "OLD", "SHINE"]
+  },
+  {
+    words: ["CARD", "HOUSE", "JOKER"],
+    answer: "DECK",
+    distractors: ["KING", "GAME", "TRICK"]
+  },
+  {
+    words: ["HONEY", "STING", "BUZZ"],
+    answer: "BEE",
+    distractors: ["SYRUP", "SWEET", "INSECT"]
+  },
+  {
+    words: ["WEB", "EIGHT", "SPIN"],
+    answer: "SPIDER",
+    distractors: ["NET", "BUG", "TRAP"]
+  }, // 53rd question
+  {
+    words: ["DESERT", "WATER", "CAMEL"],
+    answer: "OASIS",
+    distractors: ["DRY", "SAND", "TRAVEL"]
+  },
+  {
+    words: ["MAIL", "OFFICE", "BLOG"],
+    answer: "POST",
+    distractors: ["STAMP", "SEND", "SIGN"]
+  },
+  {
+    words: ["FLOOR", "CLEAN", "BROOM"],
+    answer: "SWEEP",
+    distractors: ["DIRT", "WIPE", "ROOM"]
+  },
+  {
+    words: ["RIVER", "TWITCH", "BROOK"],
+    answer: "STREAM",
+    distractors: ["FLOW", "WATER", "BANK"]
+  },
+  {
+    words: ["MAN", "GLUE", "STAR"],
+    answer: "SUPER",
+    distractors: ["LIGHT", "HERO", "STICKY"]
+  },
+  {
+    words: ["TOOTH", "POTATO", "HEART"],
+    answer: "SWEET",
+    distractors: ["FRY", "LOVE", "ACHE"]
+  },
+  {
+    words: ["ILLNESS", "BUS", "COMPUTER"],
+    answer: "TERMINAL",
+    distractors: ["STOP", "SICK", "KEYBOARD"]
+  },
+  {
+    words: ["TYPE", "GHOST", "SCREEN"],
+    answer: "WRITER",
+    distractors: ["MOVIE", "HAUNT", "TEXT"]
+  },
+  {
+    words: ["MAIL", "BOARD", "LUNG"],
+    answer: "BLACK",
+    distractors: ["POST", "AIR", "GAME"]
+  },
+  {
+    words: ["TEETH", "ARREST", "START"],
+    answer: "FALSE",
+    distractors: ["BEGIN", "JAIL", "BITE"]
+  },
+  {
+    words: ["IRON", "SHOVEL", "ENGINE"],
+    answer: "STEAM",
+    distractors: ["MOTOR", "METAL", "DIG"]
+  },
+  {
+    words: ["WET", "LAW", "BUSINESS"],
+    answer: "SUIT",
+    distractors: ["COMPANY", "COURT", "RAIN"]
+  },
+  {
+    words: ["ROPE", "TRUCK", "LINE"],
+    answer: "TOW",
+    distractors: ["LOAD", "KNOT", "QUEUE"]
+  },
+  {
+    words: ["OFF", "MILITARY", "FIRST"],
+    answer: "BASE",
+    distractors: ["AID", "SWITCH", "SOLDIER"]
+  },
+  {
+    words: ["SPOON", "CLOTH", "CARD"],
+    answer: "TABLE",
+    distractors: ["FABRIC", "UTENSIL", "DECK"]
+  },
+  {
+    words: ["CUT", "CREAM", "WAR"],
+    answer: "COLD",
+    distractors: ["SLICE", "BATTLE", "LOTION"]
+  },
+  {
+    words: ["NOTE", "CHAIN", "MASTER"],
+    answer: "KEY",
+    distractors: ["LINK", "SONG", "BOSS"]
+  },
+  {
+    words: ["SHOCK", "SHAVE", "TASTE"],
+    answer: "AFTER",
+    distractors: ["SURPRISE", "FLAVOR", "RAZOR"]
+  },
+  {
+    words: ["WISE", "WORK", "TOWER"],
+    answer: "CLOCK",
+    distractors: ["OWL", "OFFICE", "CASTLE"]
+  },
+  {
+    words: ["GRASS", "KING", "MEAT"],
+    answer: "CRAB",
+    distractors: ["FIELD", "BEEF", "CROWN"]
+  },
+  {
+    words: ["BABY", "SPRING", "CAP"],
+    answer: "SHOWER",
+    distractors: ["INFANT", "HAT", "SEASON"]
+  },
+  {
+    words: ["BREAK", "BEAN", "CAKE"],
+    answer: "COFFEE",
+    distractors: ["SNACK", "PLANT", "DESSERT"]
+  },
+  {
+    words: ["CRY", "FRONT", "SHIP"],
+    answer: "BATTLE",
+    distractors: ["TEAR", "WAR", "BOW"]
+  },
+  {
+    words: ["HOLD", "PRINT", "STOOL"],
+    answer: "FOOT",
+    distractors: ["HAND", "BOOK", "CHAIR"]
+  },
+  {
+    words: ["ROLL", "BEAN", "FISH"],
+    answer: "JELLY",
+    distractors: ["SUSHI", "LEGUME", "SALMON"]
+  },
+  {
+    words: ["HORSE", "HUMAN", "DRAG"],
+    answer: "RACE",
+    distractors: ["RIDER", "BODY", "PULL"]
+  },
+  {
+    words: ["OIL", "BAR", "TUNA"],
+    answer: "SALAD",
+    distractors: ["PETROL", "ALCOHOL", "FISH"]
+  },
+  {
+    words: ["BOTTOM", "CURVE", "HOP"],
+    answer: "BELL",
+    distractors: ["BASE", "JUMP", "ARC"]
+  },
+  {
+    words: ["TOMATO", "BOMB", "PICKER"],
+    answer: "CHERRY",
+    distractors: ["FRUIT", "EXPLOSION", "WORKER"]
+  },
+    {
+      words: ["PEA", "SHELL", "CHEST"],
+      answer: "NUT",
+      distractors: ["LEGUME", "ARMOR", "OYSTER"]
+    },
+    {
+      words: ["LINE", "FRUIT", "DRUNK"],
+      answer: "PUNCH",
+      distractors: ["QUEUE", "APPLE", "ALCOHOL"]
+    },
+    {
+      words: ["BUMP", "EGG", "STEP"],
+      answer: "GOOSE",
+      distractors: ["LUMP", "HATCH", "STAIR"]
+    },
+    {
+      words: ["FIGHT", "CONTROL", "MACHINE"],
+      answer: "GUN",
+      distractors: ["BRAWL", "REMOTE", "ENGINE"]
+    },
+    {
+      words: ["HOME", "ARM", "ROOM"],
+      answer: "REST",
+      distractors: ["HOUSE", "LIMB", "SPACE"]
+    },
+    {
+      words: ["CHILD", "SCAN", "WASH"],
+      answer: "BRAIN",
+      distractors: ["KID", "MRI", "SOAP"]
+    },
+    {
+      words: ["NOSE", "STONE", "BEAR"],
+      answer: "BROWN",
+      distractors: ["SCENT", "ROCK", "ANIMAL"]
+    },
+    {
+      words: ["END", "LINE", "LOCK"],
+      answer: "DEAD",
+      distractors: ["FINISH", "QUEUE", "KEY"]
+    },
+    {
+      words: ["CONTROL", "PLACE", "RATE"],
+      answer: "BIRTH",
+      distractors: ["MANAGE", "SPOT", "SCORE"]
+    },
+    {
+      words: ["LOUNGE", "HOUR", "NAPKIN"],
+      answer: "COCKTAIL",
+      distractors: ["WAIT", "TIME", "CLOTH"]
+    },
+    {
+      words: ["ARTIST", "HATCH", "ROUTE"],
+      answer: "ESCAPE",
+      distractors: ["PAINTER", "EGG", "ROAD"]
+    },
+    {
+      words: ["PET", "BOTTOM", "GARDEN"],
+      answer: "ROCK",
+      distractors: ["DOG", "BASE", "FLOWER"]
+    },
+    {
+      words: ["MATE", "SHOES", "TOTAL"],
+      answer: "RUNNING",
+      distractors: ["FRIEND", "SNEAKERS", "SUM"]
+    },
+    {
+      words: ["SELF", "ATTORNEY", "SPENDING"],
+      answer: "DEFENSE",
+      distractors: ["EGO", "LAWYER", "COST"]
+    },
+    {
+      words: ["BOARD", "BLADE", "BACK"],
+      answer: "SWITCH",
+      distractors: ["WOOD", "KNIFE", "SPINE"]
+    },
+    {
+      words: ["LAND", "HAND", "HOUSE"],
+      answer: "FARM",
+      distractors: ["EARTH", "PALM", "HOME"]
+    },
+    {
+      words: ["HUNGRY", "ORDER", "BELT"],
+      answer: "MONEY",
+      distractors: ["STARVING", "MEAL", "WAIST"]
+    },
+    {
+      words: ["FORWARD", "FLUSH", "RAZOR"],
+      answer: "STRAIGHT",
+      distractors: ["AHEAD", "TOILET", "BLADE"]
+    },
+    {
+      words: ["SHADOW", "CHART", "DROP"],
+      answer: "EYE",
+      distractors: ["DARK", "GRAPH", "FALL"]
+    },
+    {
+      words: ["WAY", "GROUND", "WEATHER"],
+      answer: "FAIR",
+      distractors: ["PATH", "DIRT", "RAIN"]
+    }
+  ]
 
 const GAME_DURATION = 600 // 10 minutes
 
@@ -209,16 +559,43 @@ function GameContent() {
   const [isFirstAttempt, setIsFirstAttempt] = useState(true)
   const [choices, setChoices] = useState<string[]>([])
   const [isProcessingAnswer, setIsProcessingAnswer] = useState(false)
+  const [gameInitialized, setGameInitialized] = useState(false)
 
-  // Track game start time for duration calculation
+  // Restore game state on load
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const existingStartTime = localStorage.getItem('currentGameStartTime')
-      if (!existingStartTime) {
+    if (typeof window !== 'undefined' && !gameInitialized) {
+      const savedScore = localStorage.getItem('game2_currentScore')
+      const savedTimeLeft = localStorage.getItem('game2_timeLeft')
+      const savedQuestionIndex = localStorage.getItem('game2_currentQuestionIndex')
+      const savedQuestionsAnswered = localStorage.getItem('game2_questionsAnswered')
+      const savedSkips = localStorage.getItem('game2_skips')
+      const savedStartTime = localStorage.getItem('currentGameStartTime')
+      
+      if (savedScore !== null) setScore(parseInt(savedScore))
+      if (savedTimeLeft !== null) setTimeLeft(parseInt(savedTimeLeft))
+      if (savedQuestionIndex !== null) setCurrentQuestionIndex(parseInt(savedQuestionIndex))
+      if (savedQuestionsAnswered !== null) setQuestionsAnswered(parseInt(savedQuestionsAnswered))
+      if (savedSkips !== null) setSkips(parseInt(savedSkips))
+      
+      // Initialize start time if not exists
+      if (!savedStartTime) {
         localStorage.setItem('currentGameStartTime', Date.now().toString())
       }
+      
+      setGameInitialized(true)
     }
-  }, [])
+  }, [gameInitialized])
+
+  // Save game state whenever it changes
+  useEffect(() => {
+    if (gameInitialized && typeof window !== 'undefined') {
+      localStorage.setItem('game2_currentScore', score.toString())
+      localStorage.setItem('game2_timeLeft', timeLeft.toString())
+      localStorage.setItem('game2_currentQuestionIndex', currentQuestionIndex.toString())
+      localStorage.setItem('game2_questionsAnswered', questionsAnswered.toString())
+      localStorage.setItem('game2_skips', skips.toString())
+    }
+  }, [gameInitialized, score, timeLeft, currentQuestionIndex, questionsAnswered, skips])
 
   // Helper function to calculate and store game duration
   const calculateAndStoreDuration = () => {
@@ -307,6 +684,13 @@ function GameContent() {
         localStorage.setItem('currentScore', score.toString());
         localStorage.setItem('currentGameQuestionsAnswered', questionsAnswered.toString());
         sessionStorage.setItem('shouldCreateNewPlay', 'true');
+        
+        // Clean up game state
+        localStorage.removeItem('game2_currentScore')
+        localStorage.removeItem('game2_timeLeft')
+        localStorage.removeItem('game2_currentQuestionIndex')
+        localStorage.removeItem('game2_questionsAnswered')
+        localStorage.removeItem('game2_skips')
       }
       router.replace('/2/postgame');
     }
@@ -322,6 +706,14 @@ function GameContent() {
           localStorage.setItem('currentScore', score.toString());
           localStorage.setItem('currentGameQuestionsAnswered', questionsAnswered.toString());
           sessionStorage.setItem('shouldCreateNewPlay', 'true');
+          
+          // Clean up game state
+          localStorage.removeItem('game2_currentScore')
+          localStorage.removeItem('game2_timeLeft')
+          localStorage.removeItem('game2_currentQuestionIndex')
+          localStorage.removeItem('game2_questionsAnswered')
+          localStorage.removeItem('game2_skips')
+          
           router.replace('/2/postgame');
           return 0;
         }
@@ -371,6 +763,14 @@ function GameContent() {
         localStorage.setItem('currentScore', newScore.toString());
         localStorage.setItem('currentGameQuestionsAnswered', newQuestionsAnswered.toString());
         sessionStorage.setItem('shouldCreateNewPlay', 'true');
+        
+        // Clean up game state
+        localStorage.removeItem('game2_currentScore')
+        localStorage.removeItem('game2_timeLeft')
+        localStorage.removeItem('game2_currentQuestionIndex')
+        localStorage.removeItem('game2_questionsAnswered')
+        localStorage.removeItem('game2_skips')
+        
         router.replace('/2/postgame');
       }
     }, 1000);
@@ -382,6 +782,13 @@ function GameContent() {
       localStorage.setItem('currentScore', score.toString());
       localStorage.setItem('currentGameQuestionsAnswered', questionsAnswered.toString());
       sessionStorage.setItem('shouldCreateNewPlay', 'true');
+      
+      // Clean up game state
+      localStorage.removeItem('game2_currentScore')
+      localStorage.removeItem('game2_timeLeft')
+      localStorage.removeItem('game2_currentQuestionIndex')
+      localStorage.removeItem('game2_questionsAnswered')
+      localStorage.removeItem('game2_skips')
     }
     router.replace('/2/postgame');
   };
@@ -423,13 +830,13 @@ function GameContent() {
   const getRankStyle = (index: number) => {
     switch (index) {
       case 0:
-        return "bg-yellow-100 text-yellow-700 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold border border-yellow-200"
+        return "bg-gradient-to-br from-yellow-400 to-yellow-500 text-yellow-900 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shadow-lg border-2 border-yellow-300"
       case 1:
-        return "bg-gray-100 text-gray-700 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold border border-gray-200"
+        return "bg-gradient-to-br from-gray-300 to-gray-400 text-gray-800 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shadow-lg border-2 border-gray-200"
       case 2:
-        return "bg-amber-100 text-amber-700 w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold border border-amber-200"
+        return "bg-gradient-to-br from-amber-600 to-amber-700 text-amber-100 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shadow-lg border-2 border-amber-500"
       default:
-        return "w-6 text-center text-xs"
+        return "w-8 text-center text-sm font-bold text-gray-700"
     }
   }
 
@@ -442,26 +849,74 @@ function GameContent() {
         background: "linear-gradient(135deg, #f6faff 0%, #f8f6ff 100%)",
       }}
     >
-      <div className="container mx-auto grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-        {/* Game Section - Left Side */}
-        <div className="flex flex-col items-center justify-center min-h-screen">
-          <h1
-            className="text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight text-center leading-[1.1] py-4 mb-4 z-10 relative"
-            style={{
-              background: "linear-gradient(90deg, #4f46e5 0%, #9333ea 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-            }}
-          >
-            Category Story
-          </h1>
-          <Card className="w-full max-w-xl bg-white rounded-3xl shadow-2xl border border-blue-100 p-6">
+      <div className="container mx-auto flex flex-col items-center">
+        {/* Centered Header */}
+        <h1
+          className="text-2xl sm:text-3xl md:text-4xl font-semibold tracking-tight text-center leading-[1.1] py-4 mb-6 z-10 relative"
+          style={{
+            background: "linear-gradient(90deg, #4f46e5 0%, #9333ea 100%)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            backgroundClip: "text",
+          }}
+        >
+          Category Story
+        </h1>
+        
+        {/* Cards Grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-24 items-start w-full max-w-6xl">
+          {/* Game Section - Left Side */}
+          <div className="flex flex-col items-center justify-center">
+          <Card className="w-full max-w-xl bg-white rounded-3xl shadow-2xl border border-blue-100 p-6 h-[600px]" style={{width: '576px'}}>
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
-                <Badge variant="outline" className="text-lg font-bold">
-                  {formatTime(timeLeft)}
-                </Badge>
+                <div className="relative flex items-center justify-center">
+                  <svg
+                    className="w-20 h-20 transform -rotate-90"
+                    viewBox="0 0 80 80"
+                  >
+                    {/* Background circle */}
+                    <circle
+                      cx="40"
+                      cy="40"
+                      r="35"
+                      fill="none"
+                      stroke="#e5e7eb"
+                      strokeWidth="5"
+                    />
+                    {/* Progress circle */}
+                    <circle
+                      cx="40"
+                      cy="40"
+                      r="35"
+                      fill="none"
+                      stroke={
+                        timeLeft <= 30 ? "#dc2626" : 
+                        timeLeft <= 60 ? "#ef4444" : 
+                        timeLeft <= 120 ? "#f59e0b" : 
+                        "#3b82f6"
+                      }
+                      strokeWidth="5"
+                      strokeLinecap="round"
+                      strokeDasharray={`${2 * Math.PI * 35}`}
+                      strokeDashoffset={`${2 * Math.PI * 35 * (1 - timeLeft / GAME_DURATION)}`}
+                      className="transition-all duration-500 ease-out"
+                    />
+                  </svg>
+                  {/* Timer text */}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span 
+                      className={`text-base font-bold transition-colors duration-300 ${
+                        timeLeft <= 30 ? "text-red-700" : 
+                        timeLeft <= 60 ? "text-red-600" : 
+                        timeLeft <= 120 ? "text-orange-600" : 
+                        "text-blue-600"
+                      }`}
+                    >
+                      {formatTime(timeLeft)}
+                    </span>
+                  </div>
+                </div>
                 {feedback && (
                   <div className="flex items-center space-x-2">
                     {feedback === "correct" ? (
@@ -513,27 +968,30 @@ function GameContent() {
                 </div>
               </div>
 
-              <div className="flex gap-3 justify-between">
-                <StartGameButton
-                  onClick={handleSkip}
-                  className="bg-white text-gray-600 hover:text-gray-900 border border-gray-300 px-6 py-2 flex-1"
-                >
-                  Skip
-                </StartGameButton>
+              {/* Skip and Submit Answer buttons aligned with answer options */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="flex justify-start">
+                  <StartGameButton
+                    onClick={handleSkip}
+                    className="bg-white text-gray-600 hover:text-gray-900 border border-gray-300 px-6 py-2 w-full ml-1"
+                  >
+                    Skip
+                  </StartGameButton>
+                </div>
                 <SendButton 
                   onClick={handleSubmit}
                   disabled={!selectedChoice || isProcessingAnswer}
-                  className="flex-1"
+                  className="bg-black text-white hover:bg-gray-800 w-full"
                 >
                   Submit Answer
                 </SendButton>
               </div>
               
-              {/* End Game and Advance Button */}
-              <div className="flex justify-center mt-3">
+              {/* End Game and Advance Button - Bottom Right */}
+              <div className="flex justify-end mt-3">
                 <StartGameButton
                   onClick={handleEndGame}
-                  className="bg-black text-white hover:bg-gray-800 border border-black px-6 py-2"
+                  className="bg-white text-purple-600 hover:bg-purple-50 border border-purple-300 px-6 py-2"
                 >
                   End Game and Advance
                 </StartGameButton>
@@ -542,26 +1000,15 @@ function GameContent() {
           </Card>
         </div>
 
-        {/* Leaderboard Section - Right Side */}
-        <div className="flex flex-col items-center justify-center min-h-screen">
-          <h2
-            className="text-2xl sm:text-3xl font-semibold tracking-tight text-center leading-[1.1] py-4 mb-4 z-10 relative flex items-center gap-2"
-            style={{
-              background: "linear-gradient(90deg, #4f46e5 0%, #9333ea 100%)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              backgroundClip: "text",
-            }}
-          >
-            Live Leaderboard
-          </h2>
-          <Card className="w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-blue-100 p-4">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-center flex flex-col items-center gap-2">
+          {/* Leaderboard Section - Right Side */}
+          <div className="flex flex-col items-center justify-center">
+          <Card className="w-full max-w-xl bg-white rounded-3xl shadow-2xl border border-blue-100 p-6 h-[600px]" style={{width: '576px'}}>
+            <CardHeader className="pb-3">
+              <CardTitle className="text-center flex flex-col items-center gap-1">
                 <div className="flex items-center gap-2">
-                  <Trophy className="h-5 w-5 text-yellow-500" />
-                  <span className="text-lg">Top Players</span>
-                  <Trophy className="h-5 w-5 text-yellow-500" />
+                  <Trophy className="h-4 w-4 text-yellow-500" />
+                  <span className="text-base">Top Players</span>
+                  <Trophy className="h-4 w-4 text-yellow-500" />
                 </div>
                 <div className="text-xs text-gray-500 flex items-center gap-1">
                   <Clock className="h-3 w-3" />
@@ -569,35 +1016,41 @@ function GameContent() {
                 </div>
               </CardTitle>
             </CardHeader>
-            <CardContent className="px-4">
-              <div className="w-full">
-                <div className="grid grid-cols-4 gap-2 px-3 py-2 text-xs text-gray-500 border-b">
+            <CardContent className="px-6 space-y-4">
+              <div className="space-y-1">
+                {/* Column Headers */}
+                <div className="grid grid-cols-4 gap-2 px-2 py-1 text-xs text-gray-500 border-b">
                   <div>Rank</div>
                   <div>Player</div>
                   <div className="text-right">Score</div>
                   <div className="text-center">Trend</div>
                 </div>
+                
+                {/* Player Entries */}
                 {LEADERBOARD_DATA.slice(0, 8).map((entry, index) => (
                   <div
                     key={index}
-                    className="grid grid-cols-4 gap-2 px-3 py-2 border-b text-sm"
+                    className="bg-gray-100 hover:bg-gray-200 transition-colors duration-200 rounded-lg p-1.5 shadow-sm border border-gray-200"
                   >
-                    <div className="flex items-center">
-                      <div className={getRankStyle(index)}>
-                        {index + 1}
+                    <div className="grid grid-cols-4 gap-2 items-center">
+                      <div className="flex items-center">
+                        <div className={getRankStyle(index)}>
+                          {index + 1}
+                        </div>
                       </div>
+                      <div className="font-medium text-xs text-gray-900 truncate">{entry.userName}</div>
+                      <div className="text-right font-bold text-xs text-gray-900">{entry.score}</div>
+                      <div className="flex justify-center">{getTrendIcon(entry.trend)}</div>
                     </div>
-                    <div className="font-medium text-xs truncate">{entry.userName}</div>
-                    <div className="text-right font-bold text-xs">{entry.score}</div>
-                    <div className="flex justify-center">{getTrendIcon(entry.trend)}</div>
                   </div>
                 ))}
               </div>
-              <p className="text-center text-gray-500 mt-3 text-xs">
-                Rankings updated hourly based on player performance
+              <p className="text-center text-gray-500 text-xs">
+                Rankings updated regularly based on player performance
               </p>
             </CardContent>
           </Card>
+        </div>
         </div>
       </div>
     </main>

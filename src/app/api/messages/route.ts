@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { updateWaitingRoomMessages } from "@/lib/mongoFunctions";
+import { updateWaitingRoomMessages } from "@/lib/supabaseFunctions";
 
 export async function POST(req: NextRequest) {
   const { userId, messages } = await req.json();
