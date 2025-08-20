@@ -42,7 +42,7 @@ export default function Importance() {
     {
       content: (
         <div className="text-left">
-          Performance on this task has been shown to predict a number of important outcomes, including <span className="font-bold">career success</span>, <span className="font-bold">salary</span>, and even people's ability to form <span className="font-bold">satisfying relationships.</span>
+          Performance on this task has been shown to predict a number of important outcomes, including <span className="font-bold">career success,</span> <span className="font-bold">salary,</span> and even people's ability to form <span className="font-bold">satisfying relationships.</span>
         </div>
       ),
       type: "text"

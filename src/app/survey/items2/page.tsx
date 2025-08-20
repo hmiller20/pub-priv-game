@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { RadioGroupSmall, RadioGroupItemSmall } from "@/components/ui/radio-group-small"
+import { Textarea } from "@/components/ui/textarea"
 import { StartGameButton } from "@/components/ui/send-start-buttons"
 
 const questions = [
@@ -22,7 +24,7 @@ const questions = [
   },
   {
     id: "attn_3",
-    text: "If you are paying attention, please choose option three.",
+    text: "If you are paying attention, choose the option that is equal to one plus two.",
     category: "likert",
   },
   {
@@ -72,6 +74,7 @@ const MANIP_CHECK_VALUES = {
 
 export default function SurveyPage() {
   const [responses, setResponses] = useState<Record<string, number>>({})
+  const [suspicionResponse, setSuspicionResponse] = useState<string>("")
   const router = useRouter()
 
   const handleResponse = (questionId: string, value: number) => {
@@ -84,12 +87,14 @@ export default function SurveyPage() {
   // Note: Previously checked for attention check failures and routed to page5
   // Now we continue regardless of failures but log them
 
-  // Check if all non-attention-check questions have been answered
+  // Check if all non-attention-check questions have been answered AND suspicion response is provided
   const isComplete = React.useMemo(() => {
-    return questions
+    const allQuestionsAnswered = questions
       .filter(q => !q.id.includes('attn'))
-      .every((q) => typeof responses[q.id] === 'number')
-  }, [responses])
+      .every((q) => typeof responses[q.id] === 'number');
+    const suspicionAnswered = suspicionResponse.trim().length > 0;
+    return allQuestionsAnswered && suspicionAnswered;
+  }, [responses, suspicionResponse])
 
   const handleNext = async () => {
     // Check if the attention check question was answered correctly and log failure
@@ -100,7 +105,7 @@ export default function SurveyPage() {
     }
 
     // Check if manipulation check was answered correctly and log failure
-    const assignedCondition = localStorage.getItem('assignedCondition');
+    const assignedCondition = localStorage.getItem('condition');
     const manipCheckResponse = responses['manip_check'];
     
     // Check if they answered correctly based on their condition
@@ -119,6 +124,8 @@ export default function SurveyPage() {
       if (!userId) {
         throw new Error('No user ID found');
       }
+
+
 
       // Get the mastery responses from previous page from localStorage
       const masteryResponses = JSON.parse(localStorage.getItem('masteryResponses') || '[]');
@@ -155,7 +162,8 @@ export default function SurveyPage() {
         },
         body: JSON.stringify({
           mastery: masteryObj,
-          public: publicObj
+          public: publicObj,
+          suspicion: suspicionResponse
         }),
       });
 
@@ -166,7 +174,7 @@ export default function SurveyPage() {
       // Get the latest score for the code page
       const latestPlay = parseInt(localStorage.getItem('gamePlays') || '1');
       const latestScore = parseInt(localStorage.getItem(`play${latestPlay}Score`) || '0');
-      const assignedCondition = localStorage.getItem('assignedCondition');
+      const assignedCondition = localStorage.getItem('condition');
 
       // Proceed to code page with score and condition
       router.replace(`/code?score=${latestScore}&condition=${assignedCondition}`);
@@ -178,7 +186,7 @@ export default function SurveyPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4" style={{ background: "linear-gradient(135deg, #f6faff 0%, #f8f6ff 100%)" }}>
-      <Card className="w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-blue-100">
+      <Card className="w-full max-w-4xl bg-white rounded-3xl shadow-2xl border border-blue-100">
         <CardContent className="p-6">
           <h2 className="text-2xl font-bold mb-6">Again, please rate how much you agree with each statement.</h2>
           
@@ -186,24 +194,29 @@ export default function SurveyPage() {
             <div key={question.id} className="mb-8">
               <Label className="text-lg mb-4 block">{question.text}</Label>
               {question.category === 'manipulation' ? (
-                <RadioGroup
+                <RadioGroupSmall
                   onValueChange={(value) => handleResponse(question.id, parseInt(value))}
                   value={responses[question.id]?.toString()}
                   className="space-y-3"
                 >
                   {question.options?.map((option, index) => (
                     <div key={index} className="flex items-center space-x-2">
-                      <RadioGroupItem value={(index + 1).toString()} id={`${question.id}-${index + 1}`} />
+                      <RadioGroupItemSmall value={(index + 1).toString()} id={`${question.id}-${index + 1}`} />
                       <Label htmlFor={`${question.id}-${index + 1}`} className="cursor-pointer">
                         {option}
                       </Label>
                     </div>
                   ))}
-                </RadioGroup>
+                </RadioGroupSmall>
               ) : (
                 <div className="space-y-3">
-                  <div className="flex justify-between text-sm text-muted-foreground px-0">
+                  <div className="flex justify-between text-sm text-muted-foreground px-10 mb-3">
                     <span>Strongly disagree</span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
                     <span>Strongly agree</span>
                   </div>
                   <RadioGroup
@@ -212,13 +225,15 @@ export default function SurveyPage() {
                     className="flex justify-between px-10"
                   >
                     {[1, 2, 3, 4, 5, 6, 7].map((value) => (
-                      <div key={value} className="flex flex-col items-center gap-2">
-                        <RadioGroupItem value={value.toString()} id={`${question.id}-${value}`} />
+                      <div key={value} className="flex flex-col items-center">
                         <Label 
                           htmlFor={`${question.id}-${value}`}
-                          className="cursor-pointer text-md"
+                          className="cursor-pointer relative"
                         >
-                          {value}
+                          <RadioGroupItem value={value.toString()} id={`${question.id}-${value}`} />
+                          <span className="absolute inset-0 flex items-center justify-center text-lg font-semibold pointer-events-none">
+                            {value}
+                          </span>
                         </Label>
                       </div>
                     ))}
@@ -227,6 +242,18 @@ export default function SurveyPage() {
               )}
             </div>
           ))}
+
+          <div className="mb-8">
+            <Label className="text-lg mb-4 block">
+            Before moving on, please share any thoughts about your group experience. If you have none, just write "N/A".
+            </Label>
+            <Textarea
+              value={suspicionResponse}
+              onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setSuspicionResponse(e.target.value)}
+              placeholder="Type here..."
+              className="min-h-[100px] w-full p-3 border border-gray-300 rounded-md"
+            />
+          </div>
 
           <div className="flex justify-end">
             <StartGameButton

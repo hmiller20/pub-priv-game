@@ -9,6 +9,7 @@ import { CheckCircle2, XCircle, SkipForward, Trophy, Clock, ArrowUpIcon, ArrowDo
 import { useRouter } from "next/navigation"
 import { useLocalStorage } from "@/lib/hooks/useLocalStorage"
 import { StartGameButton, SendButton } from "@/components/ui/send-start-buttons"
+import { startGameSession } from "@/lib/supabaseFunctions"
 
 // 30 questions
 const RAT_QUESTIONS = [
@@ -517,16 +518,16 @@ const RAT_QUESTIONS = [
 const GAME_DURATION = 600 // 10 minutes
 
 const LEADERBOARD_DATA = [
-  { userName: "Caleb L", score: 540, date: "2025-04-13", trend: "up" },
-  { userName: "Samantha P", score: 480, date: "2025-04-12", trend: "neutral" },
-  { userName: "Taylor R", score: 465, date: "2025-04-11", trend: "down" },
-  { userName: "David B", score: 450, date: "2025-04-10", trend: "up" },
-  { userName: "Will S", score: 425, date: "2025-04-09", trend: "down" },
-  { userName: "Landon M", score: 400, date: "2025-04-08", trend: "neutral" },
-  { userName: "Anna M", score: 390, date: "2025-04-07", trend: "up" },
-  { userName: "Kylie C", score: 385, date: "2025-04-06", trend: "neutral" },
-  { userName: "Drew N", score: 350, date: "2025-04-05", trend: "neutral" },
-  { userName: "Jeff M", score: 330, date: "2025-04-04", trend: "down" },
+  { userName: "Caleb L", score: 185, date: "2025-04-13", trend: "up" },
+  { userName: "Samantha P", score: 160, date: "2025-04-12", trend: "neutral" },
+  { userName: "Taylor R", score: 150, date: "2025-04-11", trend: "down" },
+  { userName: "Ben W", score: 145, date: "2025-04-10", trend: "up" },
+  { userName: "Nadia R", score: 130, date: "2025-04-09", trend: "down" },
+  { userName: "Anna M", score: 120, date: "2025-04-08", trend: "neutral" },
+  { userName: "Landon M", score: 120, date: "2025-04-07", trend: "up" },
+  { userName: "Kylie C", score: 70, date: "2025-04-06", trend: "neutral" },
+  { userName: "Drew N", score: 65, date: "2025-04-05", trend: "neutral" },
+  { userName: "Jeff M", score: 60, date: "2025-04-04", trend: "down" },
 ] as const;
 
 // Fisher-Yates shuffle algorithm
@@ -560,6 +561,76 @@ function GameContent() {
   const [choices, setChoices] = useState<string[]>([])
   const [isProcessingAnswer, setIsProcessingAnswer] = useState(false)
   const [gameInitialized, setGameInitialized] = useState(false)
+  const [gameSessionStarted, setGameSessionStarted] = useState(false)
+  const [gamedataId, setGamedataId] = useState<number | null>(null)
+
+  // Initialize game session in database when component mounts
+  useEffect(() => {
+    const initializeGameSession = async () => {
+      if (typeof window !== 'undefined' && !gameSessionStarted) {
+        const userId = localStorage.getItem('ratGameUserId')
+        if (userId && !sessionStorage.getItem('game2_sessionStarted')) {
+          try {
+            // Get current trial number by checking existing gamedata records
+            const gameCountResponse = await fetch(`/api/participants/${userId}/gamecount`);
+            let trialNumber = 1;
+            
+            if (gameCountResponse.ok) {
+              const countData = await gameCountResponse.json();
+              trialNumber = (countData.gameCount || 0) + 1;
+            }
+            
+            // Increment gameplays count in participant record
+            const gameplayResponse = await fetch(`/api/participants/${userId}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ 
+                gameplays: 'INCREMENT' // Special value to indicate increment
+              })
+            });
+            
+            if (!gameplayResponse.ok) {
+              console.error('Failed to increment gameplays count');
+            } else {
+              console.log('Game 2 session started and gameplays incremented');
+            }
+            
+            // Create gamedata record for this game session
+            const gamedataResponse = await fetch('/api/gamedata', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                participant_id: userId,
+                trial: trialNumber,
+                score: 0,
+                skips: 0,
+                duration: 0,
+                questions_answered: 0
+              })
+            });
+            
+            if (gamedataResponse.ok) {
+              const gamedataResult = await gamedataResponse.json();
+              if (gamedataResult.success && gamedataResult.gamedata) {
+                setGamedataId(gamedataResult.gamedata.id);
+                localStorage.setItem('game2_gamedataId', gamedataResult.gamedata.id.toString());
+                console.log('Game 2 gamedata record created with ID:', gamedataResult.gamedata.id, 'trial:', trialNumber);
+              }
+            } else {
+              console.error('Failed to create gamedata record');
+            }
+            
+            sessionStorage.setItem('game2_sessionStarted', 'true')
+          } catch (error) {
+            console.error('Failed to start game session:', error)
+          }
+        }
+        setGameSessionStarted(true)
+      }
+    }
+    
+    initializeGameSession()
+  }, [gameSessionStarted])
 
   // Restore game state on load
   useEffect(() => {
@@ -570,12 +641,14 @@ function GameContent() {
       const savedQuestionsAnswered = localStorage.getItem('game2_questionsAnswered')
       const savedSkips = localStorage.getItem('game2_skips')
       const savedStartTime = localStorage.getItem('currentGameStartTime')
+      const savedGamedataId = localStorage.getItem('game2_gamedataId')
       
       if (savedScore !== null) setScore(parseInt(savedScore))
       if (savedTimeLeft !== null) setTimeLeft(parseInt(savedTimeLeft))
       if (savedQuestionIndex !== null) setCurrentQuestionIndex(parseInt(savedQuestionIndex))
       if (savedQuestionsAnswered !== null) setQuestionsAnswered(parseInt(savedQuestionsAnswered))
       if (savedSkips !== null) setSkips(parseInt(savedSkips))
+      if (savedGamedataId !== null) setGamedataId(parseInt(savedGamedataId))
       
       // Initialize start time if not exists
       if (!savedStartTime) {
@@ -594,8 +667,83 @@ function GameContent() {
       localStorage.setItem('game2_currentQuestionIndex', currentQuestionIndex.toString())
       localStorage.setItem('game2_questionsAnswered', questionsAnswered.toString())
       localStorage.setItem('game2_skips', skips.toString())
+      if (gamedataId !== null) {
+        localStorage.setItem('game2_gamedataId', gamedataId.toString())
+      }
     }
-  }, [gameInitialized, score, timeLeft, currentQuestionIndex, questionsAnswered, skips])
+  }, [gameInitialized, score, timeLeft, currentQuestionIndex, questionsAnswered, skips, gamedataId])
+
+  // Helper function to upload final gamedata when game ends
+  const uploadFinalGamedata = async () => {
+    if (!gamedataId) {
+      console.error('No gamedata ID found, cannot upload final data');
+      return;
+    }
+
+    const duration = calculateAndStoreDuration();
+    
+    try {
+      const response = await fetch(`/api/gamedata/${gamedataId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          score: score,
+          skips: skips,
+          duration: duration,
+          questions_answered: questionsAnswered,
+          completedat: new Date().toISOString()
+        })
+      });
+
+      if (response.ok) {
+        console.log('Final gamedata uploaded successfully');
+      } else {
+        console.error('Failed to upload final gamedata');
+      }
+    } catch (error) {
+      console.error('Error uploading final gamedata:', error);
+    }
+  };
+
+  // Helper function to handle game end from timer
+  const handleGameEndFromTimer = async () => {
+    if (typeof window !== 'undefined') {
+      await uploadFinalGamedata(); // Upload final game data
+      calculateAndStoreDuration(); // Track duration when timer ends
+      localStorage.setItem('currentScore', score.toString());
+      localStorage.setItem('currentGameQuestionsAnswered', questionsAnswered.toString());
+      sessionStorage.setItem('shouldCreateNewPlay', 'true');
+      
+      // Clean up game state
+      localStorage.removeItem('game2_currentScore')
+      localStorage.removeItem('game2_timeLeft')
+      localStorage.removeItem('game2_currentQuestionIndex')
+      localStorage.removeItem('game2_questionsAnswered')
+      localStorage.removeItem('game2_skips')
+      localStorage.removeItem('game2_gamedataId')
+    }
+    router.replace('/2/postgame');
+  };
+
+  // Helper function to handle game end from completing all questions
+  const handleGameEndFromCompletion = async (finalScore: number, finalQuestionsAnswered: number) => {
+    if (typeof window !== 'undefined') {
+      await uploadFinalGamedata(); // Upload final game data
+      calculateAndStoreDuration(); // Track duration when all questions completed
+      localStorage.setItem('currentScore', finalScore.toString());
+      localStorage.setItem('currentGameQuestionsAnswered', finalQuestionsAnswered.toString());
+      sessionStorage.setItem('shouldCreateNewPlay', 'true');
+      
+      // Clean up game state
+      localStorage.removeItem('game2_currentScore')
+      localStorage.removeItem('game2_timeLeft')
+      localStorage.removeItem('game2_currentQuestionIndex')
+      localStorage.removeItem('game2_questionsAnswered')
+      localStorage.removeItem('game2_skips')
+      localStorage.removeItem('game2_gamedataId')
+    }
+    router.replace('/2/postgame');
+  };
 
   // Helper function to calculate and store game duration
   const calculateAndStoreDuration = () => {
@@ -666,7 +814,7 @@ function GameContent() {
     return () => clearInterval(interval)
   }, [])
 
-  const handleSkip = () => {
+  const handleSkip = async () => {
     // Skipping is now worth 0 points (no score change)
     const newSkips = skips + 1;
     setSkips(newSkips);
@@ -680,6 +828,7 @@ function GameContent() {
       setFeedback(null);
     } else {
       if (typeof window !== 'undefined') {
+        await uploadFinalGamedata(); // Upload final game data
         calculateAndStoreDuration(); // Track duration when skipping to end
         localStorage.setItem('currentScore', score.toString());
         localStorage.setItem('currentGameQuestionsAnswered', questionsAnswered.toString());
@@ -691,6 +840,7 @@ function GameContent() {
         localStorage.removeItem('game2_currentQuestionIndex')
         localStorage.removeItem('game2_questionsAnswered')
         localStorage.removeItem('game2_skips')
+        localStorage.removeItem('game2_gamedataId')
       }
       router.replace('/2/postgame');
     }
@@ -702,19 +852,7 @@ function GameContent() {
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
-          calculateAndStoreDuration(); // Track duration when timer ends
-          localStorage.setItem('currentScore', score.toString());
-          localStorage.setItem('currentGameQuestionsAnswered', questionsAnswered.toString());
-          sessionStorage.setItem('shouldCreateNewPlay', 'true');
-          
-          // Clean up game state
-          localStorage.removeItem('game2_currentScore')
-          localStorage.removeItem('game2_timeLeft')
-          localStorage.removeItem('game2_currentQuestionIndex')
-          localStorage.removeItem('game2_questionsAnswered')
-          localStorage.removeItem('game2_skips')
-          
-          router.replace('/2/postgame');
+          handleGameEndFromTimer();
           return 0;
         }
         return prev - 1;
@@ -759,25 +897,14 @@ function GameContent() {
         setCurrentQuestionIndex(prev => prev + 1);
         setFeedback(null);
       } else {
-        calculateAndStoreDuration(); // Track duration when all questions completed
-        localStorage.setItem('currentScore', newScore.toString());
-        localStorage.setItem('currentGameQuestionsAnswered', newQuestionsAnswered.toString());
-        sessionStorage.setItem('shouldCreateNewPlay', 'true');
-        
-        // Clean up game state
-        localStorage.removeItem('game2_currentScore')
-        localStorage.removeItem('game2_timeLeft')
-        localStorage.removeItem('game2_currentQuestionIndex')
-        localStorage.removeItem('game2_questionsAnswered')
-        localStorage.removeItem('game2_skips')
-        
-        router.replace('/2/postgame');
+        handleGameEndFromCompletion(newScore, newQuestionsAnswered);
       }
     }, 1000);
   };
 
-  const handleEndGame = () => {
+  const handleEndGame = async () => {
     if (typeof window !== 'undefined') {
+      await uploadFinalGamedata(); // Upload final game data
       calculateAndStoreDuration(); // Track duration when manually ending game
       localStorage.setItem('currentScore', score.toString());
       localStorage.setItem('currentGameQuestionsAnswered', questionsAnswered.toString());
@@ -789,6 +916,7 @@ function GameContent() {
       localStorage.removeItem('game2_currentQuestionIndex')
       localStorage.removeItem('game2_questionsAnswered')
       localStorage.removeItem('game2_skips')
+      localStorage.removeItem('game2_gamedataId')
     }
     router.replace('/2/postgame');
   };
@@ -827,13 +955,29 @@ function GameContent() {
     }
   }
 
-  const getRankStyle = (index: number) => {
-    switch (index) {
-      case 0:
-        return "bg-gradient-to-br from-yellow-400 to-yellow-500 text-yellow-900 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shadow-lg border-2 border-yellow-300"
+  const calculateRanks = () => {
+    const ranks: number[] = []
+    let currentRank = 1
+    
+    for (let i = 0; i < LEADERBOARD_DATA.length; i++) {
+      if (i > 0 && LEADERBOARD_DATA[i].score !== LEADERBOARD_DATA[i - 1].score) {
+        currentRank = i + 1
+      }
+      ranks.push(currentRank)
+    }
+    
+    return ranks
+  }
+
+  const ranks = calculateRanks()
+
+  const getRankStyle = (rank: number) => {
+    switch (rank) {
       case 1:
-        return "bg-gradient-to-br from-gray-300 to-gray-400 text-gray-800 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shadow-lg border-2 border-gray-200"
+        return "bg-gradient-to-br from-yellow-400 to-yellow-500 text-yellow-900 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shadow-lg border-2 border-yellow-300"
       case 2:
+        return "bg-gradient-to-br from-gray-300 to-gray-400 text-gray-800 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shadow-lg border-2 border-gray-200"
+      case 3:
         return "bg-gradient-to-br from-amber-600 to-amber-700 text-amber-100 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shadow-lg border-2 border-amber-500"
       default:
         return "w-8 text-center text-sm font-bold text-gray-700"
@@ -1034,8 +1178,8 @@ function GameContent() {
                   >
                     <div className="grid grid-cols-4 gap-2 items-center">
                       <div className="flex items-center">
-                        <div className={getRankStyle(index)}>
-                          {index + 1}
+                        <div className={getRankStyle(ranks[index])}>
+                          {ranks[index]}
                         </div>
                       </div>
                       <div className="font-medium text-xs text-gray-900 truncate">{entry.userName}</div>

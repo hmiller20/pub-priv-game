@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { StartGameButton } from "@/components/ui/send-start-buttons"
 
-// Start with just one question for testing
+// 
 const questions = [
   {
     id: "mastery1",
@@ -81,16 +81,21 @@ export default function SurveyPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4" style={{ background: "linear-gradient(135deg, #f6faff 0%, #f8f6ff 100%)" }}>
-      <Card className="w-full max-w-2xl bg-white rounded-3xl shadow-2xl border border-blue-100">
+      <Card className="w-full max-w-4xl bg-white rounded-3xl shadow-2xl border border-blue-100">
         <CardContent className="p-6">
-          <h2 className="text-2xl font-bold mb-6">Now, please rate how much you agree with each statement.</h2>
+          <h2 className="text-2xl font-bold mb-6">Before you discuss with your group, please answer a few questions. Your answers will not be shared with your group.</h2>
           
           {questions.map((question) => (
             <div key={question.id} className="mb-8">
               <Label className="text-lg mb-4 block">{question.text}</Label>
               <div className="space-y-3">
-                <div className="flex justify-between text-sm text-muted-foreground px-0">
+                <div className="flex justify-between text-sm text-muted-foreground px-10 mb-3">
                   <span>Strongly disagree</span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
+                  <span></span>
                   <span>Strongly agree</span>
                 </div>
                 <RadioGroup
@@ -99,13 +104,15 @@ export default function SurveyPage() {
                   className="flex justify-between px-10"
                 >
                   {[1, 2, 3, 4, 5, 6, 7].map((value) => (
-                    <div key={value} className="flex flex-col items-center gap-2">
-                      <RadioGroupItem value={value.toString()} id={`${question.id}-${value}`} />
+                    <div key={value} className="flex flex-col items-center">
                       <Label 
                         htmlFor={`${question.id}-${value}`}
-                        className="cursor-pointer text-md"
+                        className="cursor-pointer relative"
                       >
-                        {value}
+                        <RadioGroupItem value={value.toString()} id={`${question.id}-${value}`} />
+                        <span className="absolute inset-0 flex items-center justify-center text-lg font-semibold pointer-events-none">
+                          {value}
+                        </span>
                       </Label>
                     </div>
                   ))}

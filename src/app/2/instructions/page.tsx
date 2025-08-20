@@ -6,7 +6,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { useRouter } from "next/navigation"
 import { useLocalStorage } from "@/lib/hooks/useLocalStorage"
 import { StartGameButton } from "@/components/ui/send-start-buttons"
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
+import { RadioGroupSmall, RadioGroupItemSmall } from "@/components/ui/radio-group-small"
 import { Label } from "@/components/ui/label"
 import { useTextToSpeech } from "@/lib/hooks/useTextToSpeech"
 import { Volume2, VolumeX } from "lucide-react"
@@ -241,7 +241,7 @@ export default function Instructions() {
           <p className="text-lg font-medium text-center mb-4">
             {comprehensionQuestion.question}
           </p>
-          <RadioGroup
+          <RadioGroupSmall
             value={comprehensionAnswer}
             onValueChange={(value) => {
               setComprehensionAnswer(value)
@@ -251,13 +251,13 @@ export default function Instructions() {
           >
             {comprehensionQuestion.options.map((option, index) => (
               <div key={index} className="flex items-center space-x-2">
-                <RadioGroupItem value={option} id={`option-${index}`} />
+                <RadioGroupItemSmall value={option} id={`option-${index}`} />
                 <Label htmlFor={`option-${index}`} className="text-base">
                   {option}
                 </Label>
               </div>
             ))}
-          </RadioGroup>
+          </RadioGroupSmall>
           {showComprehensionError && (
             <p className="text-red-500 text-sm text-center mt-2">
               That's not correct. Please read the instructions again and try another answer.

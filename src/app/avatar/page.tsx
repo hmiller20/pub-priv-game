@@ -1,13 +1,12 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useRouter } from "next/navigation"
 import { useLocalStorage } from "@/lib/hooks/useLocalStorage"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { cn } from "@/lib/utils"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
 import FloatingBubbles from "../floating-bubbles"
@@ -79,6 +78,7 @@ export default function AvatarPage() {
   const [agreementChecked, setAgreementChecked] = useState(false)
   const [hasInitialized, setHasInitialized] = useState(false)
   const [isCreatingUser, setIsCreatingUser] = useState(false)
+  const initializationAttempted = useRef(false)
   const { playText, stopPlaying, isPlaying, isLoading } = useTextToSpeech();
 
   const modalSteps = [
@@ -87,54 +87,64 @@ export default function AvatarPage() {
     "After creating your avatar, you'll enter a waiting room where you'll be matched with other participants."
   ];
 
-  // Create user ID if it doesn't exist
+  // Create participant when page loads
   useEffect(() => {
-    const createUserIfNeeded = async () => {
+    const initializeParticipant = async () => {
+      // Prevent double initialization using ref
+      if (initializationAttempted.current) {
+        console.log('Initialization already attempted, skipping...')
+        return;
+      }
+      
+      initializationAttempted.current = true;
+      
       try {
         let userId = localStorage.getItem('ratGameUserId')
         
         if (!userId) {
+          console.log('No existing participant ID, creating new participant...')
           setIsCreatingUser(true)
           
-          const createUserResponse = await fetch('/api/users', {
+          // Generate random condition assignment (1 = private, 2 = public)
+          const condition = Math.random() < 0.5 ? '1' : '2';
+          
+          // Create participant record
+          const createResponse = await fetch('/api/participants', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-              gamePlays: 0,
-              leaderboardViews: 0,
-              gamePerformance: {},
-              createdAt: new Date(),
-              updatedAt: new Date()
+              condition: condition,
+              gameplays: 0
             }),
           })
 
-          if (!createUserResponse.ok) {
-            throw new Error('Failed to create user')
+          if (!createResponse.ok) {
+            throw new Error('Failed to create participant')
           }
 
-          const data = await createUserResponse.json()
-          if (!data.success || !data.userId) {
-            throw new Error('Failed to create user')
+          const data = await createResponse.json()
+          if (!data.success || !data.participantId) {
+            throw new Error('Failed to create participant')
           }
 
-          userId = data.userId
-          if (userId) {
-            localStorage.setItem('ratGameUserId', userId)
-            console.log('Created new user with ID:', userId)
-          }
+          userId = data.participantId
+          localStorage.setItem('ratGameUserId', userId)
+          localStorage.setItem('condition', condition)
+          console.log('Created new participant with ID:', userId, 'condition:', condition)
         } else {
-          console.log('Using existing user ID:', userId)
+          console.log('Using existing participant ID:', userId)
         }
       } catch (error) {
-        console.error('Failed to create user:', error)
+        console.error('Failed to create participant:', error)
         alert('There was an error initializing your session. Please refresh the page.')
+        initializationAttempted.current = false // Reset on error so user can try again
       } finally {
         setIsCreatingUser(false)
       }
     }
 
-    createUserIfNeeded()
-  }, [])
+    initializeParticipant()
+  }, []) // Empty dependency array to run only once
 
   useEffect(() => {
     const config = generateInitialAvatar()
@@ -229,32 +239,32 @@ export default function AvatarPage() {
       // Get the stored userId
       const userId = localStorage.getItem('ratGameUserId');
       if (!userId) {
-        alert('User profile not ready. Please wait a moment and try again.');
+        alert('Participant profile not ready. Please wait a moment and try again.');
         return;
       }
 
-      // Update user document with demographic info
-      const response = await fetch(`/api/users/${userId}`, {
+      // Update participant with demographic info
+      const response = await fetch(`/api/participants/${userId}`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
           age: parseInt(age),
-          gender: gender === 'male' ? 0 : 
-                 gender === 'female' ? 1 : 
-                 gender === 'non-binary' ? 2 : 
-                 gender === 'prefer-not' ? 3 : 4, // 4 is "other"
+          gender: gender as 'male' | 'female' | 'non-binary' | 'prefer-not' | 'other',
         }),
       });
 
       if (response.ok) {
+        // Store demographic data in localStorage for reference
+        localStorage.setItem('age', age);
+        localStorage.setItem('gender', gender);
         router.replace('/queue')
       } else {
-        throw new Error('Failed to update user demographics');
+        throw new Error('Failed to update participant demographics');
       }
     } catch (error) {
-      console.error('Error updating user demographics:', error);
+      console.error('Error updating participant demographics:', error);
       alert('There was an error. Please try again.');
     }
   }

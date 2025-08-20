@@ -32,23 +32,28 @@ export default function ConditionAssignment() {
           throw new Error('User not found. Please restart from the avatar page.');
         }
 
-        // Assign condition
-        const condition = getCondition();
-        localStorage.setItem('assignedCondition', condition);
+        // Get existing condition (should already be assigned in avatar page)
+        let condition = localStorage.getItem('condition');
+        
+        // Fallback: if no condition exists, assign one now
+        if (!condition) {
+          condition = getCondition();
+          localStorage.setItem('condition', condition);
+          
+          // Update participant with condition
+          const response = await fetch(`/api/participants/${userId}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              condition: condition
+            }),
+          });
 
-        // Update user document with assigned condition
-        const response = await fetch(`/api/users/${userId as string}`, {
-          method: 'PATCH',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            assignedCondition: condition
-          }),
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to update user condition');
+          if (!response.ok) {
+            throw new Error('Failed to update participant condition');
+          }
         }
 
         // Initialize game-related localStorage items if they don't exist

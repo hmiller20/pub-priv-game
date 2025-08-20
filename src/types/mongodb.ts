@@ -20,7 +20,7 @@ export interface SurveyResponses {
 export interface UserDocument {
   _id?: ObjectId;
   age: number;
-  gender: 0 | 1 | 2 | 3 | 4; // 0=male, 1=female, 2=non-binary, 3=prefer not to answer, 4=other
+  gender: 'male' | 'female' | 'non-binary' | 'prefer-not' | 'other';
   assignedCondition: string;
   gamePlays: number;
   leaderboardViews: number;

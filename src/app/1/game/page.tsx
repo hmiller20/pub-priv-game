@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation"
 import { Suspense } from "react"
 import { useLocalStorage } from "@/lib/hooks/useLocalStorage"
 import { StartGameButton, SendButton } from "@/components/ui/send-start-buttons"
+import { startGameSession } from "@/lib/supabaseFunctions"
 
 const RAT_QUESTIONS = [
   {
@@ -547,6 +548,76 @@ function GameContent() {
   const [choices, setChoices] = useState<string[]>([])
   const [isProcessingAnswer, setIsProcessingAnswer] = useState(false)
   const [gameInitialized, setGameInitialized] = useState(false)
+  const [gameSessionStarted, setGameSessionStarted] = useState(false)
+  const [gamedataId, setGamedataId] = useState<number | null>(null)
+
+  // Initialize game session in database when component mounts
+  useEffect(() => {
+    const initializeGameSession = async () => {
+      if (typeof window !== 'undefined' && !gameSessionStarted) {
+        const userId = localStorage.getItem('ratGameUserId')
+        if (userId && !sessionStorage.getItem('game1_sessionStarted')) {
+          try {
+            // Get current trial number by checking existing gamedata records
+            const gameCountResponse = await fetch(`/api/participants/${userId}/gamecount`);
+            let trialNumber = 1;
+            
+            if (gameCountResponse.ok) {
+              const countData = await gameCountResponse.json();
+              trialNumber = (countData.gameCount || 0) + 1;
+            }
+            
+            // Increment gameplays count in participant record
+            const gameplayResponse = await fetch(`/api/participants/${userId}`, {
+              method: 'PATCH',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ 
+                gameplays: 'INCREMENT' // Special value to indicate increment
+              })
+            });
+            
+            if (!gameplayResponse.ok) {
+              console.error('Failed to increment gameplays count');
+            } else {
+              console.log('Game 1 session started and gameplays incremented');
+            }
+            
+            // Create gamedata record for this game session
+            const gamedataResponse = await fetch('/api/gamedata', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                participant_id: userId,
+                trial: trialNumber,
+                score: 0,
+                skips: 0,
+                duration: 0,
+                questions_answered: 0
+              })
+            });
+            
+            if (gamedataResponse.ok) {
+              const gamedataResult = await gamedataResponse.json();
+              if (gamedataResult.success && gamedataResult.gamedata) {
+                setGamedataId(gamedataResult.gamedata.id);
+                localStorage.setItem('game1_gamedataId', gamedataResult.gamedata.id.toString());
+                console.log('Game 1 gamedata record created with ID:', gamedataResult.gamedata.id, 'trial:', trialNumber);
+              }
+            } else {
+              console.error('Failed to create gamedata record');
+            }
+            
+            sessionStorage.setItem('game1_sessionStarted', 'true')
+          } catch (error) {
+            console.error('Failed to start game session:', error)
+          }
+        }
+        setGameSessionStarted(true)
+      }
+    }
+    
+    initializeGameSession()
+  }, [gameSessionStarted])
 
   // Restore game state on load
   useEffect(() => {
@@ -557,12 +628,14 @@ function GameContent() {
       const savedQuestionsAnswered = localStorage.getItem('game1_questionsAnswered')
       const savedSkips = localStorage.getItem('game1_skips')
       const savedStartTime = localStorage.getItem('currentGameStartTime')
+      const savedGamedataId = localStorage.getItem('game1_gamedataId')
       
       if (savedScore !== null) setScore(parseInt(savedScore))
       if (savedTimeLeft !== null) setTimeLeft(parseInt(savedTimeLeft))
       if (savedQuestionIndex !== null) setCurrentQuestionIndex(parseInt(savedQuestionIndex))
       if (savedQuestionsAnswered !== null) setQuestionsAnswered(parseInt(savedQuestionsAnswered))
       if (savedSkips !== null) setSkips(parseInt(savedSkips))
+      if (savedGamedataId !== null) setGamedataId(parseInt(savedGamedataId))
       
       // Initialize start time if not exists
       if (!savedStartTime) {
@@ -581,8 +654,43 @@ function GameContent() {
       localStorage.setItem('game1_currentQuestionIndex', currentQuestionIndex.toString())
       localStorage.setItem('game1_questionsAnswered', questionsAnswered.toString())
       localStorage.setItem('game1_skips', skips.toString())
+      if (gamedataId !== null) {
+        localStorage.setItem('game1_gamedataId', gamedataId.toString())
+      }
     }
-  }, [gameInitialized, score, timeLeft, currentQuestionIndex, questionsAnswered, skips])
+  }, [gameInitialized, score, timeLeft, currentQuestionIndex, questionsAnswered, skips, gamedataId])
+
+  // Helper function to upload final gamedata when game ends
+  const uploadFinalGamedata = async () => {
+    if (!gamedataId) {
+      console.error('No gamedata ID found, cannot upload final data');
+      return;
+    }
+
+    const duration = calculateAndStoreDuration();
+    
+    try {
+      const response = await fetch(`/api/gamedata/${gamedataId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          score: score,
+          skips: skips,
+          duration: duration,
+          questions_answered: questionsAnswered,
+          completedat: new Date().toISOString()
+        })
+      });
+
+      if (response.ok) {
+        console.log('Final gamedata uploaded successfully');
+      } else {
+        console.error('Failed to upload final gamedata');
+      }
+    } catch (error) {
+      console.error('Error uploading final gamedata:', error);
+    }
+  };
 
   // Helper function to calculate and store game duration
   const calculateAndStoreDuration = () => {
@@ -607,7 +715,7 @@ function GameContent() {
     }
   }, [currentQuestionIndex, questions]);
 
-  const handleSkip = () => {
+  const handleSkip = async () => {
     // Skipping is now worth 0 points (no score change)
     const newSkips = skips + 1;
     setSkips(newSkips);
@@ -621,6 +729,7 @@ function GameContent() {
       setFeedback(null);
     } else {
       if (typeof window !== 'undefined') {
+        await uploadFinalGamedata(); // Upload final game data
         calculateAndStoreDuration(); // Track duration when skipping to end
         localStorage.setItem('currentScore', score.toString());
         localStorage.setItem('currentGameQuestionsAnswered', questionsAnswered.toString());
@@ -632,9 +741,50 @@ function GameContent() {
         localStorage.removeItem('game1_currentQuestionIndex')
         localStorage.removeItem('game1_questionsAnswered')
         localStorage.removeItem('game1_skips')
-      }
+        localStorage.removeItem('game1_gamedataId')
+        }
       router.replace('/1/postgame');
     }
+  };
+
+  // Helper function to handle game end from timer
+  const handleGameEndFromTimer = async () => {
+    if (typeof window !== 'undefined') {
+      await uploadFinalGamedata(); // Upload final game data
+      calculateAndStoreDuration(); // Track duration when timer ends
+      localStorage.setItem('currentScore', score.toString());
+      localStorage.setItem('currentGameQuestionsAnswered', questionsAnswered.toString());
+      sessionStorage.setItem('shouldCreateNewPlay', 'true');
+      
+      // Clean up game state
+      localStorage.removeItem('game1_currentScore')
+      localStorage.removeItem('game1_timeLeft')
+      localStorage.removeItem('game1_currentQuestionIndex')
+      localStorage.removeItem('game1_questionsAnswered')
+      localStorage.removeItem('game1_skips')
+      localStorage.removeItem('game1_gamedataId')
+    }
+    router.replace('/1/postgame');
+  };
+
+  // Helper function to handle game end from completing all questions
+  const handleGameEndFromCompletion = async (finalScore: number, finalQuestionsAnswered: number) => {
+    if (typeof window !== 'undefined') {
+      await uploadFinalGamedata(); // Upload final game data
+      calculateAndStoreDuration(); // Track duration when all questions completed
+      localStorage.setItem('currentScore', finalScore.toString());
+      localStorage.setItem('currentGameQuestionsAnswered', finalQuestionsAnswered.toString());
+      sessionStorage.setItem('shouldCreateNewPlay', 'true');
+      
+      // Clean up game state
+      localStorage.removeItem('game1_currentScore')
+      localStorage.removeItem('game1_timeLeft')
+      localStorage.removeItem('game1_currentQuestionIndex')
+      localStorage.removeItem('game1_questionsAnswered')
+      localStorage.removeItem('game1_skips')
+      localStorage.removeItem('game1_gamedataId')
+    }
+    router.replace('/1/postgame');
   };
 
   // Basic timer
@@ -643,20 +793,7 @@ function GameContent() {
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
-          if (typeof window !== 'undefined') {
-            calculateAndStoreDuration(); // Track duration when timer ends
-            localStorage.setItem('currentScore', score.toString());
-            localStorage.setItem('currentGameQuestionsAnswered', questionsAnswered.toString());
-            sessionStorage.setItem('shouldCreateNewPlay', 'true');
-            
-            // Clean up game state
-            localStorage.removeItem('game1_currentScore')
-            localStorage.removeItem('game1_timeLeft')
-            localStorage.removeItem('game1_currentQuestionIndex')
-            localStorage.removeItem('game1_questionsAnswered')
-            localStorage.removeItem('game1_skips')
-          }
-          router.replace('/1/postgame');
+          handleGameEndFromTimer();
           return 0;
         }
         return prev - 1;
@@ -701,26 +838,14 @@ function GameContent() {
         setCurrentQuestionIndex(prev => prev + 1);
         setFeedback(null);
       } else {
-        if (typeof window !== 'undefined') {
-          calculateAndStoreDuration(); // Track duration when all questions completed
-          localStorage.setItem('currentScore', newScore.toString());
-          localStorage.setItem('currentGameQuestionsAnswered', newQuestionsAnswered.toString());
-          sessionStorage.setItem('shouldCreateNewPlay', 'true');
-          
-          // Clean up game state
-          localStorage.removeItem('game1_currentScore')
-          localStorage.removeItem('game1_timeLeft')
-          localStorage.removeItem('game1_currentQuestionIndex')
-          localStorage.removeItem('game1_questionsAnswered')
-          localStorage.removeItem('game1_skips')
-        }
-        router.replace('/1/postgame');
+        handleGameEndFromCompletion(newScore, newQuestionsAnswered);
       }
     }, 1000);
   };
 
-  const handleEndGame = () => {
+  const handleEndGame = async () => {
     if (typeof window !== 'undefined') {
+      await uploadFinalGamedata(); // Upload final game data
       calculateAndStoreDuration(); // Track duration when manually ending game
       localStorage.setItem('currentScore', score.toString());
       localStorage.setItem('currentGameQuestionsAnswered', questionsAnswered.toString());
@@ -732,6 +857,7 @@ function GameContent() {
       localStorage.removeItem('game1_currentQuestionIndex')
       localStorage.removeItem('game1_questionsAnswered')
       localStorage.removeItem('game1_skips')
+      localStorage.removeItem('game1_gamedataId')
     }
     router.replace('/1/postgame');
   };
