@@ -128,7 +128,9 @@ export default function AvatarPage() {
           }
 
           userId = data.participantId
-          localStorage.setItem('ratGameUserId', userId)
+          if (userId) {
+            localStorage.setItem('ratGameUserId', userId)
+          }
           localStorage.setItem('condition', condition)
           console.log('Created new participant with ID:', userId, 'condition:', condition)
         } else {
@@ -490,11 +492,18 @@ export default function AvatarPage() {
                   <Label htmlFor="age">How old are you?</Label>
                   <Input
                     id="age"
-                    type="number"
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"
                     placeholder="Your age"
                     value={age}
-                    onChange={(e) => setAge(e.target.value)}
-                    className="w-full rounded-xl border-blue-100 focus:ring-2 focus:ring-blue-200"
+                    onChange={(e) => {
+                      // Only allow numbers
+                      const value = e.target.value.replace(/[^0-9]/g, '');
+                      setAge(value);
+                    }}
+                    onWheel={(e) => e.currentTarget.blur()}
+                    className="w-full rounded-xl border-blue-100 focus:ring-2 focus:ring-blue-200 [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
                 </div>
                 <div className="space-y-2 pb-2">

@@ -233,6 +233,7 @@ export async function addGamePlay(userId: string, gamePlay: GamePlay) {
   // Add to new gamedata table
   const gameData = {
     participant_id: userId,
+    trial: playNumber,
     score: gamePlay.score,
     skips: gamePlay.skips,
     duration: gamePlay.duration,
