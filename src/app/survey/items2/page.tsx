@@ -130,9 +130,18 @@ export default function SurveyPage() {
       // Get the mastery responses from previous page from localStorage
       const masteryResponses = JSON.parse(localStorage.getItem('masteryResponses') || '[]');
 
+      // Get the BMIS responses from localStorage
+      const bmisResponses = JSON.parse(localStorage.getItem('bmisResponses') || '[]');
+
       // Transform mastery responses into named fields
       const masteryObj = masteryResponses.reduce((acc: Record<string, number>, val: number, idx: number) => {
         acc[`mastery${idx + 1}`] = val;
+        return acc;
+      }, {});
+
+      // Transform BMIS responses into named fields
+      const bmisObj = bmisResponses.reduce((acc: Record<string, number>, val: number, idx: number) => {
+        acc[`bmis${idx + 1}`] = val;
         return acc;
       }, {});
 
@@ -163,6 +172,7 @@ export default function SurveyPage() {
         body: JSON.stringify({
           mastery: masteryObj,
           public: publicObj,
+          bmis: bmisObj,
           suspicion: suspicionResponse
         }),
       });

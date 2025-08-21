@@ -107,7 +107,7 @@ function PostGameContent() {
     await incrementGamePlay()
     setScorePosted(true)
     // After posting score, redirect to survey
-    router.replace('/survey/prompt')
+    router.replace('/survey/bmis')
   }
 
   return (

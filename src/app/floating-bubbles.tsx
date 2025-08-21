@@ -2,6 +2,9 @@
 
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog"
+import { Button } from "@/components/ui/button"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 
 function Bubble({ x, y, size, color }: { x: number; y: number; size: number; color: string }) {
   return (
@@ -69,15 +72,18 @@ export default function FloatingBubblesBackground({
   title?: string
   onButtonClick?: () => void
 }) {
+  const [hasViewedConsent, setHasViewedConsent] = useState(false)
+  const [showConsentDialog, setShowConsentDialog] = useState(false)
   const words = title.split(" ")
 
   return (
-    <div
-      className="relative min-h-screen w-full flex flex-col items-center justify-center overflow-hidden"
-      style={{
-        background: "linear-gradient(135deg, #f6faff 0%, #f8f6ff 100%)",
-      }}
-    >
+    <TooltipProvider>
+      <div
+        className="relative min-h-screen w-full flex flex-col items-center justify-center overflow-hidden"
+        style={{
+          background: "linear-gradient(135deg, #f6faff 0%, #f8f6ff 100%)",
+        }}
+      >
       <FloatingBubblesComponent />
       <div className="relative z-10 flex flex-col items-center justify-center px-4">
         <h1
@@ -92,18 +98,68 @@ export default function FloatingBubblesBackground({
           {title}
         </h1>
         <button
-          onClick={onButtonClick}
+          onClick={() => {
+            setShowConsentDialog(true)
+            setHasViewedConsent(true)
+          }}
           className="mt-6 px-8 py-4 rounded-2xl bg-white text-blue-700 font-semibold text-lg shadow-lg border border-blue-100 transition-all duration-200 flex items-center gap-2 group hover:scale-105 hover:-translate-y-1 hover:shadow-2xl"
           style={{ boxShadow: "0 4px 16px 0 rgba(80, 112, 255, 0.08)" }}
         >
-          <span className="transition-all duration-200 ">Create my avatar</span>
-          <span className="text-xl transition-all duration-200 group-hover:translate-x-1"></span>
+          <span className="transition-all duration-200">View consent form</span>
         </button>
+        <Tooltip delayDuration={300}>
+          <TooltipTrigger asChild>
+            <button
+              onClick={hasViewedConsent ? onButtonClick : undefined}
+              disabled={!hasViewedConsent}
+              className={`mt-4 px-8 py-4 rounded-2xl font-semibold text-lg shadow-lg border transition-all duration-200 flex items-center gap-2 ${
+                hasViewedConsent 
+                  ? "bg-white text-blue-700 border-blue-100 group hover:scale-105 hover:-translate-y-1 hover:shadow-2xl cursor-pointer" 
+                  : "bg-gray-100 text-gray-500 border-gray-200 cursor-not-allowed"
+              }`}
+              style={{ boxShadow: hasViewedConsent ? "0 4px 16px 0 rgba(80, 112, 255, 0.08)" : "0 4px 16px 0 rgba(128, 128, 128, 0.08)" }}
+            >
+              <span className="transition-all duration-200">Create my avatar</span>
+              <span className="text-xl transition-all duration-200 group-hover:translate-x-1"></span>
+            </button>
+          </TooltipTrigger>
+          {!hasViewedConsent && (
+            <TooltipContent side="bottom" className="bg-black text-white border-black">
+              <p>Please view the consent form first</p>
+            </TooltipContent>
+          )}
+        </Tooltip>
       </div>
       <footer className="fixed left-0 right-0 bottom-4 text-center text-xs text-gray-400 z-20">
         © PsycTech 2025. All rights reserved.
       </footer>
-    </div>
+      
+      <Dialog open={showConsentDialog} onOpenChange={setShowConsentDialog}>
+        <DialogContent className="sm:max-w-5xl max-h-[85vh] p-0">
+          <DialogHeader className="p-6 pb-4">
+            <DialogTitle className="text-2xl font-semibold text-center">
+              Research Study Information Sheet
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex-1 px-6">
+            <iframe
+              src="/Information Sheet (Exempt Studies) 8.21.25.pdf"
+              className="w-full h-[60vh] border-0 rounded-lg"
+              title="Information Sheet PDF"
+            />
+          </div>
+          <DialogFooter className="p-6 pt-4">
+            <Button
+              onClick={() => setShowConsentDialog(false)}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2"
+            >
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      </div>
+    </TooltipProvider>
   )
 }
 

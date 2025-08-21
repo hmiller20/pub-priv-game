@@ -271,7 +271,24 @@ export async function updateSurveyResponses(userId: string, responses: any) {
     // Handle manipulation check
     manip_check: responses.manipCheck || responses.public?.manipCheck,
     // Handle suspicion text response
-    suspicion: responses.suspicion || responses.public?.suspicion
+    suspicion: responses.suspicion || responses.public?.suspicion,
+    // Handle BMIS responses
+    bmis1: responses.bmis?.bmis1,
+    bmis2: responses.bmis?.bmis2,
+    bmis3: responses.bmis?.bmis3,
+    bmis4: responses.bmis?.bmis4,
+    bmis5: responses.bmis?.bmis5,
+    bmis6: responses.bmis?.bmis6,
+    bmis7: responses.bmis?.bmis7,
+    bmis8: responses.bmis?.bmis8,
+    bmis9: responses.bmis?.bmis9,
+    bmis10: responses.bmis?.bmis10,
+    bmis11: responses.bmis?.bmis11,
+    bmis12: responses.bmis?.bmis12,
+    bmis13: responses.bmis?.bmis13,
+    bmis14: responses.bmis?.bmis14,
+    bmis15: responses.bmis?.bmis15,
+    bmis16: responses.bmis?.bmis16
   };
 
   return await addSurveyResponse(surveyData);
