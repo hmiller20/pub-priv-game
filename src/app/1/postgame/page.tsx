@@ -62,6 +62,8 @@ function PostGameContent() {
   const handlePlayAgain = async () => {
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('fromPostgame', 'true');
+      // Clear session state to allow new game session creation
+      sessionStorage.removeItem('game1_sessionStarted');
       // Clear timing data for new game session
       localStorage.removeItem('currentGameStartTime');
       localStorage.removeItem('currentGameDuration');
