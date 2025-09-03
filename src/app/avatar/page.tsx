@@ -493,7 +493,7 @@ export default function AvatarPage() {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="age">How old are you?</Label>
+                  <Label htmlFor="age">How old are you? (in real life)</Label>
                   <Input
                     id="age"
                     type="text"
@@ -511,7 +511,7 @@ export default function AvatarPage() {
                   />
                 </div>
                 <div className="space-y-2 pb-2">
-                  <Label htmlFor="gender">What is your gender?</Label>
+                  <Label htmlFor="gender">What is your gender? (in real life)</Label>
                   <Select
                     value={gender}
                     onValueChange={(value: string) => setGender(value)}
