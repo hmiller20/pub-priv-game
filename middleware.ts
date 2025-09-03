@@ -1,19 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
 
 export function middleware(request: NextRequest) {
+  console.log('Middleware running for:', request.nextUrl.pathname)
+  
   // Skip middleware for specific paths
   if (request.nextUrl.pathname.startsWith('/desktop-only') ||
       request.nextUrl.pathname.startsWith('/api') ||
       request.nextUrl.pathname.startsWith('/_next')) {
+    console.log('Skipping middleware for:', request.nextUrl.pathname)
     return NextResponse.next()
   }
 
   const userAgent = request.headers.get('user-agent') || ''
+  console.log('User agent:', userAgent)
   
-  // Simple but effective mobile detection
-  const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)
+  // Detect mobile devices - be more aggressive
+  const isMobile = /Mobile|Android|iPhone|iPad|webOS|iPod|BlackBerry|IEMobile|Opera Mini|Mobi/i.test(userAgent)
+  console.log('Is mobile:', isMobile)
   
   if (isMobile) {
+    console.log('Redirecting mobile user to /desktop-only')
     const url = request.nextUrl.clone()
     url.pathname = '/desktop-only'
     
@@ -26,6 +32,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
+  console.log('Allowing request to continue')
   return NextResponse.next()
 }
 
