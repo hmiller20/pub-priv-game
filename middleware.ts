@@ -27,9 +27,12 @@ export function middleware(req: NextRequest) {
   }
 
   const ua = req.headers.get("user-agent") || ""
+  
+  // More comprehensive mobile detection
+  const isMobile = /Mobile|Android|iP(hone|od|ad)|BlackBerry|IEMobile|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/.test(ua)
 
   // Check if it's a mobile device
-  if (MOBILE_REGEX.test(ua) || MOBILE_REGEX_SHORT.test(ua.substr(0, 4))) {
+  if (isMobile || MOBILE_REGEX.test(ua) || MOBILE_REGEX_SHORT.test(ua.substr(0, 4))) {
     const url = req.nextUrl.clone()
     url.pathname = "/desktop-only"
     
