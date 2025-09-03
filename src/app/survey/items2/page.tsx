@@ -198,7 +198,7 @@ export default function SurveyPage() {
     <div className="min-h-screen flex items-center justify-center p-4" style={{ background: "linear-gradient(135deg, #f6faff 0%, #f8f6ff 100%)" }}>
       <Card className="w-full max-w-4xl bg-white rounded-3xl shadow-2xl border border-blue-100">
         <CardContent className="p-6">
-          <h2 className="text-2xl font-bold mb-6">Again, please rate how much you agree with each statement.</h2>
+          <h2 className="text-2xl font-bold mb-6">Again, please rate how much you agree with each statement. Your answers will not be shared with your group.</h2>
           
           {questions.map((question) => (
             <div key={question.id} className="mb-8">
@@ -255,7 +255,7 @@ export default function SurveyPage() {
 
           <div className="mb-8">
             <Label className="text-lg mb-4 block">
-            Before moving on, please share any thoughts about your group experience. If you have none, just write "N/A".
+            Before moving on, please share any thoughts about your group experience so far. If you have none, just write "N/A".
             </Label>
             <Textarea
               value={suspicionResponse}

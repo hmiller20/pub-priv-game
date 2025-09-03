@@ -14,7 +14,9 @@ function PostGameContent() {
   const [lastInitial] = useLocalStorage('avatarLastInitial', '')
   const [displayScore, setDisplayScore] = useState(0)
   const [scorePosted, setScorePosted] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const hasWritten = useRef(false)
+  const hasSubmitted = useRef(false)
 
   useEffect(() => {
     if (typeof window !== 'undefined' && !hasWritten.current) {
@@ -60,8 +62,16 @@ function PostGameContent() {
   }
 
   const incrementGamePlay = async () => {
+    // Prevent duplicate submissions
+    if (hasSubmitted.current || isSubmitting) {
+      return
+    }
+
     const userId = typeof window !== 'undefined' ? localStorage.getItem('ratGameUserId') : null
     if (!userId) return
+
+    setIsSubmitting(true)
+    hasSubmitted.current = true
 
     try {
       const latestPlay = getLatestPlayNumber()
@@ -88,22 +98,32 @@ function PostGameContent() {
       })
     } catch (error) {
       console.error('Failed to submit game results:', error)
+      // Reset submission state on error so user can retry
+      hasSubmitted.current = false
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
   const handlePlayAgain = async () => {
+    if (isSubmitting) return
+    
     await incrementGamePlay()
     if (typeof window !== 'undefined') {
       sessionStorage.setItem('fromPostgame', 'true');
       // Clear timing data for new game session
       localStorage.removeItem('currentGameStartTime');
       localStorage.removeItem('currentGameDuration');
+      // Reset submission state for new game
+      hasSubmitted.current = false
     }
     router.replace("/2/game")
   }
 
   // Handle posting score to leaderboard and proceeding to survey
   const postScoreAndContinue = async () => {
+    if (isSubmitting) return
+    
     await incrementGamePlay()
     setScorePosted(true)
     // After posting score, redirect to survey
@@ -143,14 +163,16 @@ function PostGameContent() {
           <StartGameButton
             onClick={handlePlayAgain}
             className="w-full"
+            disabled={isSubmitting}
           >
-            Play Again
+            {isSubmitting ? 'Submitting...' : 'Play Again'}
           </StartGameButton>
           <StartGameButton
             onClick={postScoreAndContinue}
             className="w-full"
+            disabled={isSubmitting}
           >
-            Post Score and Continue
+            {isSubmitting ? 'Submitting...' : 'Post Score and Continue'}
           </StartGameButton>
           {/* <StartGameButton
             onClick={() => router.replace("/2/leaderboard?from=postgame")}

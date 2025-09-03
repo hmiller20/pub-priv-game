@@ -17,7 +17,8 @@ export async function PATCH(
       'age': 'age',
       'gender': 'gender',
       'condition': 'condition',
-      'gameplays': 'gameplays'
+      'gameplays': 'gameplays',
+      'studyComplete': 'study_complete'
     };
     
     const filteredData: any = {};

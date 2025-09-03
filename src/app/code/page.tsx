@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { FileText } from "lucide-react"
@@ -10,6 +10,39 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 
 export default function CodePage() {
   const [showDebriefingDialog, setShowDebriefingDialog] = useState(false)
+
+  // Mark study as complete when this page mounts
+  useEffect(() => {
+    const markStudyComplete = async () => {
+      try {
+        const userId = localStorage.getItem('ratGameUserId');
+        if (!userId) {
+          console.error('No participant ID found');
+          return;
+        }
+
+        const response = await fetch(`/api/participants/${userId}`, {
+          method: 'PATCH',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            studyComplete: true,
+          }),
+        });
+
+        if (response.ok) {
+          console.log('Study marked as complete');
+        } else {
+          console.error('Failed to mark study as complete');
+        }
+      } catch (error) {
+        console.error('Error marking study complete:', error);
+      }
+    };
+
+    markStudyComplete();
+  }, [])
 
   return (
     <main

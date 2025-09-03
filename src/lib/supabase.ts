@@ -16,6 +16,7 @@ export interface Participant {
   firstname?: string;
   lastinitial?: string;
   fsuemail?: string;
+  study_complete: boolean;
 }
 
 export interface GameData {
