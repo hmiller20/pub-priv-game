@@ -74,7 +74,7 @@ export default function AvatarPage() {
   const [avatarConfig, setAvatarConfig] = useState<AvatarConfig | null>(null)
   const [currentStep, setCurrentStep] = useState(1)
   const [canProceed, setCanProceed] = useState(false)
-  const [stepCountdown, setStepCountdown] = useState(3)
+  const [stepCountdown, setStepCountdown] = useState(5)
   const totalSteps = 3
   const [agreementChecked, setAgreementChecked] = useState(false)
   const [hasInitialized, setHasInitialized] = useState(false)
@@ -178,7 +178,7 @@ export default function AvatarPage() {
   useEffect(() => {
     // Reset step timer and canProceed when step changes
     setCanProceed(false)
-    setStepCountdown(3)
+    setStepCountdown(5)
     
     // Start countdown timer
     const timer = setInterval(() => {

@@ -13,7 +13,7 @@ export default function SurveyPage2() {
 
   // Typewriter effect state
   const heading1 = "Please take a moment to think about the activities you care about.";
-  const heading2 = "These could include your job, your hobbies, or anything else you spend time on.";
+  const heading2 = "These could include your job, your hobbies, school, or anything else you spend time on.";
   const heading1Words = heading1.split(" ");
   const heading2Words = heading2.split(" ");
   const [displayedWords1, setDisplayedWords1] = useState(0);

@@ -16,7 +16,7 @@ export default function Importance() {
   const [currentStep, setCurrentStep] = useState(0)
   const [stepStartTime, setStepStartTime] = useState(Date.now())
   const [canProceed, setCanProceed] = useState(false)
-  const [stepCountdown, setStepCountdown] = useState(3)
+  const [stepCountdown, setStepCountdown] = useState(5)
   const [hasInitialized, setHasInitialized] = useState(false)
   const { playText, stopPlaying, isPlaying, isLoading } = useTextToSpeech();
 
@@ -109,7 +109,7 @@ export default function Importance() {
     // Reset step timer and canProceed when step changes
     setStepStartTime(Date.now())
     setCanProceed(false)
-    setStepCountdown(3)
+    setStepCountdown(5)
     
     // Only auto-play if we're not on the initial mount
     if (hasInitialized && currentStep < importanceSteps.length) {

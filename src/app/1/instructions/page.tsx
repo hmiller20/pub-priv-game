@@ -18,7 +18,7 @@ export default function Instructions() {
   const [currentStep, setCurrentStep] = useState(0)
   const [stepStartTime, setStepStartTime] = useState(Date.now())
   const [canProceed, setCanProceed] = useState(false)
-  const [stepCountdown, setStepCountdown] = useState(3)
+  const [stepCountdown, setStepCountdown] = useState(5)
   const [comprehensionAnswer, setComprehensionAnswer] = useState("")
   const [showComprehensionError, setShowComprehensionError] = useState(false)
   const { playText, stopPlaying, isPlaying, isLoading } = useTextToSpeech();
@@ -103,7 +103,7 @@ export default function Instructions() {
     setStepStartTime(Date.now())
     setCanProceed(false)
     setShowComprehensionError(false)
-    setStepCountdown(3)
+    setStepCountdown(5)
     
     // Only auto-play if we're not on the initial mount
     if (hasInitialized && currentStep < instructions.length) {

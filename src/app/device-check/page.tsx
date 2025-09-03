@@ -66,7 +66,7 @@ function DeviceCheckContent() {
 
   return (
     <main className="mx-auto max-w-xl p-6">
-      <div className="text-sm opacity-70">Checking your device…</div>
+      <div className="text-sm opacity-70"></div>
     </main>
   )
 }

@@ -47,7 +47,7 @@ export default function WaitingRoom() {
   const chatEndRef = useRef<HTMLDivElement | null>(null)
   const [currentStep, setCurrentStep] = useState(1)
   const [canProceed, setCanProceed] = useState(false)
-  const [stepCountdown, setStepCountdown] = useState(3)
+  const [stepCountdown, setStepCountdown] = useState(5)
   const totalSteps = 2
   const [showMessageWarning, setShowMessageWarning] = useState(false)
   const initialGreetingsSent = useRef(false)
@@ -230,7 +230,7 @@ export default function WaitingRoom() {
   useEffect(() => {
     // Reset step timer and canProceed when step changes
     setCanProceed(false)
-    setStepCountdown(3)
+    setStepCountdown(5)
     
     // Start countdown timer
     const timer = setInterval(() => {

@@ -602,9 +602,12 @@ function GameContent() {
                 setGamedataId(gamedataResult.gamedata.id);
                 localStorage.setItem('game1_gamedataId', gamedataResult.gamedata.id.toString());
                 console.log('Game 1 gamedata record created with ID:', gamedataResult.gamedata.id, 'trial:', trialNumber);
+              } else {
+                console.error('Gamedata response OK but missing success/gamedata:', gamedataResult);
               }
             } else {
-              console.error('Failed to create gamedata record');
+              const errorText = await gamedataResponse.text();
+              console.error('Failed to create gamedata record:', gamedataResponse.status, errorText);
             }
             
             sessionStorage.setItem('game1_sessionStarted', 'true')
@@ -669,6 +672,13 @@ function GameContent() {
 
     const duration = calculateAndStoreDuration();
     
+    console.log('Uploading final gamedata with ID:', gamedataId, {
+      score,
+      skips,
+      duration,
+      questions_answered: questionsAnswered
+    });
+    
     try {
       const response = await fetch(`/api/gamedata/${gamedataId}`, {
         method: 'PATCH',
@@ -683,9 +693,11 @@ function GameContent() {
       });
 
       if (response.ok) {
-        console.log('Final gamedata uploaded successfully');
+        const result = await response.json();
+        console.log('Final gamedata uploaded successfully:', result);
       } else {
-        console.error('Failed to upload final gamedata');
+        const errorText = await response.text();
+        console.error('Failed to upload final gamedata:', response.status, errorText);
       }
     } catch (error) {
       console.error('Error uploading final gamedata:', error);
