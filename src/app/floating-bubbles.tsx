@@ -138,14 +138,14 @@ export default function FloatingBubblesBackground({
         <DialogContent className="sm:max-w-5xl max-h-[85vh] p-0">
           <DialogHeader className="p-6 pb-4">
             <DialogTitle className="text-2xl font-semibold text-center">
-              Research Study Information Sheet
+              Consent Form
             </DialogTitle>
           </DialogHeader>
           <div className="flex-1 px-6">
             <iframe
-              src="/Information Sheet (Exempt Studies) 8.21.25.pdf"
+              src="/consent form.pdf"
               className="w-full h-[60vh] border-0 rounded-lg"
-              title="Information Sheet PDF"
+              title="Consent Form PDF"
             />
           </div>
           <DialogFooter className="p-6 pt-4">

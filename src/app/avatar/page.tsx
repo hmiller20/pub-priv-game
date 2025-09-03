@@ -65,6 +65,7 @@ export default function AvatarPage() {
   const [isTimerActive, setIsTimerActive] = useState(true)
   const [firstName, setFirstName] = useLocalStorage('currentFirstName', '')
   const [lastInitial, setLastInitial] = useLocalStorage('currentLastInitial', '')
+  const [fsuEmail, setFsuEmail] = useLocalStorage('currentFsuEmail', '')
   const [age, setAge] = useLocalStorage('currentAge', '')
   const [gender, setGender] = useLocalStorage('currentGender', '')
   const [year, setYear] = useLocalStorage('currentYear', '')
@@ -225,7 +226,7 @@ export default function AvatarPage() {
       return
     }
 
-    if (!firstName.trim() || !lastInitial.trim() || !age || !gender || !year.trim() || !major.trim()) {
+    if (!firstName.trim() || !lastInitial.trim() || !fsuEmail.trim() || !age || !gender || !year.trim() || !major.trim()) {
       alert("Please respond to all questions!")
       return
     }
@@ -252,6 +253,9 @@ export default function AvatarPage() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          firstName: firstName.trim(),
+          lastInitial: lastInitial.trim(),
+          fsuEmail: fsuEmail.trim(),
           age: parseInt(age),
           gender: gender as 'male' | 'female' | 'non-binary' | 'prefer-not' | 'other',
         }),
@@ -640,6 +644,21 @@ export default function AvatarPage() {
                       ))}
                     </SelectContent>
                   </Select>
+                </div>
+              </div>
+              
+              {/* FSU Email section */}
+              <div className="mt-6">
+                <div className="space-y-2">
+                  <Label htmlFor="fsuEmail">Enter your FSU email address</Label>
+                  <Input
+                    id="fsuEmail"
+                    type="email"
+                    placeholder="e.g., sh24s@fsu.edu"
+                    value={fsuEmail}
+                    onChange={(e) => setFsuEmail(e.target.value)}
+                    className="w-full rounded-xl border-blue-100 focus:ring-2 focus:ring-blue-200"
+                  />
                 </div>
               </div>
               
