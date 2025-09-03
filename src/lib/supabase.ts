@@ -13,6 +13,9 @@ export interface Participant {
   condition?: string;
   gameplays: number;
   createdat: string;
+  firstname?: string;
+  lastinitial?: string;
+  fsuemail?: string;
 }
 
 export interface GameData {
