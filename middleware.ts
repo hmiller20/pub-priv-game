@@ -12,12 +12,14 @@ export function middleware(req: NextRequest) {
   // Only guard study pages - allow API routes, static assets, etc.
   const isStudyPage = 
     pathname === "/" ||
-    pathname.startsWith("/consent") ||
     pathname.startsWith("/survey") ||
-    pathname.startsWith("/audioCheck") ||
-    pathname.startsWith("/0/") ||
+    pathname.startsWith("/queue") ||
+    pathname.startsWith("/waitingRoom") ||
+    pathname.startsWith("/loading") ||
     pathname.startsWith("/1/") ||
-    pathname.startsWith("/conclusion")
+    pathname.startsWith("/2/") ||
+    pathname.startsWith("/code") ||
+    pathname.startsWith("/avatar")
 
   // Don't guard the desktop-only page itself or non-study pages
   if (!isStudyPage || pathname.startsWith("/desktop-only")) {
