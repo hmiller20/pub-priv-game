@@ -1,13 +1,13 @@
 // app/device-check/page.tsx
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, Suspense } from "react"
 import { useSearchParams } from "next/navigation"
 
 const MIN_W = 1024
 const MIN_H = 650
 
-export default function DeviceCheck() {
+function DeviceCheckContent() {
   const params = useSearchParams()
   const next = params.get("next") || "/"
   const surveyCode = params.get("survey_code") // optional
@@ -68,5 +68,17 @@ export default function DeviceCheck() {
     <main className="mx-auto max-w-xl p-6">
       <div className="text-sm opacity-70">Checking your device…</div>
     </main>
+  )
+}
+
+export default function DeviceCheck() {
+  return (
+    <Suspense fallback={
+      <main className="mx-auto max-w-xl p-6">
+        <div className="text-sm opacity-70">Loading...</div>
+      </main>
+    }>
+      <DeviceCheckContent />
+    </Suspense>
   )
 }
