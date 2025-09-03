@@ -39,6 +39,7 @@ export async function createParticipant(participantData: Partial<Participant>) {
     gender: participantData.gender,
     condition: participantData.condition,
     gameplays: participantData.gameplays || 0,
+    study_complete: false,
   };
 
   console.log('DB: Attempting to insert participant:', JSON.stringify(participant, null, 2));
