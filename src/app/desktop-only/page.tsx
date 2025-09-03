@@ -4,10 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { useSearchParams } from 'next/navigation'
 import { Inter } from 'next/font/google'
+import { Suspense } from 'react'
 
 const inter = Inter({ subsets: ['latin'], display: 'swap', weight: '400' })
 
-export default function DesktopOnlyPage() {
+function DesktopOnlyContent() {
   const searchParams = useSearchParams()
   const surveyCode = searchParams.get('survey_code')
 
@@ -71,5 +72,13 @@ export default function DesktopOnlyPage() {
         </Card>
       </div>
     </main>
+  )
+}
+
+export default function DesktopOnlyPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <DesktopOnlyContent />
+    </Suspense>
   )
 }
