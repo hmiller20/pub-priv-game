@@ -640,7 +640,6 @@ function GameContent() {
       const savedQuestionIndex = localStorage.getItem('game2_currentQuestionIndex')
       const savedQuestionsAnswered = localStorage.getItem('game2_questionsAnswered')
       const savedSkips = localStorage.getItem('game2_skips')
-      const savedStartTime = localStorage.getItem('currentGameStartTime')
       const savedGamedataId = localStorage.getItem('game2_gamedataId')
       
       if (savedScore !== null) setScore(parseInt(savedScore))
@@ -649,11 +648,6 @@ function GameContent() {
       if (savedQuestionsAnswered !== null) setQuestionsAnswered(parseInt(savedQuestionsAnswered))
       if (savedSkips !== null) setSkips(parseInt(savedSkips))
       if (savedGamedataId !== null) setGamedataId(parseInt(savedGamedataId))
-      
-      // Initialize start time if not exists
-      if (!savedStartTime) {
-        localStorage.setItem('currentGameStartTime', Date.now().toString())
-      }
       
       setGameInitialized(true)
     }
@@ -846,9 +840,18 @@ function GameContent() {
     }
   };
 
-  // Basic timer
+  // Basic timer - also starts the duration tracking
   useEffect(() => {
     console.log("Timer effect running")
+    
+    // Start duration tracking when countdown timer begins
+    if (typeof window !== 'undefined') {
+      const existingStartTime = localStorage.getItem('currentGameStartTime')
+      if (!existingStartTime) {
+        localStorage.setItem('currentGameStartTime', Date.now().toString())
+      }
+    }
+    
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
