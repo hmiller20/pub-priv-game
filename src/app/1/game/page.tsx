@@ -700,12 +700,7 @@ function GameContent() {
 
   // Helper function to calculate and store game duration
   const calculateAndStoreDuration = () => {
-    if (typeof window === 'undefined') return 0
-    
-    const startTime = localStorage.getItem('currentGameStartTime')
-    if (!startTime) return 0
-    
-    const duration = Math.floor((Date.now() - parseInt(startTime)) / 1000) // Duration in seconds
+    const duration = GAME_DURATION - timeLeft // Duration based on countdown timer
     localStorage.setItem('currentGameDuration', duration.toString())
     return duration
   }
@@ -793,17 +788,9 @@ function GameContent() {
     router.replace('/1/postgame');
   };
 
-  // Basic timer - also starts the duration tracking
+  // Basic timer
   useEffect(() => {
     console.log("Timer effect running")
-    
-    // Start duration tracking when countdown timer begins
-    if (typeof window !== 'undefined') {
-      const existingStartTime = localStorage.getItem('currentGameStartTime')
-      if (!existingStartTime) {
-        localStorage.setItem('currentGameStartTime', Date.now().toString())
-      }
-    }
     
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
@@ -913,52 +900,11 @@ function GameContent() {
           <Card className="w-full max-w-xl bg-white rounded-3xl shadow-2xl border border-blue-100 p-6 h-[600px]" style={{width: '576px'}}>
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
-                <div className="relative flex items-center justify-center">
-                  <svg
-                    className="w-20 h-20 transform -rotate-90"
-                    viewBox="0 0 80 80"
-                  >
-                    {/* Background circle */}
-                    <circle
-                      cx="40"
-                      cy="40"
-                      r="35"
-                      fill="none"
-                      stroke="#e5e7eb"
-                      strokeWidth="5"
-                    />
-                    {/* Progress circle */}
-                    <circle
-                      cx="40"
-                      cy="40"
-                      r="35"
-                      fill="none"
-                      stroke={
-                        timeLeft <= 30 ? "#dc2626" : 
-                        timeLeft <= 60 ? "#ef4444" : 
-                        timeLeft <= 120 ? "#f59e0b" : 
-                        "#3b82f6"
-                      }
-                      strokeWidth="5"
-                      strokeLinecap="round"
-                      strokeDasharray={`${2 * Math.PI * 35}`}
-                      strokeDashoffset={`${2 * Math.PI * 35 * (1 - timeLeft / GAME_DURATION)}`}
-                      className="transition-all duration-500 ease-out"
-                    />
-                  </svg>
-                  {/* Timer text */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <span 
-                      className={`text-base font-bold transition-colors duration-300 ${
-                        timeLeft <= 30 ? "text-red-700" : 
-                        timeLeft <= 60 ? "text-red-600" : 
-                        timeLeft <= 120 ? "text-orange-600" : 
-                        "text-blue-600"
-                      }`}
-                    >
-                      {formatTime(timeLeft)}
-                    </span>
-                  </div>
+                <div className="flex flex-col items-center bg-purple-100 px-4 py-3 rounded-lg">
+                  <span className="text-lg text-purple-700 mb-1">Time Elapsed</span>
+                  <span className="text-2xl font-bold text-purple-800">
+                    {formatTime(GAME_DURATION - timeLeft)}
+                  </span>
                 </div>
                 {feedback && (
                   <div className="flex items-center space-x-2">
